@@ -250,44 +250,52 @@
         }
       }
 
-      const esValida = ronda => {
-        const jugadores = new Set();
-        for (const [a, b] of ronda) {
-          if (jugadores.has(a) || jugadores.has(b)) return false;
-          jugadores.add(a); jugadores.add(b);
+      // Algoritmo original
+      const combinaciones = [];
+      const usados = new Set();
+
+      function jugadoresUsados(ronda) {
+        return new Set(ronda.flat());
+      }
+
+      function esValida(ronda, acumuladas) {
+        const usados = jugadoresUsados(ronda);
+        for (const jugador of usados) {
+          let veces = 0;
+          for (const previa of acumuladas) {
+            if (jugadoresUsados(previa).has(jugador)) veces++;
+          }
+          if (veces >= 5) return false;
         }
         return true;
-      };
+      }
 
-      const todasLasRondas = [];
-      const generar = (rondasAcumuladas, restantes) => {
-        if (rondasAcumuladas.length === 5) {
-          todasLasRondas.push(rondasAcumuladas);
+      function generar(acumuladas, disponibles) {
+        if (acumuladas.length === 5) {
+          combinaciones.push([...acumuladas]);
           return true;
         }
 
-        for (let i = 0; i < restantes.length; i++) {
-          for (let j = i + 1; j < restantes.length; j++) {
-            for (let k = j + 1; k < restantes.length; k++) {
-              const ronda = [restantes[i], restantes[j], restantes[k]];
-              if (esValida(ronda)) {
-                const nuevas = restantes.filter((_, idx) => idx !== i && idx !== j && idx !== k);
-                if (generar([...rondasAcumuladas, ronda], nuevas)) return true;
+        for (let i = 0; i < disponibles.length; i++) {
+          for (let j = i + 1; j < disponibles.length; j++) {
+            for (let k = j + 1; k < disponibles.length; k++) {
+              const ronda = [disponibles[i], disponibles[j], disponibles[k]];
+              const jug = jugadoresUsados(ronda);
+              if (jug.size === 6 && esValida(ronda, acumuladas)) {
+                const resto = disponibles.filter((_, idx) => idx !== i && idx !== j && idx !== k);
+                if (generar([...acumuladas, ronda], resto)) return true;
               }
             }
           }
         }
+
         return false;
-      };
-
-      const exito = generar([], parejas);
-
-      if (!exito || todasLasRondas.length === 0) {
-        alert("No se pudo generar un calendario válido. Probá cambiar los nombres o refrescar.");
-        return;
       }
 
-      rondas = todasLasRondas[0];
+      const ok = generar([], parejas);
+      if (!ok || combinaciones.length === 0) return alert("No se pudo generar un calendario válido.");
+
+      rondas = combinaciones[0];
       partidos = rondas.flat();
       resultados = Array(partidos.length / 2).fill([null, null]);
       mostrarSeccion('rondas');
