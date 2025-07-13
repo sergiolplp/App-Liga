@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Torneo por Parejas</title>
   <style>
     :root {
@@ -39,12 +39,10 @@
     .hamburger {
       font-size: 24px;
       cursor: pointer;
-      user-select: none;
     }
     .title {
       font-size: 20px;
       font-weight: bold;
-      user-select: none;
     }
     .theme-toggle {
       width: 24px;
@@ -53,7 +51,6 @@
       border-radius: 50%;
       cursor: pointer;
       border: 2px solid var(--text);
-      user-select: none;
     }
     .menu {
       display: none;
@@ -74,28 +71,15 @@
       text-decoration: none;
       color: var(--text);
       border-bottom: 1px solid #ccc;
-      user-select: none;
     }
     .menu a:hover {
       background-color: var(--accent);
       color: #fff;
     }
     main {
-      padding: 80px 20px 60px;
+      padding: 80px 20px 100px;
       max-width: 700px;
       margin: auto;
-    }
-    footer {
-      position: fixed;
-      bottom: 0;
-      width: 100%;
-      background-color: var(--menu-bg);
-      color: var(--text);
-      text-align: center;
-      padding: 10px 0;
-      font-size: 14px;
-      border-top: 1px solid #ccc;
-      user-select: none;
     }
     .ronda {
       border: 1px solid var(--accent);
@@ -104,14 +88,14 @@
       border-radius: 6px;
       background: var(--menu-bg);
     }
-    input[type=number] {
+    input[type=number], input[type=text] {
       width: 45px;
       font-size: 16px;
       padding: 4px;
       text-align: center;
       border: 1px solid #999;
       border-radius: 4px;
-      user-select: text;
+      margin: 3px;
     }
     button {
       cursor: pointer;
@@ -122,8 +106,6 @@
       margin: 5px 5px 20px 0;
       border-radius: 5px;
       font-size: 16px;
-      user-select: none;
-      transition: background-color 0.3s;
     }
     button:hover {
       background-color: #2255bb;
@@ -143,6 +125,17 @@
       background-color: var(--accent);
       color: white;
     }
+    footer {
+      position: fixed;
+      bottom: 0;
+      width: 100%;
+      background-color: var(--menu-bg);
+      color: var(--text);
+      text-align: center;
+      padding: 10px 0;
+      font-size: 14px;
+      border-top: 1px solid #ccc;
+    }
   </style>
 </head>
 <body>
@@ -159,38 +152,106 @@
   </div>
 
   <main>
-    <h2>Ingresar Resultados de las Rondas</h2>
-
-    <!-- Rondas (pegaremos las que ya tenías, con inputs numerados r1p1_g1, etc.) -->
-    <!-- Por simplicidad, lo omito acá pero lo tenés listo en la versión anterior. -->
-
-    <!-- BOTONES -->
-    <button onclick="calcularTablas()">Calcular Tablas</button>
-    <button onclick="reiniciarResultados()">Reiniciar Resultados</button>
+    <h2>Ingresar nombres de los 6 jugadores</h2>
+    <div id="form-jugadores">
+      <input type="text" placeholder="Jugador 1" id="j1" />
+      <input type="text" placeholder="Jugador 2" id="j2" />
+      <input type="text" placeholder="Jugador 3" id="j3" />
+      <input type="text" placeholder="Jugador 4" id="j4" />
+      <input type="text" placeholder="Jugador 5" id="j5" />
+      <input type="text" placeholder="Jugador 6" id="j6" /><br><br>
+      <button onclick="generarRondas()">Generar rondas</button>
+    </div>
+    <div id="contenido"></div>
   </main>
 
   <footer>Desarrollado por I.A</footer>
 
   <script>
-    // Modo oscuro
     function toggleTheme() {
       const current = document.body.getAttribute('data-theme');
       const newTheme = current === 'dark' ? 'light' : 'dark';
       document.body.setAttribute('data-theme', newTheme);
       localStorage.setItem('theme', newTheme);
     }
-    window.onload = () => {
-      const saved = localStorage.getItem('theme') || 'light';
-      document.body.setAttribute('data-theme', saved);
-    };
-
-    // Menú hamburguesa
     function toggleMenu() {
       const menu = document.getElementById('menu');
       menu.style.display = menu.style.display === 'flex' ? 'none' : 'flex';
     }
+    window.onload = () => {
+      const savedTheme = localStorage.getItem('theme') || 'light';
+      document.body.setAttribute('data-theme', savedTheme);
+    };
 
-    // Cálculo y reinicio (pegamos todo el JS de cálculo de parejas e individuales)
+    function generarRondas() {
+      const nombres = [];
+      for (let i = 1; i <= 6; i++) {
+        const val = document.getElementById(`j${i}`).value.trim();
+        if (!val) return alert("Completá todos los nombres.");
+        nombres.push(val);
+      }
+
+      const parejas = [];
+      for (let i = 0; i < 6; i++) {
+        for (let j = i + 1; j < 6; j++) {
+          parejas.push([nombres[i], nombres[j]]);
+        }
+      }
+
+      const usados = new Set();
+      const rondas = [];
+
+      while (parejas.length && rondas.length < 5) {
+        const ronda = [];
+        const usadosEstaRonda = new Set();
+
+        for (let i = 0; i < parejas.length; i++) {
+          const [a, b] = parejas[i];
+          if (!usadosEstaRonda.has(a) && !usadosEstaRonda.has(b)) {
+            ronda.push(parejas[i]);
+            usadosEstaRonda.add(a);
+            usadosEstaRonda.add(b);
+          }
+          if (ronda.length === 3) break;
+        }
+
+        if (ronda.length === 3) {
+          rondas.push(ronda);
+          ronda.forEach(p => {
+            usados.add(p.join('|'));
+          });
+          parejas = parejas.filter(p => !usados.has(p.join('|')));
+        } else {
+          break;
+        }
+      }
+
+      document.getElementById("form-jugadores").style.display = "none";
+
+      const cont = document.getElementById("contenido");
+      cont.innerHTML = "<h3>Rondas generadas</h3>";
+
+      rondas.forEach((ronda, idx) => {
+        let html = `<div class="ronda"><strong>Ronda ${idx + 1}</strong><br><br>`;
+        for (let i = 0; i < 3; i += 2) {
+          const p1 = ronda[i];
+          const p2 = ronda[i + 1];
+          html += `
+            ${p1[0]} & ${p1[1]} <input type="number" id="r${idx + 1}p${i + 1}_g1"> - 
+            <input type="number" id="r${idx + 1}p${i + 1}_g2"> ${p2[0]} & ${p2[1]}<br><br>
+          `;
+        }
+        html += `</div>`;
+        cont.innerHTML += html;
+      });
+
+      cont.innerHTML += `
+        <button onclick="calcularTablas()">Calcular Tablas</button>
+        <button onclick="location.reload()">Reiniciar</button>
+        <div id="resultados-tabla"></div>
+      `;
+    }
+
     function calcularTablas() {
       const tablaParejas = {};
       const tablaJugadores = {};
@@ -211,19 +272,15 @@
         const partidoDiv = document.getElementById(key + "_g1").parentElement;
         const texto = partidoDiv.textContent;
         const parejasTexto = texto.replace(/\d+\s*-\s*\d+/, '|').split('|');
-
         const nombres1 = parejasTexto[0].trim().split(' & ');
         const nombres2 = parejasTexto[1].trim().split(' & ');
-
         const goles1 = partidos[key].g1;
         const goles2 = partidos[key].g2;
-
         const pKey1 = nombres1.join(' & ');
         const pKey2 = nombres2.join(' & ');
 
         if (!tablaParejas[pKey1]) tablaParejas[pKey1] = { puntos: 0, pj: 0, dg: 0 };
         if (!tablaParejas[pKey2]) tablaParejas[pKey2] = { puntos: 0, pj: 0, dg: 0 };
-
         nombres1.forEach(n => tablaJugadores[n] = tablaJugadores[n] || { puntos: 0, pj: 0, dg: 0 });
         nombres2.forEach(n => tablaJugadores[n] = tablaJugadores[n] || { puntos: 0, pj: 0, dg: 0 });
 
@@ -268,19 +325,7 @@
         });
       html += "</table>";
 
-      const existing = document.getElementById("resultados-tabla");
-      if (existing) existing.remove();
-
-      const div = document.createElement("div");
-      div.id = "resultados-tabla";
-      div.innerHTML = html;
-      document.querySelector("main").appendChild(div);
-    }
-
-    function reiniciarResultados() {
-      document.querySelectorAll("input[type='number']").forEach(i => i.value = '');
-      const res = document.getElementById("resultados-tabla");
-      if (res) res.remove();
+      document.getElementById("resultados-tabla").innerHTML = html;
     }
   </script>
 </body>
