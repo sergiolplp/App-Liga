@@ -1,9 +1,10 @@
+<!-- Copiá desde aquí -->
 <!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Torneo por Parejas</title>
+  <title>Torneo de los Pibes</title>
   <style>
     :root {
       --bg: #ffffff;
@@ -88,9 +89,16 @@
 
     main {
       padding: 80px 20px 100px;
-      max-width: 700px;
+      max-width: 800px;
       margin: auto;
-      text-align: center;
+    }
+
+    .section {
+      display: none;
+    }
+
+    .section.active {
+      display: block;
     }
 
     #form-jugadores {
@@ -125,6 +133,31 @@
       background-color: #2255bb;
     }
 
+    .partido {
+      margin-bottom: 10px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .partido input {
+      width: 40px;
+      text-align: center;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 15px;
+    }
+
+    th, td {
+      border: 1px solid #ccc;
+      padding: 5px;
+      text-align: center;
+    }
+
     footer {
       position: fixed;
       bottom: 0;
@@ -152,23 +185,56 @@
   </div>
 
   <main>
-    <h2>Ingresar nombres de los 6 jugadores</h2>
-    <div id="form-jugadores">
-      <input type="text" placeholder="Jugador 1" id="j1" />
-      <input type="text" placeholder="Jugador 2" id="j2" />
-      <input type="text" placeholder="Jugador 3" id="j3" />
-      <input type="text" placeholder="Jugador 4" id="j4" />
-      <input type="text" placeholder="Jugador 5" id="j5" />
-      <input type="text" placeholder="Jugador 6" id="j6" />
+    <section id="seccion-jugadores" class="section active">
+      <h2>Ingresar nombres de los 6 jugadores</h2>
+      <div id="form-jugadores"></div>
       <button onclick="generarRondas()">Generar Rondas</button>
-    </div>
+    </section>
 
-    <div id="contenido"></div>
+    <section id="seccion-rondas" class="section">
+      <h2>Rondas Generadas</h2>
+      <div id="contenido-rondas"></div>
+      <button onclick="mostrarSeccion('seccion-partidos')">Ver partidos de parejas</button>
+    </section>
+
+    <section id="seccion-partidos" class="section">
+      <h2>Partidos</h2>
+      <div id="contenido-partidos"></div>
+      <button onclick="mostrarSeccion('seccion-tabla')">Ver tabla de posiciones</button>
+    </section>
+
+    <section id="seccion-tabla" class="section">
+      <h2>Tabla de posiciones</h2>
+      <div id="contenido-tabla"></div>
+      <button onclick="mostrarSeccion('seccion-partidos')">Volver a partidos</button>
+    </section>
   </main>
 
   <footer>Desarrollado por I.A</footer>
 
   <script>
+    const form = document.getElementById("form-jugadores");
+    const nombres = JSON.parse(localStorage.getItem("jugadores")) || ["", "", "", "", "", ""];
+
+    nombres.forEach((nombre, i) => {
+      const input = document.createElement("input");
+      input.placeholder = `Jugador ${i + 1}`;
+      input.value = nombre;
+      input.oninput = () => {
+        nombres[i] = input.value;
+        localStorage.setItem("jugadores", JSON.stringify(nombres));
+      };
+      form.appendChild(input);
+    });
+
+    let partidos = [];
+    let resultados = JSON.parse(localStorage.getItem("resultados") || "[]");
+
+    function toggleMenu() {
+      const menu = document.getElementById('menu');
+      menu.style.display = menu.style.display === 'flex' ? 'none' : 'flex';
+    }
+
     function toggleTheme() {
       const current = document.body.getAttribute('data-theme');
       const newTheme = current === 'dark' ? 'light' : 'dark';
@@ -176,9 +242,11 @@
       localStorage.setItem('theme', newTheme);
     }
 
-    function toggleMenu() {
-      const menu = document.getElementById('menu');
-      menu.style.display = menu.style.display === 'flex' ? 'none' : 'flex';
+    function mostrarSeccion(id) {
+      document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+      document.getElementById(id).classList.add('active');
+
+      if (id === 'seccion-tabla') mostrarTabla();
     }
 
     window.onload = () => {
@@ -187,26 +255,103 @@
     };
 
     function generarRondas() {
-      const nombres = [];
-      for (let i = 1; i <= 6; i++) {
-        const val = document.getElementById(`j${i}`).value.trim();
-        if (!val) {
-          alert("Por favor completá todos los nombres.");
-          return;
+      if (nombres.some(n => !n.trim())) return alert("Completá todos los nombres.");
+      const parejas = [];
+
+      for (let i = 0; i < 6; i++) {
+        for (let j = i + 1; j < 6; j++) {
+          parejas.push([nombres[i], nombres[j]]);
         }
-        nombres.push(val);
       }
 
-      // Simulamos que se generaron las rondas
-      document.getElementById("form-jugadores").style.display = "none";
+      const partidosUnicos = [];
+      for (let a = 0; a < parejas.length; a++) {
+        for (let b = a + 1; b < parejas.length; b++) {
+          const [p1a, p1b] = parejas[a];
+          const [p2a, p2b] = parejas[b];
+          const jugadores = new Set([p1a, p1b, p2a, p2b]);
+          if (jugadores.size === 4) partidosUnicos.push([[p1a, p1b], [p2a, p2b]]);
+        }
+      }
 
-      const contenido = document.getElementById("contenido");
-      contenido.innerHTML = `
-        <h3>Rondas generadas correctamente</h3>
-        <p>(Acá irá el fixture completo con los partidos)</p>
-        <button onclick="location.reload()">Volver a empezar</button>
-      `;
+      partidos = partidosUnicos.slice(0, 15);
+      localStorage.setItem("partidos", JSON.stringify(partidos));
+      localStorage.setItem("resultados", JSON.stringify(partidos.map(() => [null, null])));
+      mostrarRondas();
+      mostrarSeccion("seccion-rondas");
     }
+
+    function mostrarRondas() {
+      const container = document.getElementById("contenido-rondas");
+      container.innerHTML = "";
+      partidos.forEach(([[a, b], [c, d]], i) => {
+        container.innerHTML += `<p><strong>Partido ${i + 1}:</strong> ${a} + ${b} vs ${c} + ${d}</p>`;
+      });
+    }
+
+    function mostrarPartidos() {
+      const cont = document.getElementById("contenido-partidos");
+      cont.innerHTML = "";
+      resultados = JSON.parse(localStorage.getItem("resultados") || "[]");
+
+      partidos.forEach(([[a, b], [c, d]], i) => {
+        const [g1, g2] = resultados[i] || [null, null];
+        cont.innerHTML += `
+          <div class="partido">
+            ${a} + ${b}
+            <input type="number" min="0" value="${g1 ?? ''}" onchange="guardarResultado(${i}, 0, this.value)">
+            vs
+            <input type="number" min="0" value="${g2 ?? ''}" onchange="guardarResultado(${i}, 1, this.value)">
+            ${c} + ${d}
+          </div>`;
+      });
+    }
+
+    function guardarResultado(i, equipo, valor) {
+      resultados[i] = resultados[i] || [null, null];
+      resultados[i][equipo] = valor === "" ? null : parseInt(valor);
+      localStorage.setItem("resultados", JSON.stringify(resultados));
+      mostrarPartidos();
+    }
+
+    function mostrarTabla() {
+      const tabla = {};
+      const individual = {};
+      resultados.forEach(([g1, g2], i) => {
+        if (g1 === null || g2 === null) return;
+        const [[a, b], [c, d]] = partidos[i];
+        const equipo1 = `${a} + ${b}`;
+        const equipo2 = `${c} + ${d}`;
+        tabla[equipo1] = tabla[equipo1] || [0, 0, 0]; // Pts, PJ, DG
+        tabla[equipo2] = tabla[equipo2] || [0, 0, 0];
+
+        tabla[equipo1][1]++;
+        tabla[equipo2][1]++;
+        tabla[equipo1][2] += g1 - g2;
+        tabla[equipo2][2] += g2 - g1;
+
+        if (g1 > g2) tabla[equipo1][0] += 3;
+        else if (g2 > g1) tabla[equipo2][0] += 3;
+        else { tabla[equipo1][0]++; tabla[equipo2][0]++; }
+
+        [a, b, c, d].forEach(j => individual[j] = individual[j] || [0, 0, 0]);
+        [a, b].forEach(j => { individual[j][1]++; individual[j][2] += g1 - g2; if (g1 > g2) individual[j][0] += 3; else if (g1 === g2) individual[j][0] += 1; });
+        [c, d].forEach(j => { individual[j][1]++; individual[j][2] += g2 - g1; if (g2 > g1) individual[j][0] += 3; else if (g1 === g2) individual[j][0] += 1; });
+      });
+
+      const cont = document.getElementById("contenido-tabla");
+      cont.innerHTML = "<h3>Por pareja</h3><table><tr><th>Pareja</th><th>Pts</th><th>PJ</th><th>DG</th></tr>" +
+        Object.entries(tabla).sort((a, b) => b[1][0] - a[1][0]).map(([k, v]) =>
+        `<tr><td>${k}</td><td>${v[0]}</td><td>${v[1]}</td><td>${v[2]}</td></tr>`).join("") +
+        "</table><h3>Individual</h3><table><tr><th>Jugador</th><th>Pts</th><th>PJ</th><th>DG</th></tr>" +
+        Object.entries(individual).sort((a, b) => b[1][0] - a[1][0]).map(([k, v]) =>
+        `<tr><td>${k}</td><td>${v[0]}</td><td>${v[1]}</td><td>${v[2]}</td></tr>`).join("") +
+        "</table>";
+    }
+
+    // Mostrar partidos al entrar a sección
+    document.querySelector("button[onclick*='seccion-partidos']").addEventListener("click", mostrarPartidos);
   </script>
 </body>
 </html>
+<!-- Hasta aquí -->
