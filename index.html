@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Torneo de los Pibes</title>
   <style>
     :root {
@@ -34,16 +34,22 @@
       padding: 10px 20px;
       background-color: var(--menu-bg);
       border-bottom: 1px solid #ccc;
+      position: fixed;
+      top: 0;
+      width: 100%;
+      z-index: 10;
     }
 
     .hamburger {
       font-size: 24px;
       cursor: pointer;
+      user-select: none;
     }
 
     .title {
       font-size: 20px;
       font-weight: bold;
+      user-select: none;
     }
 
     .theme-toggle {
@@ -53,6 +59,7 @@
       border-radius: 50%;
       cursor: pointer;
       border: 2px solid var(--text);
+      user-select: none;
     }
 
     .menu {
@@ -60,6 +67,14 @@
       flex-direction: column;
       background-color: var(--menu-bg);
       border-top: 1px solid #ccc;
+      position: fixed;
+      top: 50px;
+      left: 0;
+      width: 250px;
+      max-height: calc(100% - 50px);
+      overflow-y: auto;
+      box-shadow: 2px 0 5px rgba(0,0,0,0.2);
+      z-index: 9;
     }
 
     .menu a {
@@ -67,6 +82,7 @@
       text-decoration: none;
       color: var(--text);
       border-bottom: 1px solid #ccc;
+      user-select: none;
     }
 
     .menu a:hover {
@@ -75,43 +91,8 @@
     }
 
     main {
-      padding: 20px;
+      padding: 80px 20px 60px;
       text-align: center;
-    }
-
-    #form-jugadores input {
-      display: block;
-      margin: 5px auto;
-      padding: 8px;
-      font-size: 16px;
-      width: 200px;
-    }
-
-    #form-jugadores button, button {
-      margin-top: 10px;
-      padding: 10px 20px;
-      font-size: 16px;
-      background-color: var(--accent);
-      color: #fff;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-    }
-
-    ul {
-      text-align: left;
-      max-width: 300px;
-      margin: 10px auto;
-      padding-left: 20px;
-    }
-
-    .ronda {
-      margin: 10px auto;
-      background-color: var(--menu-bg);
-      padding: 10px;
-      border-radius: 6px;
-      max-width: 400px;
-      text-align: left;
     }
 
     footer {
@@ -124,12 +105,7 @@
       padding: 10px 0;
       font-size: 14px;
       border-top: 1px solid #ccc;
-    }
-
-    @media (min-width: 600px) {
-      .title {
-        font-size: 24px;
-      }
+      user-select: none;
     }
   </style>
 </head>
@@ -141,12 +117,12 @@
   </header>
 
   <div id="menu" class="menu">
-    <a href="#" onclick="mostrarInicio()">LIGAS INDIVIDUALES</a>
-    <a href="#" onclick="mostrarParejas()">TORNEOS POR PAREJAS ROTATIVAS</a>
-    <a href="#" onclick="mostrarHistorico()">HISTÓRICO ENTRE JUGADORES</a>
+    <a href="ligasindividuales.html">LIGAS INDIVIDUALES</a>
+    <a href="torneoparejas.html">TORNEOS POR PAREJAS ROTATIVAS</a>
+    <a href="historico.html">HISTÓRICO ENTRE JUGADORES</a>
   </div>
 
-  <main id="contenido">
+  <main>
     <h2>Bienvenido al Torneo de los Pibes</h2>
     <p>Seleccioná una opción del menú para comenzar.</p>
   </main>
@@ -154,134 +130,22 @@
   <footer>Desarrollado por I.A</footer>
 
   <script>
-    const menu = document.getElementById('menu');
-    const contenido = document.getElementById('contenido');
-
-    function toggleMenu() {
-      menu.style.display = menu.style.display === 'flex' ? 'none' : 'flex';
-    }
-
     function toggleTheme() {
       const currentTheme = document.body.getAttribute('data-theme');
-      document.body.setAttribute('data-theme', currentTheme === 'dark' ? 'light' : 'dark');
+      const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+      document.body.setAttribute('data-theme', newTheme);
+      localStorage.setItem('theme', newTheme);
+    }
+
+    function toggleMenu() {
+      const menu = document.getElementById('menu');
+      menu.style.display = menu.style.display === 'flex' ? 'none' : 'flex';
     }
 
     window.onload = () => {
       const savedTheme = localStorage.getItem('theme') || 'light';
       document.body.setAttribute('data-theme', savedTheme);
     };
-
-    document.querySelector('.theme-toggle').addEventListener('click', () => {
-      const current = document.body.getAttribute('data-theme');
-      const newTheme = current === 'dark' ? 'light' : 'dark';
-      document.body.setAttribute('data-theme', newTheme);
-      localStorage.setItem('theme', newTheme);
-    });
-
-    function mostrarInicio() {
-      contenido.innerHTML = `
-        <h2>Bienvenido al Torneo de los Pibes</h2>
-        <p>Seleccioná una opción del menú para comenzar.</p>
-      `;
-      menu.style.display = 'none';
-    }
-
-    function mostrarHistorico() {
-      contenido.innerHTML = `
-        <h2>Histórico entre jugadores</h2>
-        <p>Esta sección estará disponible pronto.</p>
-      `;
-      menu.style.display = 'none';
-    }
-
-    function mostrarParejas() {
-      contenido.innerHTML = `
-        <h2>Torneo por Parejas Rotativas</h2>
-        <p>Ingresá los nombres de los 6 jugadores:</p>
-        <div id="form-jugadores">
-          <input placeholder="Jugador 1" />
-          <input placeholder="Jugador 2" />
-          <input placeholder="Jugador 3" />
-          <input placeholder="Jugador 4" />
-          <input placeholder="Jugador 5" />
-          <input placeholder="Jugador 6" />
-          <button onclick="generarParejas()">Generar Parejas</button>
-        </div>
-        <div id="resultado-parejas" style="display:none;">
-          <h3>Parejas Generadas</h3>
-          <ul id="lista-parejas"></ul>
-          <h3>Rondas Sugeridas</h3>
-          <div id="rondas"></div>
-        </div>
-      `;
-      menu.style.display = 'none';
-    }
-
-    function generarParejas() {
-      const inputs = document.querySelectorAll('#form-jugadores input');
-      const nombres = Array.from(inputs).map(i => i.value.trim()).filter(n => n !== '');
-
-      if (nombres.length !== 6) {
-        alert('Tenés que ingresar exactamente 6 jugadores.');
-        return;
-      }
-
-      const parejas = [];
-      for (let i = 0; i < nombres.length; i++) {
-        for (let j = i + 1; j < nombres.length; j++) {
-          parejas.push([nombres[i], nombres[j]]);
-        }
-      }
-
-      const lista = document.getElementById('lista-parejas');
-      lista.innerHTML = '';
-      parejas.forEach((p, i) => {
-        const li = document.createElement('li');
-        li.textContent = `${i + 1}. ${p[0]} & ${p[1]}`;
-        lista.appendChild(li);
-      });
-
-      mostrarRondas(parejas);
-      document.getElementById('resultado-parejas').style.display = 'block';
-
-      localStorage.setItem('jugadores', JSON.stringify(nombres));
-      localStorage.setItem('parejas', JSON.stringify(parejas));
-    }
-
-    function jugadoresDe(pareja) {
-      return new Set(pareja);
-    }
-
-    function rondaValida(p1, p2, p3) {
-      const all = new Set([...p1, ...p2, ...p3]);
-      return all.size === 6;
-    }
-
-    function mostrarRondas(parejas) {
-      const rondas = [];
-      for (let i = 0; i < parejas.length; i++) {
-        for (let j = i + 1; j < parejas.length; j++) {
-          for (let k = j + 1; k < parejas.length; k++) {
-            if (rondaValida(parejas[i], parejas[j], parejas[k])) {
-              rondas.push([parejas[i], parejas[j], parejas[k]]);
-            }
-          }
-        }
-      }
-
-      // Mostrar solo primeras 5 rondas válidas
-      const contenedor = document.getElementById('rondas');
-      contenedor.innerHTML = '';
-      rondas.slice(0, 5).forEach((ronda, i) => {
-        const div = document.createElement('div');
-        div.className = 'ronda';
-        div.innerHTML = `<strong>Ronda ${i + 1}:</strong><br>
-          1. ${ronda[0][0]} & ${ronda[0][1]}<br>
-          2. ${ronda[1][0]} & ${ronda[1][1]}<br>
-          3. ${ronda[2][0]} & ${ronda[2][1]}`;
-        contenedor.appendChild(div);
-      });
-    }
   </script>
 </body>
 </html>
