@@ -239,6 +239,7 @@
       for (let i = 0; i < 6; i++) {
         const nombre = document.getElementById(`jugador${i}`).value.trim();
         if (!nombre) return alert("Completá todos los nombres");
+        if (nombres.includes(nombre)) return alert("No repitas nombres de jugadores");
         nombres.push(nombre);
       }
 
@@ -279,9 +280,12 @@
         return false;
       };
 
-      generar([], parejas);
+      const exito = generar([], parejas);
 
-      if (todasLasRondas.length === 0) return alert("No se pudo generar un calendario válido");
+      if (!exito || todasLasRondas.length === 0) {
+        alert("No se pudo generar un calendario válido. Probá cambiar los nombres o refrescar.");
+        return;
+      }
 
       rondas = todasLasRondas[0];
       partidos = rondas.flat();
