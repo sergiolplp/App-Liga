@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Torneo de los Pibes</title>
   <style>
     :root {
@@ -11,14 +11,12 @@
       --accent: #3333cc;
       --menu-bg: #f0f0f0;
     }
-
     [data-theme="dark"] {
       --bg: #121212;
       --text: #ffffff;
       --accent: #3399ff;
       --menu-bg: #1e1e1e;
     }
-
     body {
       margin: 0;
       font-family: 'Poppins', sans-serif;
@@ -26,7 +24,6 @@
       color: var(--text);
       transition: background 0.3s, color 0.3s;
     }
-
     header {
       display: flex;
       align-items: center;
@@ -34,18 +31,21 @@
       padding: 10px 20px;
       background-color: var(--menu-bg);
       border-bottom: 1px solid #ccc;
+      position: fixed;
+      width: 100%;
+      top: 0;
+      z-index: 10;
     }
-
     .hamburger {
       font-size: 24px;
       cursor: pointer;
+      user-select: none;
     }
-
     .title {
       font-size: 20px;
       font-weight: bold;
+      user-select: none;
     }
-
     .theme-toggle {
       width: 24px;
       height: 24px;
@@ -53,58 +53,38 @@
       border-radius: 50%;
       cursor: pointer;
       border: 2px solid var(--text);
+      user-select: none;
     }
-
     .menu {
       display: none;
       flex-direction: column;
       background-color: var(--menu-bg);
       border-top: 1px solid #ccc;
+      position: fixed;
+      top: 50px;
+      left: 0;
+      width: 250px;
+      max-height: calc(100% - 50px);
+      overflow-y: auto;
+      box-shadow: 2px 0 5px rgba(0,0,0,0.2);
+      z-index: 9;
     }
-
     .menu a {
       padding: 12px 20px;
       text-decoration: none;
       color: var(--text);
       border-bottom: 1px solid #ccc;
+      user-select: none;
     }
-
     .menu a:hover {
       background-color: var(--accent);
       color: #fff;
     }
-
     main {
-      padding: 20px;
-      text-align: center;
+      padding: 80px 20px 60px; /* espacio para header y footer */
+      max-width: 700px;
+      margin: auto;
     }
-
-    #form-jugadores input {
-      display: block;
-      margin: 5px auto;
-      padding: 8px;
-      font-size: 16px;
-      width: 200px;
-    }
-
-    #form-jugadores button, button {
-      margin-top: 10px;
-      padding: 10px 20px;
-      font-size: 16px;
-      background-color: var(--accent);
-      color: #fff;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-    }
-
-    ul {
-      text-align: left;
-      max-width: 300px;
-      margin: 10px auto;
-      padding-left: 20px;
-    }
-
     footer {
       position: fixed;
       bottom: 0;
@@ -115,12 +95,52 @@
       padding: 10px 0;
       font-size: 14px;
       border-top: 1px solid #ccc;
+      user-select: none;
     }
-
-    @media (min-width: 600px) {
-      .title {
-        font-size: 24px;
-      }
+    .ronda {
+      border: 1px solid var(--accent);
+      padding: 10px 15px;
+      margin-bottom: 20px;
+      border-radius: 6px;
+      background: var(--menu-bg);
+    }
+    input[type=number] {
+      width: 45px;
+      font-size: 16px;
+      padding: 4px;
+      text-align: center;
+      border: 1px solid #999;
+      border-radius: 4px;
+      user-select: text;
+    }
+    button {
+      cursor: pointer;
+      background-color: var(--accent);
+      color: white;
+      border: none;
+      padding: 10px 15px;
+      margin: 5px;
+      border-radius: 5px;
+      font-size: 16px;
+      user-select: none;
+    }
+    button:hover {
+      background-color: #2255bb;
+    }
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      max-width: 500px;
+      margin: 10px auto;
+    }
+    th, td {
+      border: 1px solid var(--accent);
+      padding: 8px 12px;
+      text-align: center;
+    }
+    th {
+      background-color: var(--accent);
+      color: white;
     }
   </style>
 </head>
@@ -132,112 +152,208 @@
   </header>
 
   <div id="menu" class="menu">
-    <a href="#" onclick="mostrarInicio()">LIGAS INDIVIDUALES</a>
-    <a href="#" onclick="mostrarParejas()">TORNEOS POR PAREJAS ROTATIVAS</a>
-    <a href="#" onclick="mostrarHistorico()">HISTÓRICO ENTRE JUGADORES</a>
+    <a href="#">LIGAS INDIVIDUALES</a>
+    <a href="#">TORNEOS POR PAREJAS ROTATIVAS</a>
+    <a href="#">HISTÓRICO ENTRE JUGADORES</a>
   </div>
 
-  <main id="contenido">
-    <h2>Bienvenido al Torneo de los Pibes</h2>
-    <p>Seleccioná una opción del menú para comenzar.</p>
+  <main>
+    <h2>Ingresar Resultados de las Rondas</h2>
+
+    <div class='ronda'><h3>Ronda 1</h3>
+      <div><strong>Partido 1:</strong><br>
+        Juan & Luis <input type='number' min='0' id='r1p1_g1'> -
+        <input type='number' min='0' id='r1p1_g2'> Pedro & Nico
+      </div><br>
+      <div><strong>Partido 2:</strong><br>
+        Juan & Luis <input type='number' min='0' id='r1p2_g1'> -
+        <input type='number' min='0' id='r1p2_g2'> Mati & Santi
+      </div><br>
+      <div><strong>Partido 3:</strong><br>
+        Pedro & Nico <input type='number' min='0' id='r1p3_g1'> -
+        <input type='number' min='0' id='r1p3_g2'> Mati & Santi
+      </div><br>
+    </div>
+
+    <div class='ronda'><h3>Ronda 2</h3>
+      <div><strong>Partido 1:</strong><br>
+        Juan & Pedro <input type='number' min='0' id='r2p1_g1'> -
+        <input type='number' min='0' id='r2p1_g2'> Luis & Nico
+      </div><br>
+      <div><strong>Partido 2:</strong><br>
+        Juan & Pedro <input type='number' min='0' id='r2p2_g1'> -
+        <input type='number' min='0' id='r2p2_g2'> Mati & Santi
+      </div><br>
+      <div><strong>Partido 3:</strong><br>
+        Luis & Nico <input type='number' min='0' id='r2p3_g1'> -
+        <input type='number' min='0' id='r2p3_g2'> Mati & Santi
+      </div><br>
+    </div>
+
+    <div class='ronda'><h3>Ronda 3</h3>
+      <div><strong>Partido 1:</strong><br>
+        Juan & Nico <input type='number' min='0' id='r3p1_g1'> -
+        <input type='number' min='0' id='r3p1_g2'> Luis & Pedro
+      </div><br>
+      <div><strong>Partido 2:</strong><br>
+        Juan & Nico <input type='number' min='0' id='r3p2_g1'> -
+        <input type='number' min='0' id='r3p2_g2'> Mati & Santi
+      </div><br>
+      <div><strong>Partido 3:</strong><br>
+        Luis & Pedro <input type='number' min='0' id='r3p3_g1'> -
+        <input type='number' min='0' id='r3p3_g2'> Mati & Santi
+      </div><br>
+    </div>
+
+    <div class='ronda'><h3>Ronda 4</h3>
+      <div><strong>Partido 1:</strong><br>
+        Juan & Mati <input type='number' min='0' id='r4p1_g1'> -
+        <input type='number' min='0' id='r4p1_g2'> Luis & Nico
+      </div><br>
+      <div><strong>Partido 2:</strong><br>
+        Juan & Mati <input type='number' min='0' id='r4p2_g1'> -
+        <input type='number' min='0' id='r4p2_g2'> Pedro & Santi
+      </div><br>
+      <div><strong>Partido 3:</strong><br>
+        Luis & Nico <input type='number' min='0' id='r4p3_g1'> -
+        <input type='number' min='0' id='r4p3_g2'> Pedro & Santi
+      </div><br>
+    </div>
+
+    <div class='ronda'><h3>Ronda 5</h3>
+      <div><strong>Partido 1:</strong><br>
+        Juan & Santi <input type='number' min='0' id='r5p1_g1'> -
+        <input type='number' min='0' id='r5p1_g2'> Luis & Pedro
+      </div><br>
+      <div><strong>Partido 2:</strong><br>
+        Juan & Santi <input type='number' min='0' id='r5p2_g1'> -
+        <input type='number' min='0' id='r5p2_g2'> Mati & Nico
+      </div><br>
+      <div><strong>Partido 3:</strong><br>
+        Luis & Pedro <input type='number' min='0' id='r5p3_g1'> -
+        <input type='number' min='0' id='r5p3_g2'> Mati & Nico
+      </div><br>
+    </div>
+
+    <button onclick="calcularTablas()">Calcular Tablas</button>
+    <button onclick="reiniciarResultados()">Reiniciar Resultados</button>
   </main>
 
   <footer>Desarrollado por I.A</footer>
 
-  <script>
-    const menu = document.getElementById('menu');
-    const contenido = document.getElementById('contenido');
+<script>
+  // Menú hamburguesa
+  const menu = document.getElementById('menu');
+  function toggleMenu() {
+    menu.style.display = menu.style.display === 'flex' ? 'none' : 'flex';
+  }
 
-    function toggleMenu() {
-      menu.style.display = menu.style.display === 'flex' ? 'none' : 'flex';
-    }
+  // Tema claro/oscuro
+  function toggleTheme() {
+    const currentTheme = document.body.getAttribute('data-theme');
+    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+    document.body.setAttribute('data-theme', newTheme);
+    localStorage.setItem('theme', newTheme);
+  }
+  window.onload = () => {
+    const savedTheme = localStorage.getItem('theme') || 'light';
+    document.body.setAttribute('data-theme', savedTheme);
+  };
 
-    function toggleTheme() {
-      const currentTheme = document.body.getAttribute('data-theme');
-      document.body.setAttribute('data-theme', currentTheme === 'dark' ? 'light' : 'dark');
-    }
+  // Calcular tablas
+  function calcularTablas() {
+    const tablaParejas = {};
+    const tablaJugadores = {};
+    const inputs = document.querySelectorAll("input[type='number']");
+    const partidos = {};
 
-    // Guardar y aplicar tema desde localStorage
-    window.onload = () => {
-      const savedTheme = localStorage.getItem('theme') || 'light';
-      document.body.setAttribute('data-theme', savedTheme);
-    };
-
-    document.querySelector('.theme-toggle').addEventListener('click', () => {
-      const current = document.body.getAttribute('data-theme');
-      const newTheme = current === 'dark' ? 'light' : 'dark';
-      document.body.setAttribute('data-theme', newTheme);
-      localStorage.setItem('theme', newTheme);
+    inputs.forEach(input => {
+      const match = input.id.match(/r(\d+)p(\d+)_g([12])/);
+      if (match) {
+        const [_, ronda, partido, equipo] = match;
+        const key = `r${ronda}p${partido}`;
+        if (!partidos[key]) partidos[key] = {};
+        partidos[key][`g${equipo}`] = parseInt(input.value) || 0;
+      }
     });
 
-    function mostrarInicio() {
-      contenido.innerHTML = `
-        <h2>Bienvenido al Torneo de los Pibes</h2>
-        <p>Seleccioná una opción del menú para comenzar.</p>
-      `;
-      menu.style.display = 'none';
-    }
+    Object.keys(partidos).forEach(key => {
+      const partidoDiv = document.getElementById(key + "_g1").parentElement;
+      const texto = partidoDiv.textContent;
+      const parejasTexto = texto.replace(/\d+\s*-\s*\d+/, '|').split('|');
 
-    function mostrarHistorico() {
-      contenido.innerHTML = `
-        <h2>Histórico entre jugadores</h2>
-        <p>Esta sección estará disponible pronto.</p>
-      `;
-      menu.style.display = 'none';
-    }
+      const nombres1 = parejasTexto[0].trim().split(' & ');
+      const nombres2 = parejasTexto[1].trim().split(' & ');
 
-    function mostrarParejas() {
-      contenido.innerHTML = `
-        <h2>Torneo por Parejas Rotativas</h2>
-        <p>Ingresá los nombres de los 6 jugadores:</p>
-        <div id="form-jugadores">
-          <input placeholder="Jugador 1" />
-          <input placeholder="Jugador 2" />
-          <input placeholder="Jugador 3" />
-          <input placeholder="Jugador 4" />
-          <input placeholder="Jugador 5" />
-          <input placeholder="Jugador 6" />
-          <button onclick="generarParejas()">Generar Parejas</button>
-        </div>
-        <div id="resultado-parejas" style="display:none;">
-          <h3>Parejas Generadas</h3>
-          <ul id="lista-parejas"></ul>
-          <p>Próximo paso: agrupar en rondas y registrar resultados.</p>
-        </div>
-      `;
-      menu.style.display = 'none';
-    }
+      const goles1 = partidos[key].g1;
+      const goles2 = partidos[key].g2;
 
-    function generarParejas() {
-      const inputs = document.querySelectorAll('#form-jugadores input');
-      const nombres = Array.from(inputs).map(i => i.value.trim()).filter(n => n !== '');
+      const pKey1 = nombres1.join(' & ');
+      const pKey2 = nombres2.join(' & ');
 
-      if (nombres.length !== 6) {
-        alert('Tenés que ingresar exactamente 6 jugadores.');
-        return;
+      if (!tablaParejas[pKey1]) tablaParejas[pKey1] = { puntos: 0, pj: 0, dg: 0 };
+      if (!tablaParejas[pKey2]) tablaParejas[pKey2] = { puntos: 0, pj: 0, dg: 0 };
+
+      nombres1.forEach(n => tablaJugadores[n] = tablaJugadores[n] || { puntos: 0, pj: 0, dg: 0 });
+      nombres2.forEach(n => tablaJugadores[n] = tablaJugadores[n] || { puntos: 0, pj: 0, dg: 0 });
+
+      tablaParejas[pKey1].pj++;
+      tablaParejas[pKey2].pj++;
+      nombres1.forEach(n => tablaJugadores[n].pj++);
+      nombres2.forEach(n => tablaJugadores[n].pj++);
+
+      const dg = goles1 - goles2;
+      tablaParejas[pKey1].dg += dg;
+      tablaParejas[pKey2].dg -= dg;
+      nombres1.forEach(n => tablaJugadores[n].dg += dg);
+      nombres2.forEach(n => tablaJugadores[n].dg -= dg);
+
+      if (goles1 > goles2) {
+        tablaParejas[pKey1].puntos += 3;
+        nombres1.forEach(n => tablaJugadores[n].puntos += 3);
+      } else if (goles2 > goles1) {
+        tablaParejas[pKey2].puntos += 3;
+        nombres2.forEach(n => tablaJugadores[n].puntos += 3);
+      } else {
+        tablaParejas[pKey1].puntos += 1;
+        tablaParejas[pKey2].puntos += 1;
+        nombres1.forEach(n => tablaJugadores[n].puntos += 1);
+        nombres2.forEach(n => tablaJugadores[n].puntos += 1);
       }
+    });
 
-      const parejas = [];
-      for (let i = 0; i < nombres.length; i++) {
-        for (let j = i + 1; j < nombres.length; j++) {
-          parejas.push([nombres[i], nombres[j]]);
-        }
-      }
-
-      const lista = document.getElementById('lista-parejas');
-      lista.innerHTML = '';
-      parejas.forEach((p, i) => {
-        const li = document.createElement('li');
-        li.textContent = `${i + 1}. ${p[0]} & ${p[1]}`;
-        lista.appendChild(li);
+    let html = "<h3>🏅 Tabla por Pareja</h3><table><tr><th>Pareja</th><th>Puntos</th><th>PJ</th><th>DG</th></tr>";
+    Object.entries(tablaParejas)
+      .sort((a, b) => b[1].puntos - a[1].puntos || b[1].dg - a[1].dg)
+      .forEach(([k, v]) => {
+        html += `<tr><td>${k}</td><td>${v.puntos}</td><td>${v.pj}</td><td>${v.dg >= 0 ? '+' : ''}${v.dg}</td></tr>`;
       });
+    html += "</table>";
 
-      document.getElementById('resultado-parejas').style.display = 'block';
+    html += "<h3>🧍 Tabla Individual</h3><table><tr><th>Jugador</th><th>Puntos</th><th>PJ</th><th>DG</th></tr>";
+    Object.entries(tablaJugadores)
+      .sort((a, b) => b[1].puntos - a[1].puntos || b[1].dg - a[1].dg)
+      .forEach(([k, v]) => {
+        html += `<tr><td>${k}</td><td>${v.puntos}</td><td>${v.pj}</td><td>${v.dg >= 0 ? '+' : ''}${v.dg}</td></tr>`;
+      });
+    html += "</table>";
 
-      // Guardar en localStorage
-      localStorage.setItem('jugadores', JSON.stringify(nombres));
-      localStorage.setItem('parejas', JSON.stringify(parejas));
-    }
-  </script>
+    const existing = document.getElementById("resultados-tabla");
+    if (existing) existing.remove();
+
+    const div = document.createElement("div");
+    div.id = "resultados-tabla";
+    div.innerHTML = html;
+    document.querySelector("main").appendChild(div);
+  }
+
+  // Limpiar inputs y resultados
+  function reiniciarResultados() {
+    const inputs = document.querySelectorAll("input[type='number']");
+    inputs.forEach(input => input.value = '');
+    const resultados = document.getElementById("resultados-tabla");
+    if (resultados) resultados.remove();
+  }
+</script>
 </body>
 </html>
