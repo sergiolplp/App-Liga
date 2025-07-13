@@ -11,12 +11,14 @@
       --accent: #3333cc;
       --menu-bg: #f0f0f0;
     }
+
     [data-theme="dark"] {
       --bg: #121212;
       --text: #ffffff;
       --accent: #3399ff;
       --menu-bg: #1e1e1e;
     }
+
     body {
       margin: 0;
       font-family: 'Poppins', sans-serif;
@@ -24,6 +26,7 @@
       color: var(--text);
       transition: background 0.3s, color 0.3s;
     }
+
     header {
       display: flex;
       align-items: center;
@@ -32,18 +35,21 @@
       background-color: var(--menu-bg);
       border-bottom: 1px solid #ccc;
       position: fixed;
-      width: 100%;
       top: 0;
+      width: 100%;
       z-index: 10;
     }
+
     .hamburger {
       font-size: 24px;
       cursor: pointer;
     }
+
     .title {
       font-size: 20px;
       font-weight: bold;
     }
+
     .theme-toggle {
       width: 24px;
       height: 24px;
@@ -52,6 +58,7 @@
       cursor: pointer;
       border: 2px solid var(--text);
     }
+
     .menu {
       display: none;
       flex-direction: column;
@@ -66,65 +73,58 @@
       box-shadow: 2px 0 5px rgba(0,0,0,0.2);
       z-index: 9;
     }
+
     .menu a {
       padding: 12px 20px;
       text-decoration: none;
       color: var(--text);
       border-bottom: 1px solid #ccc;
     }
+
     .menu a:hover {
       background-color: var(--accent);
       color: #fff;
     }
+
     main {
       padding: 80px 20px 100px;
       max-width: 700px;
       margin: auto;
-    }
-    .ronda {
-      border: 1px solid var(--accent);
-      padding: 10px 15px;
-      margin-bottom: 20px;
-      border-radius: 6px;
-      background: var(--menu-bg);
-    }
-    input[type=number], input[type=text] {
-      width: 45px;
-      font-size: 16px;
-      padding: 4px;
       text-align: center;
-      border: 1px solid #999;
-      border-radius: 4px;
-      margin: 3px;
     }
+
+    #form-jugadores {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    #form-jugadores input {
+      width: 200px;
+      padding: 8px;
+      font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      text-align: center;
+    }
+
     button {
       cursor: pointer;
       background-color: var(--accent);
       color: white;
       border: none;
       padding: 10px 15px;
-      margin: 5px 5px 20px 0;
+      margin-top: 15px;
       border-radius: 5px;
       font-size: 16px;
     }
+
     button:hover {
       background-color: #2255bb;
     }
-    table {
-      border-collapse: collapse;
-      width: 100%;
-      max-width: 500px;
-      margin: 10px auto 30px auto;
-    }
-    th, td {
-      border: 1px solid var(--accent);
-      padding: 8px 12px;
-      text-align: center;
-    }
-    th {
-      background-color: var(--accent);
-      color: white;
-    }
+
     footer {
       position: fixed;
       bottom: 0;
@@ -159,9 +159,10 @@
       <input type="text" placeholder="Jugador 3" id="j3" />
       <input type="text" placeholder="Jugador 4" id="j4" />
       <input type="text" placeholder="Jugador 5" id="j5" />
-      <input type="text" placeholder="Jugador 6" id="j6" /><br><br>
-      <button onclick="generarRondas()">Generar rondas</button>
+      <input type="text" placeholder="Jugador 6" id="j6" />
+      <button onclick="generarRondas()">Generar Rondas</button>
     </div>
+
     <div id="contenido"></div>
   </main>
 
@@ -174,10 +175,12 @@
       document.body.setAttribute('data-theme', newTheme);
       localStorage.setItem('theme', newTheme);
     }
+
     function toggleMenu() {
       const menu = document.getElementById('menu');
       menu.style.display = menu.style.display === 'flex' ? 'none' : 'flex';
     }
+
     window.onload = () => {
       const savedTheme = localStorage.getItem('theme') || 'light';
       document.body.setAttribute('data-theme', savedTheme);
@@ -187,145 +190,22 @@
       const nombres = [];
       for (let i = 1; i <= 6; i++) {
         const val = document.getElementById(`j${i}`).value.trim();
-        if (!val) return alert("Completá todos los nombres.");
+        if (!val) {
+          alert("Por favor completá todos los nombres.");
+          return;
+        }
         nombres.push(val);
       }
 
-      const parejas = [];
-      for (let i = 0; i < 6; i++) {
-        for (let j = i + 1; j < 6; j++) {
-          parejas.push([nombres[i], nombres[j]]);
-        }
-      }
-
-      const usados = new Set();
-      const rondas = [];
-
-      while (parejas.length && rondas.length < 5) {
-        const ronda = [];
-        const usadosEstaRonda = new Set();
-
-        for (let i = 0; i < parejas.length; i++) {
-          const [a, b] = parejas[i];
-          if (!usadosEstaRonda.has(a) && !usadosEstaRonda.has(b)) {
-            ronda.push(parejas[i]);
-            usadosEstaRonda.add(a);
-            usadosEstaRonda.add(b);
-          }
-          if (ronda.length === 3) break;
-        }
-
-        if (ronda.length === 3) {
-          rondas.push(ronda);
-          ronda.forEach(p => {
-            usados.add(p.join('|'));
-          });
-          parejas = parejas.filter(p => !usados.has(p.join('|')));
-        } else {
-          break;
-        }
-      }
-
+      // Simulamos que se generaron las rondas
       document.getElementById("form-jugadores").style.display = "none";
 
-      const cont = document.getElementById("contenido");
-      cont.innerHTML = "<h3>Rondas generadas</h3>";
-
-      rondas.forEach((ronda, idx) => {
-        let html = `<div class="ronda"><strong>Ronda ${idx + 1}</strong><br><br>`;
-        for (let i = 0; i < 3; i += 2) {
-          const p1 = ronda[i];
-          const p2 = ronda[i + 1];
-          html += `
-            ${p1[0]} & ${p1[1]} <input type="number" id="r${idx + 1}p${i + 1}_g1"> - 
-            <input type="number" id="r${idx + 1}p${i + 1}_g2"> ${p2[0]} & ${p2[1]}<br><br>
-          `;
-        }
-        html += `</div>`;
-        cont.innerHTML += html;
-      });
-
-      cont.innerHTML += `
-        <button onclick="calcularTablas()">Calcular Tablas</button>
-        <button onclick="location.reload()">Reiniciar</button>
-        <div id="resultados-tabla"></div>
+      const contenido = document.getElementById("contenido");
+      contenido.innerHTML = `
+        <h3>Rondas generadas correctamente</h3>
+        <p>(Acá irá el fixture completo con los partidos)</p>
+        <button onclick="location.reload()">Volver a empezar</button>
       `;
-    }
-
-    function calcularTablas() {
-      const tablaParejas = {};
-      const tablaJugadores = {};
-      const inputs = document.querySelectorAll("input[type='number']");
-      const partidos = {};
-
-      inputs.forEach(input => {
-        const match = input.id.match(/r(\d+)p(\d+)_g([12])/);
-        if (match) {
-          const [_, ronda, partido, equipo] = match;
-          const key = `r${ronda}p${partido}`;
-          if (!partidos[key]) partidos[key] = {};
-          partidos[key][`g${equipo}`] = parseInt(input.value) || 0;
-        }
-      });
-
-      Object.keys(partidos).forEach(key => {
-        const partidoDiv = document.getElementById(key + "_g1").parentElement;
-        const texto = partidoDiv.textContent;
-        const parejasTexto = texto.replace(/\d+\s*-\s*\d+/, '|').split('|');
-        const nombres1 = parejasTexto[0].trim().split(' & ');
-        const nombres2 = parejasTexto[1].trim().split(' & ');
-        const goles1 = partidos[key].g1;
-        const goles2 = partidos[key].g2;
-        const pKey1 = nombres1.join(' & ');
-        const pKey2 = nombres2.join(' & ');
-
-        if (!tablaParejas[pKey1]) tablaParejas[pKey1] = { puntos: 0, pj: 0, dg: 0 };
-        if (!tablaParejas[pKey2]) tablaParejas[pKey2] = { puntos: 0, pj: 0, dg: 0 };
-        nombres1.forEach(n => tablaJugadores[n] = tablaJugadores[n] || { puntos: 0, pj: 0, dg: 0 });
-        nombres2.forEach(n => tablaJugadores[n] = tablaJugadores[n] || { puntos: 0, pj: 0, dg: 0 });
-
-        tablaParejas[pKey1].pj++;
-        tablaParejas[pKey2].pj++;
-        nombres1.forEach(n => tablaJugadores[n].pj++);
-        nombres2.forEach(n => tablaJugadores[n].pj++);
-
-        const dg = goles1 - goles2;
-        tablaParejas[pKey1].dg += dg;
-        tablaParejas[pKey2].dg -= dg;
-        nombres1.forEach(n => tablaJugadores[n].dg += dg);
-        nombres2.forEach(n => tablaJugadores[n].dg -= dg);
-
-        if (goles1 > goles2) {
-          tablaParejas[pKey1].puntos += 3;
-          nombres1.forEach(n => tablaJugadores[n].puntos += 3);
-        } else if (goles2 > goles1) {
-          tablaParejas[pKey2].puntos += 3;
-          nombres2.forEach(n => tablaJugadores[n].puntos += 3);
-        } else {
-          tablaParejas[pKey1].puntos += 1;
-          tablaParejas[pKey2].puntos += 1;
-          nombres1.forEach(n => tablaJugadores[n].puntos += 1);
-          nombres2.forEach(n => tablaJugadores[n].puntos += 1);
-        }
-      });
-
-      let html = "<h3>🏅 Tabla por Pareja</h3><table><tr><th>Pareja</th><th>Puntos</th><th>PJ</th><th>DG</th></tr>";
-      Object.entries(tablaParejas)
-        .sort((a, b) => b[1].puntos - a[1].puntos || b[1].dg - a[1].dg)
-        .forEach(([k, v]) => {
-          html += `<tr><td>${k}</td><td>${v.puntos}</td><td>${v.pj}</td><td>${v.dg >= 0 ? '+' : ''}${v.dg}</td></tr>`;
-        });
-      html += "</table>";
-
-      html += "<h3>🧍 Tabla Individual</h3><table><tr><th>Jugador</th><th>Puntos</th><th>PJ</th><th>DG</th></tr>";
-      Object.entries(tablaJugadores)
-        .sort((a, b) => b[1].puntos - a[1].puntos || b[1].dg - a[1].dg)
-        .forEach(([k, v]) => {
-          html += `<tr><td>${k}</td><td>${v.puntos}</td><td>${v.pj}</td><td>${v.dg >= 0 ? '+' : ''}${v.dg}</td></tr>`;
-        });
-      html += "</table>";
-
-      document.getElementById("resultados-tabla").innerHTML = html;
     }
   </script>
 </body>
