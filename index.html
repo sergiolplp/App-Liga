@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Torneo de los Pibes</title>
+  <style>
+    :root {
+      --bg: #ffffff;
+      --text: #000000;
+      --accent: #3333cc;
+      --menu-bg: #f0f0f0;
+    }
+
+    [data-theme="dark"] {
+      --bg: #121212;
+      --text: #ffffff;
+      --accent: #3399ff;
+      --menu-bg: #1e1e1e;
+    }
+
+    body {
+      margin: 0;
+      font-family: 'Poppins', sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      transition: background 0.3s, color 0.3s;
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 20px;
+      background-color: var(--menu-bg);
+      border-bottom: 1px solid #ccc;
+    }
+
+    .hamburger {
+      font-size: 24px;
+      cursor: pointer;
+    }
+
+    .title {
+      font-size: 20px;
+      font-weight: bold;
+    }
+
+    .theme-toggle {
+      width: 24px;
+      height: 24px;
+      background: linear-gradient(90deg, #fff 50%, #000 50%);
+      border-radius: 50%;
+      cursor: pointer;
+      border: 2px solid var(--text);
+    }
+
+    .menu {
+      display: none;
+      flex-direction: column;
+      background-color: var(--menu-bg);
+      border-top: 1px solid #ccc;
+    }
+
+    .menu a {
+      padding: 12px 20px;
+      text-decoration: none;
+      color: var(--text);
+      border-bottom: 1px solid #ccc;
+    }
+
+    .menu a:hover {
+      background-color: var(--accent);
+      color: #fff;
+    }
+
+    main {
+      padding: 20px;
+      text-align: center;
+    }
+
+    footer {
+      position: fixed;
+      bottom: 0;
+      width: 100%;
+      background-color: var(--menu-bg);
+      color: var(--text);
+      text-align: center;
+      padding: 10px 0;
+      font-size: 14px;
+      border-top: 1px solid #ccc;
+    }
+
+    @media (min-width: 600px) {
+      .title {
+        font-size: 24px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="hamburger" onclick="toggleMenu()">☰</div>
+    <div class="title">Torneo de los Pibes</div>
+    <div class="theme-toggle" onclick="toggleTheme()" title="Cambiar tema"></div>
+  </header>
+
+  <div id="menu" class="menu">
+    <a href="#">LIGAS INDIVIDUALES</a>
+    <a href="#">TORNEOS POR PAREJAS ROTATIVAS</a>
+    <a href="#">HISTÓRICO ENTRE JUGADORES</a>
+  </div>
+
+  <main>
+    <h2>Bienvenido al Torneo de los Pibes</h2>
+    <p>Seleccioná una opción del menú para comenzar.</p>
+  </main>
+
+  <footer>Desarrollado por I.A</footer>
+
+  <script>
+    const menu = document.getElementById('menu');
+    function toggleMenu() {
+      menu.style.display = menu.style.display === 'flex' ? 'none' : 'flex';
+    }
+
+    function toggleTheme() {
+      const currentTheme = document.body.getAttribute('data-theme');
+      document.body.setAttribute('data-theme', currentTheme === 'dark' ? 'light' : 'dark');
+    }
+
+    // Guardar y aplicar tema desde localStorage
+    window.onload = () => {
+      const savedTheme = localStorage.getItem('theme') || 'light';
+      document.body.setAttribute('data-theme', savedTheme);
+    };
+
+    document.querySelector('.theme-toggle').addEventListener('click', () => {
+      const current = document.body.getAttribute('data-theme');
+      const newTheme = current === 'dark' ? 'light' : 'dark';
+      document.body.setAttribute('data-theme', newTheme);
+      localStorage.setItem('theme', newTheme);
+    });
+  </script>
+</body>
+</html>
