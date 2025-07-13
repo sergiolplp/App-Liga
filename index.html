@@ -79,6 +79,32 @@
       text-align: center;
     }
 
+    #form-jugadores input {
+      display: block;
+      margin: 5px auto;
+      padding: 8px;
+      font-size: 16px;
+      width: 200px;
+    }
+
+    #form-jugadores button, button {
+      margin-top: 10px;
+      padding: 10px 20px;
+      font-size: 16px;
+      background-color: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    ul {
+      text-align: left;
+      max-width: 300px;
+      margin: 10px auto;
+      padding-left: 20px;
+    }
+
     footer {
       position: fixed;
       bottom: 0;
@@ -106,12 +132,12 @@
   </header>
 
   <div id="menu" class="menu">
-    <a href="#">LIGAS INDIVIDUALES</a>
-    <a href="#">TORNEOS POR PAREJAS ROTATIVAS</a>
-    <a href="#">HISTÓRICO ENTRE JUGADORES</a>
+    <a href="#" onclick="mostrarInicio()">LIGAS INDIVIDUALES</a>
+    <a href="#" onclick="mostrarParejas()">TORNEOS POR PAREJAS ROTATIVAS</a>
+    <a href="#" onclick="mostrarHistorico()">HISTÓRICO ENTRE JUGADORES</a>
   </div>
 
-  <main>
+  <main id="contenido">
     <h2>Bienvenido al Torneo de los Pibes</h2>
     <p>Seleccioná una opción del menú para comenzar.</p>
   </main>
@@ -120,6 +146,8 @@
 
   <script>
     const menu = document.getElementById('menu');
+    const contenido = document.getElementById('contenido');
+
     function toggleMenu() {
       menu.style.display = menu.style.display === 'flex' ? 'none' : 'flex';
     }
@@ -141,6 +169,75 @@
       document.body.setAttribute('data-theme', newTheme);
       localStorage.setItem('theme', newTheme);
     });
+
+    function mostrarInicio() {
+      contenido.innerHTML = `
+        <h2>Bienvenido al Torneo de los Pibes</h2>
+        <p>Seleccioná una opción del menú para comenzar.</p>
+      `;
+      menu.style.display = 'none';
+    }
+
+    function mostrarHistorico() {
+      contenido.innerHTML = `
+        <h2>Histórico entre jugadores</h2>
+        <p>Esta sección estará disponible pronto.</p>
+      `;
+      menu.style.display = 'none';
+    }
+
+    function mostrarParejas() {
+      contenido.innerHTML = `
+        <h2>Torneo por Parejas Rotativas</h2>
+        <p>Ingresá los nombres de los 6 jugadores:</p>
+        <div id="form-jugadores">
+          <input placeholder="Jugador 1" />
+          <input placeholder="Jugador 2" />
+          <input placeholder="Jugador 3" />
+          <input placeholder="Jugador 4" />
+          <input placeholder="Jugador 5" />
+          <input placeholder="Jugador 6" />
+          <button onclick="generarParejas()">Generar Parejas</button>
+        </div>
+        <div id="resultado-parejas" style="display:none;">
+          <h3>Parejas Generadas</h3>
+          <ul id="lista-parejas"></ul>
+          <p>Próximo paso: agrupar en rondas y registrar resultados.</p>
+        </div>
+      `;
+      menu.style.display = 'none';
+    }
+
+    function generarParejas() {
+      const inputs = document.querySelectorAll('#form-jugadores input');
+      const nombres = Array.from(inputs).map(i => i.value.trim()).filter(n => n !== '');
+
+      if (nombres.length !== 6) {
+        alert('Tenés que ingresar exactamente 6 jugadores.');
+        return;
+      }
+
+      const parejas = [];
+      for (let i = 0; i < nombres.length; i++) {
+        for (let j = i + 1; j < nombres.length; j++) {
+          parejas.push([nombres[i], nombres[j]]);
+        }
+      }
+
+      const lista = document.getElementById('lista-parejas');
+      lista.innerHTML = '';
+      parejas.forEach((p, i) => {
+        const li = document.createElement('li');
+        li.textContent = `${i + 1}. ${p[0]} & ${p[1]}`;
+        lista.appendChild(li);
+      });
+
+      document.getElementById('resultado-parejas').style.display = 'block';
+
+      // Guardar en localStorage
+      localStorage.setItem('jugadores', JSON.stringify(nombres));
+      localStorage.setItem('parejas', JSON.stringify(parejas));
+    }
   </script>
 </body>
 </html>
