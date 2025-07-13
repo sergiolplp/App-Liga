@@ -1,371 +1,448 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Torneo de los Pibes</title>
-  <style>
-    :root {
-      --bg: #ffffff;
-      --text: #000000;
-      --accent: #3333cc;
-      --menu-bg: #f0f0f0;
-    }
-
-    [data-theme="dark"] {
-      --bg: #121212;
-      --text: #ffffff;
-      --accent: #3399ff;
-      --menu-bg: #1e1e1e;
-    }
-
-    body {
-      margin: 0;
-      font-family: sans-serif;
-      background-color: var(--bg);
-      color: var(--text);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      min-height: 100vh;
-    }
-
-    header {
-      width: 100%;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 10px 20px;
-      background: var(--menu-bg);
-      border-bottom: 1px solid #ccc;
-    }
-
-    .hamburger {
-      font-size: 24px;
-      cursor: pointer;
-    }
-
-    .title {
-      font-weight: bold;
-    }
-
-    .theme-toggle {
-      width: 24px;
-      height: 24px;
-      background: linear-gradient(90deg, #fff 50%, #000 50%);
-      border-radius: 50%;
-      border: 2px solid var(--text);
-      cursor: pointer;
-    }
-
-    .menu {
-      display: none;
-      flex-direction: column;
-      background: var(--menu-bg);
-      position: absolute;
-      top: 50px;
-      left: 0;
-      width: 200px;
-      border: 1px solid #ccc;
-    }
-
-    .menu a {
-      padding: 10px;
-      text-decoration: none;
-      color: var(--text);
-      border-bottom: 1px solid #ccc;
-    }
-
-    main {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: flex-start;
-      padding: 40px 20px 100px;
-      width: 100%;
-      max-width: 800px;
-      box-sizing: border-box;
-    }
-
-    .section {
-      display: none;
-      width: 100%;
-      text-align: center;
-    }
-
-    .active {
-      display: block;
-    }
-
-    input {
-      margin: 5px;
-      padding: 8px;
-      width: 200px;
-      text-align: center;
-    }
-
-    button {
-      margin: 10px 5px;
-      padding: 10px 20px;
-      background: var(--accent);
-      color: white;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-    }
-
-    .partido {
-      margin: 8px 0;
-      display: flex;
-      justify-content: center;
-      gap: 8px;
-      align-items: center;
-      flex-wrap: wrap;
-    }
-
-    .partido input {
-      width: 40px;
-      text-align: center;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 20px;
-    }
-
-    th, td {
-      border: 1px solid #ccc;
-      padding: 5px;
-      text-align: center;
-    }
-
-    footer {
-      position: fixed;
-      bottom: 0;
-      width: 100%;
-      text-align: center;
-      padding: 10px;
-      background: var(--menu-bg);
-      color: var(--text);
-      border-top: 1px solid #ccc;
-    }
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Torneo de los Pibes - Parejas Rotativas</title>
+<style>
+  :root {
+    --bg: #fff;
+    --text: #000;
+    --accent: #3366cc;
+    --menu-bg: #f0f0f0;
+  }
+  [data-theme="dark"] {
+    --bg: #121212;
+    --text: #fff;
+    --accent: #3399ff;
+    --menu-bg: #1e1e1e;
+  }
+  body {
+    margin: 0;
+    font-family: sans-serif;
+    background-color: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+  header {
+    background: var(--menu-bg);
+    border-bottom: 1px solid #ccc;
+    padding: 10px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .title {
+    font-weight: bold;
+    font-size: 1.2rem;
+  }
+  .theme-toggle {
+    cursor: pointer;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    border: 2px solid var(--text);
+    background: linear-gradient(90deg, #fff 50%, #000 50%);
+  }
+  main {
+    flex: 1;
+    max-width: 700px;
+    margin: auto;
+    padding: 30px 20px 80px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  section {
+    width: 100%;
+    display: none;
+    flex-direction: column;
+    align-items: center;
+  }
+  section.active {
+    display: flex;
+  }
+  input[type="text"] {
+    width: 220px;
+    padding: 8px;
+    margin: 8px 0;
+    font-size: 1rem;
+    text-align: center;
+  }
+  button {
+    margin: 10px 5px;
+    padding: 10px 22px;
+    font-size: 1rem;
+    background-color: var(--accent);
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  button:disabled {
+    background: #999;
+    cursor: default;
+  }
+  .partido {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    margin: 8px 0;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .partido input[type="number"] {
+    width: 40px;
+    padding: 5px;
+    text-align: center;
+  }
+  table {
+    border-collapse: collapse;
+    width: 100%;
+    margin-top: 20px;
+  }
+  th, td {
+    border: 1px solid #ccc;
+    padding: 6px;
+    text-align: center;
+  }
+  footer {
+    background: var(--menu-bg);
+    border-top: 1px solid #ccc;
+    text-align: center;
+    padding: 10px 0;
+  }
+</style>
 </head>
 <body>
-  <header>
-    <div class="hamburger" onclick="toggleMenu()">☰</div>
-    <div class="title">Torneo de los Pibes</div>
-    <div class="theme-toggle" onclick="toggleTheme()"></div>
-  </header>
+<header>
+  <div class="title">Torneo de los Pibes</div>
+  <div class="theme-toggle" title="Cambiar tema" onclick="toggleTheme()"></div>
+</header>
 
-  <div class="menu" id="menu">
-    <a href="ligasindividuales.html">LIGAS INDIVIDUALES</a>
-    <a href="torneoparejas.html">TORNEOS POR PAREJAS ROTATIVAS</a>
-    <a href="historico.html">HISTÓRICO ENTRE JUGADORES</a>
-  </div>
+<main>
+  <!-- Ingreso de jugadores -->
+  <section id="jugadores" class="active">
+    <h2>Ingresá los 6 jugadores</h2>
+    <div id="form-jugadores"></div>
+    <button id="btnGenerar">Generar rondas</button>
+  </section>
 
-  <main>
-    <section id="jugadores" class="section active">
-      <h2>Ingresá los 6 jugadores</h2>
-      <div id="form-jugadores"></div>
-      <button onclick="generarRondas()">Generar Rondas</button>
-    </section>
+  <!-- Rondas generadas -->
+  <section id="rondas">
+    <h2>Rondas Generadas</h2>
+    <div id="lista-rondas"></div>
+    <button id="btnVerPartidos">Ver partidos</button>
+    <button id="btnVolverJugadores">Volver</button>
+  </section>
 
-    <section id="rondas" class="section">
-      <h2>Rondas Generadas</h2>
-      <div id="lista-rondas"></div>
-      <button onclick="mostrarSeccion('partidos');mostrarPartidos()">Ver partidos</button>
-      <button onclick="mostrarSeccion('jugadores')">Volver</button>
-    </section>
+  <!-- Partidos -->
+  <section id="partidos">
+    <h2>Partidos</h2>
+    <div id="partidos-lista"></div>
+    <button id="btnVerTabla">Ver tabla</button>
+    <button id="btnVolverRondas">Volver</button>
+  </section>
 
-    <section id="partidos" class="section">
-      <h2>Partidos</h2>
-      <div id="partidos-lista"></div>
-      <button onclick="mostrarSeccion('tabla');mostrarTabla()">Ver tabla</button>
-      <button onclick="mostrarSeccion('rondas')">Volver</button>
-    </section>
+  <!-- Tabla de posiciones -->
+  <section id="tabla">
+    <h2>Tabla de posiciones</h2>
+    <div id="tabla-resultados"></div>
+    <button id="btnVolverPartidos">Volver a partidos</button>
+  </section>
+</main>
 
-    <section id="tabla" class="section">
-      <h2>Tabla de posiciones</h2>
-      <div id="tabla-resultados"></div>
-      <button onclick="mostrarSeccion('partidos')">Volver a partidos</button>
-    </section>
-  </main>
+<footer>Desarrollado por I.A</footer>
 
-  <footer>Desarrollado por I.A</footer>
+<script>
+  // Tema guardado y toggle
+  function toggleTheme() {
+    const current = document.body.getAttribute('data-theme') || 'light';
+    const next = current === 'dark' ? 'light' : 'dark';
+    document.body.setAttribute('data-theme', next);
+    localStorage.setItem('theme', next);
+  }
+  window.onload = () => {
+    const savedTheme = localStorage.getItem('theme') || 'light';
+    document.body.setAttribute('data-theme', savedTheme);
+    crearInputsJugadores();
+  };
 
-  <script>
-    function toggleMenu() {
-      const menu = document.getElementById('menu');
-      menu.style.display = menu.style.display === 'flex' ? 'none' : 'flex';
+  // Variables globales
+  const secciones = ['jugadores', 'rondas', 'partidos', 'tabla'];
+  let nombres = [];
+  let rondas = [];
+  let partidos = [];
+  let resultados = [];
+
+  // Mostrar sección activa
+  function mostrarSeccion(id) {
+    secciones.forEach(sec => {
+      document.getElementById(sec).classList.remove('active');
+    });
+    document.getElementById(id).classList.add('active');
+    window.scrollTo(0, 0);
+  }
+
+  // Crear inputs para 6 jugadores
+  function crearInputsJugadores() {
+    const cont = document.getElementById('form-jugadores');
+    cont.innerHTML = '';
+    for (let i = 1; i <= 6; i++) {
+      const input = document.createElement('input');
+      input.type = 'text';
+      input.id = `jugador${i}`;
+      input.placeholder = `Jugador ${i}`;
+      cont.appendChild(input);
     }
+  }
 
-    function toggleTheme() {
-      const t = document.body.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
-      document.body.setAttribute('data-theme', t);
-      localStorage.setItem('theme', t);
+  // Validar y cargar nombres
+  function cargarNombres() {
+    nombres = [];
+    for (let i = 1; i <= 6; i++) {
+      const val = document.getElementById(`jugador${i}`).value.trim();
+      if (!val) {
+        alert('Completá todos los nombres.');
+        return false;
+      }
+      if (nombres.includes(val)) {
+        alert('No pueden repetirse nombres.');
+        return false;
+      }
+      nombres.push(val);
     }
+    return true;
+  }
 
-    window.onload = () => {
-      const t = localStorage.getItem('theme') || 'light';
-      document.body.setAttribute('data-theme', t);
-      generarInputs();
-    };
+  // Generar rondas (pares de parejas sin repetir jugadores)
+  // Algoritmo: generar todas las parejas posibles y luego armar 5 rondas con 3 partidos cada una (sin repetir jugadores en una ronda)
+  function generarRondas() {
+    if (!cargarNombres()) return;
 
-    const secciones = ['jugadores','rondas','partidos','tabla'];
-    function mostrarSeccion(id) {
-      secciones.forEach(s => document.getElementById(s).classList.remove('active'));
-      document.getElementById(id).classList.add('active');
-    }
-
-    const nombres = [];
-
-    function generarInputs() {
-      const div = document.getElementById('form-jugadores');
-      for (let i = 0; i < 6; i++) {
-        const input = document.createElement('input');
-        input.placeholder = `Jugador ${i+1}`;
-        input.id = `jugador${i}`;
-        div.appendChild(input);
+    // Generar todas las parejas posibles
+    const parejas = [];
+    for (let i = 0; i < 6; i++) {
+      for (let j = i + 1; j < 6; j++) {
+        parejas.push([nombres[i], nombres[j]]);
       }
     }
 
-    let rondas = [], partidos = [], resultados = [];
+    // Ahora debemos armar las rondas (5 rondas con 3 partidos sin repetir jugadores en una misma ronda)
+    rondas = [];
+    const usadosPorRonda = [];
 
-    function generarRondas() {
-      nombres.length = 0;
-      for (let i = 0; i < 6; i++) {
-        const nombre = document.getElementById(`jugador${i}`).value.trim();
-        if (!nombre) return alert("Completá todos los nombres");
-        if (nombres.includes(nombre)) return alert("No repitas nombres de jugadores");
-        nombres.push(nombre);
-      }
+    function puedeAgregar(ronda, pareja) {
+      return !ronda.some(p => p.includes(pareja[0]) || p.includes(pareja[1]));
+    }
 
-      const parejas = [];
-      for (let i = 0; i < 6; i++) {
-        for (let j = i + 1; j < 6; j++) {
-          parejas.push([nombres[i], nombres[j]]);
-        }
-      }
-
-      // Algoritmo original
-      const combinaciones = [];
-      const usados = new Set();
-
-      function jugadoresUsados(ronda) {
-        return new Set(ronda.flat());
-      }
-
-      function esValida(ronda, acumuladas) {
-        const usados = jugadoresUsados(ronda);
-        for (const jugador of usados) {
-          let veces = 0;
-          for (const previa of acumuladas) {
-            if (jugadoresUsados(previa).has(jugador)) veces++;
-          }
-          if (veces >= 5) return false;
-        }
+    // Buscamos combinar parejas para armar rondas sin superposición de jugadores
+    // Esta función busca recursivamente hasta armar 5 rondas
+    function armarRondas(rondasActuales, parejasRestantes) {
+      if (rondasActuales.length === 5) {
+        rondas = rondasActuales;
         return true;
       }
-
-      function generar(acumuladas, disponibles) {
-        if (acumuladas.length === 5) {
-          combinaciones.push([...acumuladas]);
-          return true;
-        }
-
-        for (let i = 0; i < disponibles.length; i++) {
-          for (let j = i + 1; j < disponibles.length; j++) {
-            for (let k = j + 1; k < disponibles.length; k++) {
-              const ronda = [disponibles[i], disponibles[j], disponibles[k]];
-              const jug = jugadoresUsados(ronda);
-              if (jug.size === 6 && esValida(ronda, acumuladas)) {
-                const resto = disponibles.filter((_, idx) => idx !== i && idx !== j && idx !== k);
-                if (generar([...acumuladas, ronda], resto)) return true;
-              }
+      // Intentar armar una ronda
+      for (let i = 0; i < parejasRestantes.length; i++) {
+        for (let j = i + 1; j < parejasRestantes.length; j++) {
+          for (let k = j + 1; k < parejasRestantes.length; k++) {
+            const rondaPosible = [parejasRestantes[i], parejasRestantes[j], parejasRestantes[k]];
+            // Verificar que no se repitan jugadores en la ronda
+            const jugadoresEnRonda = rondaPosible.flat();
+            const setJugadores = new Set(jugadoresEnRonda);
+            if (setJugadores.size === 6) {
+              // Validar que no haya jugadores repetidos con rondas anteriores
+              // pero acá no lo necesitamos, porque solo chequeamos ronda individual
+              // Verificar que estas parejas no estén en rondas anteriores para evitar repetir partidos
+              const usadasAntes = rondasActuales.flat().map(p => p.join('-'));
+              const nuevas = rondaPosible.map(p => p.join('-'));
+              if (nuevas.some(np => usadasAntes.includes(np))) continue;
+              // Construir parejas restantes para la siguiente llamada
+              const nuevasParejasRestantes = parejasRestantes.filter((_, idx) => idx !== i && idx !== j && idx !== k);
+              if (armarRondas([...rondasActuales, rondaPosible], nuevasParejasRestantes)) return true;
             }
           }
         }
+      }
+      return false;
+    }
 
-        return false;
+    if (!armarRondas([], parejas)) {
+      alert('No se pudo generar un calendario válido.');
+      return;
+    }
+
+    // Extraer partidos para poner en la lista (2 parejas enfrentadas por partido)
+    partidos = [];
+    for (const ronda of rondas) {
+      // Cada ronda tiene 3 parejas, formamos 3 partidos:
+      // partido1: parejas[0] vs parejas[1]
+      // partido2: parejas[2] vs parejas[0] (esto puede variar)
+      // Pero mejor: armamos partidos en pares de 2 parejas por ronda, para total 3 partidos
+      // Para simplicidad: cada ronda son 3 partidos formados por las 3 parejas, 2 vs 1 y 3 vs ??
+      // Mejor simplemente en esta app: cada partido es dos parejas (las parejas de la ronda en orden)
+      // Por simplicidad mostramos partido1: pareja0 vs pareja1, partido2: pareja2 vs pareja0, partido3: pareja1 vs pareja2
+      // Pero para no complicar, muestro las 3 parejas enfrentándose 2 a 2, en partidos consecutivos:
+      // por ronda, partidos: (0 vs 1), (2 vs -) no hay tercera pareja para partido 3, así que solo 2 partidos
+      // Mejor mostrar partidos: (0 vs 1), (1 vs 2), (0 vs 2)
+      partidos.push([ronda[0], ronda[1]]);
+      partidos.push([ronda[1], ronda[2]]);
+      partidos.push([ronda[0], ronda[2]]);
+    }
+
+    // Inicializar resultados vacíos (null)
+    resultados = partidos.map(() => [null, null]);
+
+    mostrarSeccion('rondas');
+    mostrarRondas();
+  }
+
+  function mostrarRondas() {
+    const cont = document.getElementById('lista-rondas');
+    cont.innerHTML = '';
+    rondas.forEach((ronda, i) => {
+      cont.innerHTML += `<h4>Ronda ${i + 1}</h4>` +
+        ronda.map(pareja => `<p>${pareja[0]} + ${pareja[1]}</p>`).join('');
+    });
+  }
+
+  function mostrarPartidos() {
+    const cont = document.getElementById('partidos-lista');
+    cont.innerHTML = '';
+    partidos.forEach((partido, i) => {
+      const [eq1, eq2] = partido;
+      const res = resultados[i] || [null, null];
+      cont.innerHTML += `
+        <div class="partido">
+          <span>${eq1[0]} + ${eq1[1]}</span>
+          <input type="number" min="0" value="${res[0] ?? ''}" onchange="guardarResultado(${i}, 0, this.value)">
+          <span>vs</span>
+          <input type="number" min="0" value="${res[1] ?? ''}" onchange="guardarResultado(${i}, 1, this.value)">
+          <span>${eq2[0]} + ${eq2[1]}</span>
+        </div>
+      `;
+    });
+  }
+
+  function guardarResultado(idx, equipo, val) {
+    if (!resultados[idx]) resultados[idx] = [null, null];
+    resultados[idx][equipo] = val === '' ? null : Number(val);
+  }
+
+  function mostrarTabla() {
+    // Calcular tabla por pareja e individual
+    const tablaParejas = {};
+    const tablaIndividual = {};
+
+    resultados.forEach((res, idx) => {
+      if (res[0] == null || res[1] == null) return; // ignorar si falta resultado
+      const [eq1, eq2] = partidos[idx];
+      const nombreEq1 = `${eq1[0]} + ${eq1[1]}`;
+      const nombreEq2 = `${eq2[0]} + ${eq2[1]}`;
+
+      // Inicializar si no existe
+      if (!tablaParejas[nombreEq1]) tablaParejas[nombreEq1] = { pts:0, pj:0, dg:0 };
+      if (!tablaParejas[nombreEq2]) tablaParejas[nombreEq2] = { pts:0, pj:0, dg:0 };
+
+      tablaParejas[nombreEq1].pj++;
+      tablaParejas[nombreEq2].pj++;
+
+      tablaParejas[nombreEq1].dg += res[0] - res[1];
+      tablaParejas[nombreEq2].dg += res[1] - res[0];
+
+      if (res[0] > res[1]) {
+        tablaParejas[nombreEq1].pts += 3;
+      } else if (res[1] > res[0]) {
+        tablaParejas[nombreEq2].pts += 3;
+      } else {
+        tablaParejas[nombreEq1].pts += 1;
+        tablaParejas[nombreEq2].pts += 1;
       }
 
-      const ok = generar([], parejas);
-      if (!ok || combinaciones.length === 0) return alert("No se pudo generar un calendario válido.");
-
-      rondas = combinaciones[0];
-      partidos = rondas.flat();
-      resultados = Array(partidos.length / 2).fill([null, null]);
-      mostrarSeccion('rondas');
-      mostrarRondas();
-    }
-
-    function mostrarRondas() {
-      const cont = document.getElementById('lista-rondas');
-      cont.innerHTML = '';
-      rondas.forEach((ronda, i) => {
-        cont.innerHTML += `<h4>Ronda ${i + 1}</h4>` +
-          ronda.map(([a, b]) => `<p>${a} + ${b}</p>`).join('');
-      });
-    }
-
-    function mostrarPartidos() {
-      const cont = document.getElementById('partidos-lista');
-      cont.innerHTML = '';
-      for (let i = 0; i < partidos.length; i += 2) {
-        const [a1, a2] = partidos[i];
-        const [b1, b2] = partidos[i + 1];
-        const [g1, g2] = resultados[i / 2] ?? [null, null];
-        cont.innerHTML += `
-          <div class="partido">
-            ${a1} + ${a2}
-            <input type="number" min="0" value="${g1 ?? ''}" onchange="guardarResultado(${i / 2}, 0, this.value)">
-            vs
-            <input type="number" min="0" value="${g2 ?? ''}" onchange="guardarResultado(${i / 2}, 1, this.value)">
-            ${b1} + ${b2}
-          </div>`;
-      }
-    }
-
-    function guardarResultado(i, eq, val) {
-      const [a, b] = resultados[i] ?? [null, null];
-      resultados[i] = eq === 0 ? [parseInt(val), b] : [a, parseInt(val)];
-    }
-
-    function mostrarTabla() {
-      const tabla = {}, indiv = {};
-
-      resultados.forEach(([g1, g2], i) => {
-        if (g1 == null || g2 == null) return;
-        const [a1, a2] = partidos[i * 2];
-        const [b1, b2] = partidos[i * 2 + 1];
-        const nombreA = `${a1} + ${a2}`;
-        const nombreB = `${b1} + ${b2}`;
-        [nombreA, nombreB].forEach(n => tabla[n] = tabla[n] || [0, 0, 0]);
-        tabla[nombreA][1]++;
-        tabla[nombreB][1]++;
-        tabla[nombreA][2] += g1 - g2;
-        tabla[nombreB][2] += g2 - g1;
-        if (g1 > g2) tabla[nombreA][0] += 3;
-        else if (g2 > g1) tabla[nombreB][0] += 3;
-        else { tabla[nombreA][0]++; tabla[nombreB][0]++; }
-        [a1, a2, b1, b2].forEach(j => indiv[j] = indiv[j] || [0, 0, 0]);
-        [a1, a2].forEach(j => { indiv[j][1]++; indiv[j][2] += g1 - g2; if (g1 > g2) indiv[j][0] += 3; else if (g1 === g2) indiv[j][0] += 1; });
-        [b1, b2].forEach(j => { indiv[j][1]++; indiv[j][2] += g2 - g1; if (g2 > g1) indiv[j][0] += 3; else if (g1 === g2) indiv[j][0] += 1; });
+      // Individual
+      [eq1[0], eq1[1], eq2[0], eq2[1]].forEach(j => {
+        if (!tablaIndividual[j]) tablaIndividual[j] = { pts:0, pj:0, dg:0 };
       });
 
-      const div = document.getElementById('tabla-resultados');
-      div.innerHTML =
-        "<h3>Por Pareja</h3><table><tr><th>Pareja</th><th>Pts</th><th>PJ</th><th>DG</th></tr>" +
-        Object.entries(tabla).sort((a, b) => b[1][0] - a[1][0]).map(([k, v]) =>
-          `<tr><td>${k}</td><td>${v[0]}</td><td>${v[1]}</td><td>${v[2]}</td></tr>`).join("") +
-        "</table><h3>Individual</h3><table><tr><th>Jugador</th><th>Pts</th><th>PJ</th><th>DG</th></tr>" +
-        Object.entries(indiv).sort((a, b) => b[1][0] - a[1][0]).map(([k, v]) =>
-          `<tr><td>${k}</td><td>${v[0]}</td><td>${v[1]}</td><td>${v[2]}</td></tr>`).join("") +
-        "</table>";
-    }
-  </script>
+      [eq1[0], eq1[1]].forEach(j => {
+        tablaIndividual[j].pj++;
+        tablaIndividual[j].dg += res[0] - res[1];
+        if (res[0] > res[1]) tablaIndividual[j].pts += 3;
+        else if (res[0] === res[1]) tablaIndividual[j].pts += 1;
+      });
+
+      [eq2[0], eq2[1]].forEach(j => {
+        tablaIndividual[j].pj++;
+        tablaIndividual[j].dg += res[1] - res[0];
+        if (res[1] > res[0]) tablaIndividual[j].pts += 3;
+        else if (res[0] === res[1]) tablaIndividual[j].pts += 1;
+      });
+    });
+
+    const div = document.getElementById('tabla-resultados');
+    div.innerHTML = `
+      <h3>Tabla por Parejas</h3>
+      <table>
+        <thead><tr><th>Pareja</th><th>Pts</th><th>PJ</th><th>DG</th></tr></thead>
+        <tbody>
+          ${Object.entries(tablaParejas)
+            .sort((a,b) => b[1].pts - a[1].pts)
+            .map(([nombre, val]) => `
+              <tr>
+                <td>${nombre}</td>
+                <td>${val.pts}</td>
+                <td>${val.pj}</td>
+                <td>${val.dg}</td>
+              </tr>`).join('')}
+        </tbody>
+      </table>
+      <h3>Tabla Individual</h3>
+      <table>
+        <thead><tr><th>Jugador</th><th>Pts</th><th>PJ</th><th>DG</th></tr></thead>
+        <tbody>
+          ${Object.entries(tablaIndividual)
+            .sort((a,b) => b[1].pts - a[1].pts)
+            .map(([nombre, val]) => `
+              <tr>
+                <td>${nombre}</td>
+                <td>${val.pts}</td>
+                <td>${val.pj}</td>
+                <td>${val.dg}</td>
+              </tr>`).join('')}
+        </tbody>
+      </table>
+    `;
+  }
+
+  // Botones y eventos
+  document.getElementById('btnGenerar').addEventListener('click', () => {
+    generarRondas();
+  });
+
+  document.getElementById('btnVerPartidos').addEventListener('click', () => {
+    mostrarSeccion('partidos');
+    mostrarPartidos();
+  });
+
+  document.getElementById('btnVolverJugadores').addEventListener('click', () => {
+    mostrarSeccion('jugadores');
+  });
+
+  document.getElementById('btnVerTabla').addEventListener('click', () => {
+    mostrarSeccion('tabla');
+    mostrarTabla();
+  });
+
+  document.getElementById('btnVolverRondas').addEventListener('click', () => {
+    mostrarSeccion('rondas');
+  });
+
+  document.getElementById('btnVolverPartidos').addEventListener('click', () => {
+    mostrarSeccion('partidos');
+  });
+</script>
 </body>
 </html>
