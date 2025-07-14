@@ -186,29 +186,35 @@
   <footer>Desarrollado por I.A</footer>
 
   <script>
-    // Script completo tal como ya funciona, sin tocar nada:
+  function toggleTheme() {
+    const current = document.body.getAttribute('data-theme') || 'light';
+    const next = current === 'dark' ? 'light' : 'dark';
+    document.body.setAttribute('data-theme', next);
+    localStorage.setItem('theme', next);
+  }
 
-    // Tema guardado y toggle
-    function toggleTheme() {
-      const current = document.body.getAttribute('data-theme') || 'light';
-      const next = current === 'dark' ? 'light' : 'dark';
-      document.body.setAttribute('data-theme', next);
-      localStorage.setItem('theme', next);
+  function toggleMenu() {
+    const menu = document.getElementById('menu');
+    menu.style.display = menu.style.display === 'flex' ? 'none' : 'flex';
+  }
+
+  function crearInputsJugadores() {
+    const cont = document.getElementById('form-jugadores');
+    cont.innerHTML = '';
+    for (let i = 1; i <= 6; i++) {
+      const input = document.createElement('input');
+      input.type = 'text';
+      input.id = `jugador${i}`;
+      input.placeholder = `Jugador ${i}`;
+      cont.appendChild(input);
     }
+  }
 
-    function toggleMenu() {
-      const menu = document.getElementById('menu');
-      menu.style.display = menu.style.display === 'flex' ? 'none' : 'flex';
-    }
-
-    window.onload = () => {
-      const savedTheme = localStorage.getItem('theme') || 'light';
-      document.body.setAttribute('data-theme', savedTheme);
-      crearInputsJugadores();
-    };
-
-    // Variables globales y toda la lógica completa original...
-    // ⏩ Mismo script que ya funciona perfectamente (omitido por brevedad si ya lo tenés pegado)
-  </script>
+  window.onload = () => {
+    const savedTheme = localStorage.getItem('theme') || 'light';
+    document.body.setAttribute('data-theme', savedTheme);
+    crearInputsJugadores();
+  };
+</script>
 </body>
 </html>
