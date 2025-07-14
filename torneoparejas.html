@@ -24,6 +24,7 @@
       font-family: sans-serif;
       background-color: var(--bg);
       color: var(--text);
+      font-size: 1.2rem;
     }
 
     header {
@@ -72,14 +73,14 @@
     }
 
     main {
-  padding: 80px 20px 100px;
-  max-width: 800px;
-  margin: auto;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-}
+      padding: 80px 20px 100px;
+      max-width: 800px;
+      margin: auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
 
     .section {
       display: none;
@@ -97,15 +98,15 @@
     }
 
     button {
-  display: block;
-  margin: 10px auto;
-  padding: 10px 20px;
-  background: var(--accent);
-  color: white;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-}
+      display: block;
+      margin: 10px auto;
+      padding: 10px 20px;
+      background: var(--accent);
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
 
     .partido {
       margin: 8px 0;
@@ -132,23 +133,31 @@
       text-align: center;
     }
 
-#form-jugadores {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
+    #form-jugadores {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    #lista-rondas,
+    #partidos-lista,
+    #tabla-resultados {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
 
     footer {
-  position: fixed;
-  bottom: 0;
-  width: 100%;
-  text-align: center;
-  padding: 10px;
-  background: var(--menu-bg);
-  color: var(--text);
-  border-top: 1px solid #ccc;
-  font-size: 14px;
-}
+      position: fixed;
+      bottom: 0;
+      width: 100%;
+      text-align: center;
+      padding: 10px;
+      background: var(--menu-bg);
+      color: var(--text);
+      border-top: 1px solid #ccc;
+      font-size: 14px;
+    }
   </style>
 </head>
 <body>
@@ -175,16 +184,16 @@
       <h2>Rondas Generadas</h2>
       <div id="lista-rondas"></div>
       <button onclick="mostrarSeccion('partidos');mostrarPartidos()">Ver partidos</button>
-<br>
-<button onclick="mostrarSeccion('jugadores')">Volver</button>
+      <br>
+      <button onclick="mostrarSeccion('jugadores')">Volver</button>
     </section>
 
     <section id="partidos" class="section">
       <h2>Partidos</h2>
       <div id="partidos-lista"></div>
       <button onclick="mostrarSeccion('tabla');mostrarTabla()">Ver tabla</button>
-<br>
-<button onclick="mostrarSeccion('rondas')">Volver</button>
+      <br>
+      <button onclick="mostrarSeccion('rondas')">Volver</button>
     </section>
 
     <section id="tabla" class="section">
@@ -306,18 +315,19 @@
     function mostrarPartidos() {
       const cont = document.getElementById('partidos-lista');
       cont.innerHTML = '';
-      partidos.forEach(([a, b], i) => {
+      for (let i = 0; i < partidos.length; i += 2) {
+        const [a, b] = partidos[i];
         const [g1, g2] = resultados[i] ?? [null, null];
+        const [c, d] = partidos[i + 1] ?? ['', ''];
         cont.innerHTML += `
           <div class="partido">
             ${a} + ${b}
             <input type="number" min="0" value="${g1 ?? ''}" onchange="guardarResultado(${i}, 0, this.value)">
             vs
             <input type="number" min="0" value="${g2 ?? ''}" onchange="guardarResultado(${i}, 1, this.value)">
-            ${partidos[i + 1]?.[0] ?? ''} + ${partidos[i + 1]?.[1] ?? ''}
+            ${c && d ? `${c} + ${d}` : ''}
           </div>`;
-        i++; // saltar al siguiente partido
-      });
+      }
     }
 
     function guardarResultado(i, eq, val) {
