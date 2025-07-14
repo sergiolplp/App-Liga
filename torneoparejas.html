@@ -316,16 +316,20 @@
   const cont = document.getElementById('partidos-lista');
   cont.innerHTML = '';
 
-  partidos.forEach(([a, b], i) => {
+  for (let i = 0; i < partidos.length; i += 2) {
+    const [a1, a2] = partidos[i];
+    const [b1, b2] = partidos[i + 1] || ['', ''];
     const [g1, g2] = resultados[i] ?? [null, null];
+
     cont.innerHTML += `
       <div class="partido">
-        ${a} + ${b}
+        ${a1} + ${a2}
         <input type="number" min="0" value="${g1 ?? ''}" onchange="guardarResultado(${i}, 0, this.value)">
         vs
         <input type="number" min="0" value="${g2 ?? ''}" onchange="guardarResultado(${i}, 1, this.value)">
+        ${b1 && b2 ? `${b1} + ${b2}` : ''}
       </div>`;
-  });
+  }
 }
 
     function guardarResultado(i, eq, val) {
