@@ -313,22 +313,28 @@
     }
 
     function mostrarPartidos() {
-      const cont = document.getElementById('partidos-lista');
-      cont.innerHTML = '';
-      for (let i = 0; i < partidos.length; i += 2) {
-        const [a, b] = partidos[i];
-        const [g1, g2] = resultados[i] ?? [null, null];
-        const [c, d] = partidos[i + 1] ?? ['', ''];
-        cont.innerHTML += `
-          <div class="partido">
-            ${a} + ${b}
-            <input type="number" min="0" value="${g1 ?? ''}" onchange="guardarResultado(${i}, 0, this.value)">
-            vs
-            <input type="number" min="0" value="${g2 ?? ''}" onchange="guardarResultado(${i}, 1, this.value)">
-            ${c && d ? `${c} + ${d}` : ''}
-          </div>`;
-      }
+  const cont = document.getElementById('partidos-lista');
+  cont.innerHTML = '';
+  for (let i = 0; i < partidos.length; i += 2) {
+    const [a, b] = partidos[i];
+    const [g1, g2] = resultados[i] ?? [null, null];
+
+    const eq1 = `
+      ${a} + ${b}
+      <input type="number" min="0" value="${g1 ?? ''}" onchange="guardarResultado(${i}, 0, this.value)">
+      vs
+      <input type="number" min="0" value="${g2 ?? ''}" onchange="guardarResultado(${i}, 1, this.value)">
+    `;
+
+    let eq2 = '';
+    if (partidos[i + 1]) {
+      const [c, d] = partidos[i + 1];
+      eq2 = `${c} + ${d}`;
     }
+
+    cont.innerHTML += `<div class="partido">${eq1} ${eq2}</div>`;
+  }
+}
 
     function guardarResultado(i, eq, val) {
       const [a, b] = resultados[i] ?? [null, null];
