@@ -315,24 +315,26 @@
     function mostrarPartidos() {
   const cont = document.getElementById('partidos-lista');
   cont.innerHTML = '';
+
   for (let i = 0; i < partidos.length; i += 2) {
-    const [a, b] = partidos[i];
+    const [a1, a2] = partidos[i];
     const [g1, g2] = resultados[i] ?? [null, null];
 
-    const eq1 = `
-      ${a} + ${b}
-      <input type="number" min="0" value="${g1 ?? ''}" onchange="guardarResultado(${i}, 0, this.value)">
-      vs
-      <input type="number" min="0" value="${g2 ?? ''}" onchange="guardarResultado(${i}, 1, this.value)">
+    let bloque = `
+      <div class="partido">
+        ${a1} + ${a2}
+        <input type="number" min="0" value="${g1 ?? ''}" onchange="guardarResultado(${i}, 0, this.value)">
+        vs
+        <input type="number" min="0" value="${g2 ?? ''}" onchange="guardarResultado(${i}, 1, this.value)">
     `;
 
-    let eq2 = '';
-    if (partidos[i + 1]) {
-      const [c, d] = partidos[i + 1];
-      eq2 = `${c} + ${d}`;
+    if (i + 1 < partidos.length) {
+      const [b1, b2] = partidos[i + 1];
+      bloque += ` ${b1} + ${b2}`;
     }
 
-    cont.innerHTML += `<div class="partido">${eq1} ${eq2}</div>`;
+    bloque += '</div>';
+    cont.innerHTML += bloque;
   }
 }
 
