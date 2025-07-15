@@ -153,6 +153,27 @@
       align-items: center;
     }
 
+    #lista-rondas {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 16px;
+  justify-items: center;
+  align-items: start;
+  margin-top: 20px;
+  width: 100%;
+}
+
+.ronda-box {
+  text-align: center;
+  padding: 10px 5px;
+  background: none;
+  border: none;
+  box-shadow: none;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
     footer {
       position: fixed;
       bottom: 0;
@@ -329,13 +350,16 @@ function generarRondas() {
 }
 
     function mostrarRondas() {
-      const cont = document.getElementById('lista-rondas');
-      cont.innerHTML = '';
-      rondas.forEach((ronda, i) => {
-        cont.innerHTML += `<h4>Ronda ${i + 1}</h4>` +
-          ronda.map(([a, b]) => `<p>${a} + ${b}</p>`).join('');
-      });
-    }
+  const cont = document.getElementById('lista-rondas');
+  cont.innerHTML = '';
+  rondas.forEach((ronda, i) => {
+    const div = document.createElement('div');
+    div.className = 'ronda-box';
+    div.innerHTML = `<strong>Ronda ${i + 1}</strong>` +
+      ronda.map(([a, b]) => `<div>${a} + ${b}</div>`).join('');
+    cont.appendChild(div);
+  });
+}
 
     function mostrarPartidos() {
   const cont = document.getElementById('partidos-lista');
