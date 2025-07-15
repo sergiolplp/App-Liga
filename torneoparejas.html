@@ -357,7 +357,7 @@ function generarRondas() {
         <input type="number" min="0" value="${g1 ?? ''}" onchange="guardarResultado(${i}, 0, this.value)">
         vs
         <input type="number" min="0" value="${g2 ?? ''}" onchange="guardarResultado(${i}, 1, this.value)">
-        ${b1 && b2 ? `${b1} + ${b2}` : '<em>(Libre)</em>'}
+        ${b1 && b2 ? `${b1} + ${b2}` : '<em>Libre</em>'}
       </div>`;
   }
 }
