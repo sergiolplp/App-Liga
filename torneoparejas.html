@@ -121,6 +121,23 @@
       gap: 8px;
       align-items: center;
     }
+    
+    .partido {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: 8px;
+  align-items: center;
+  margin: 12px 0;
+  text-align: center;
+}
+
+.partido span {
+  display: block;
+  word-break: break-word;
+  max-width: 130px;
+  margin: 0 auto;
+}
+    
 
     .partido input {
       width: 40px;
@@ -375,11 +392,13 @@ function generarRondas() {
 
     cont.innerHTML += `
       <div class="partido">
-        ${a1} + ${a2}
-        <input type="number" min="0" value="${g1 ?? ''}" onchange="guardarResultado(${i}, 0, this.value)">
-        vs
-        <input type="number" min="0" value="${g2 ?? ''}" onchange="guardarResultado(${i}, 1, this.value)">
-        ${b1 && b2 ? `${b1} + ${b2}` : '<em>Libre</em>'}
+        <span>${a1} + ${a2}</span>
+        <div>
+          <input type="number" min="0" value="${g1 ?? ''}" onchange="guardarResultado(${i}, 0, this.value)">
+          <div>vs</div>
+          <input type="number" min="0" value="${g2 ?? ''}" onchange="guardarResultado(${i}, 1, this.value)">
+        </div>
+        <span>${b1 && b2 ? `${b1} + ${b2}` : '<em>(Libre)</em>'}</span>
       </div>`;
   }
 }
