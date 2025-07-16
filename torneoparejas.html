@@ -103,16 +103,21 @@
 }
 
     button {
-      display: block;
-      margin: 10px auto;
-      padding: 10px 20px;
-      font-size: 1.0rem;
-      background: var(--accent);
-      color: white;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-    }
+  display: block;
+  margin: 10px auto;
+  padding: 10px 20px;
+  font-size: 1.2rem; /* Letra más grande */
+  background-color: #006400; /* Verde oscuro */
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.boton-rojo {
+  background-color: #cc0000 !important; /* Rojo fuerte */
+  color: white !important;
+}
 
     .partido {
       margin: 8px 0;
@@ -255,7 +260,7 @@
       <h2>Tabla de posiciones</h2>
       <div id="tabla-resultados"></div>
       <button onclick="mostrarSeccion('partidos')">Volver a partidos</button>
-      <button onclick="reiniciarTodo()">Reiniciar torneo</button>
+      <button class="boton-rojo" onclick="confirmarReinicio()">Reiniciar torneo</button>
     </section>
   </main>
 
@@ -492,12 +497,15 @@ Mail: sergiosainz.proyectos@gmail.com</footer>
   }
 
   // 🔁 NUEVO: Botón de reinicio total
-  function reiniciarTodo() {
+  function confirmarReinicio() {
+  const seguro = confirm("¿Vas a reiniciar todo?");
+  if (seguro) {
     localStorage.removeItem('jugadores');
     localStorage.removeItem('rondas');
     localStorage.removeItem('resultados');
     location.reload();
   }
+}
 </script>
 </body>
 </html>
