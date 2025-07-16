@@ -255,6 +255,7 @@
       <h2>Tabla de posiciones</h2>
       <div id="tabla-resultados"></div>
       <button onclick="mostrarSeccion('partidos')">Volver a partidos</button>
+      <button onclick="reiniciarTodo()">Reiniciar torneo</button>
     </section>
   </main>
 
@@ -263,201 +264,240 @@ Donaciones al ALIAS: sergiosainz.frances GRACIAS!
 Mail: sergiosainz.proyectos@gmail.com</footer>
 
   <script>
-    const secciones = ['jugadores','rondas','partidos','tabla'];
-    function mostrarSeccion(id) {
-      secciones.forEach(s => document.getElementById(s).classList.remove('active'));
-      document.getElementById(id).classList.add('active');
-    }
+  const secciones = ['jugadores', 'rondas', 'partidos', 'tabla'];
 
-    function toggleMenu() {
-      const menu = document.getElementById('menu');
-      menu.style.display = menu.style.display === 'flex' ? 'none' : 'flex';
-    }
+  function mostrarSeccion(id) {
+    secciones.forEach(s => document.getElementById(s).classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+  }
 
-    function toggleTheme() {
-      const t = document.body.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
-      document.body.setAttribute('data-theme', t);
-      localStorage.setItem('theme', t);
-    }
+  function toggleMenu() {
+    const menu = document.getElementById('menu');
+    menu.style.display = menu.style.display === 'flex' ? 'none' : 'flex';
+  }
 
-    window.onload = () => {
-      const t = localStorage.getItem('theme') || 'light';
-      document.body.setAttribute('data-theme', t);
+  function toggleTheme() {
+    const t = document.body.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    document.body.setAttribute('data-theme', t);
+    localStorage.setItem('theme', t);
+  }
+
+  window.onload = () => {
+    const t = localStorage.getItem('theme') || 'light';
+    document.body.setAttribute('data-theme', t);
+
+    if (cargarEstado()) {
+      mostrarSeccion('rondas');
+      mostrarRondas();
+    } else {
       generarInputs();
-    };
-
-    const nombres = [];
-
-    function generarInputs() {
-      const div = document.getElementById('form-jugadores');
-      for (let i = 0; i < 6; i++) {
-        const input = document.createElement('input');
-        input.placeholder = `Jugador ${i+1}`;
-        input.id = `jugador${i}`;
-        div.appendChild(input);
-      }
     }
-
-function agregarJugador() {
-  const index = document.querySelectorAll('#form-jugadores input').length;
-  const input = document.createElement('input');
-  input.placeholder = `Jugador ${index + 1}`;
-  input.id = `jugador${index}`;
-  document.getElementById('form-jugadores').appendChild(input);
-}
-
-    let rondas = [];
-    let partidos = [];
-    let resultados = [];
-
-function generarRondas() {
-  const inputs = document.querySelectorAll('#form-jugadores input');
-  nombres.length = 0;
-
-  inputs.forEach(input => {
-    const nombre = input.value.trim();
-    if (!nombre) return;
-    nombres.push(nombre);
-  });
-
-  if (nombres.length < 4) {
-    alert("Debe haber al menos 4 jugadores para generar rondas");
-    return;
-  }
-
-  const parejas = [];
-  for (let i = 0; i < nombres.length; i++) {
-    for (let j = i + 1; j < nombres.length; j++) {
-      parejas.push([nombres[i], nombres[j]]);
-    }
-  }
-
-  const esValida = ronda => {
-    const usados = new Set();
-    for (const [a, b] of ronda) {
-      if (usados.has(a) || usados.has(b)) return false;
-      usados.add(a); usados.add(b);
-    }
-    return true;
   };
 
-  const usadas = new Set();
-  const totalParejas = Math.floor(nombres.length / 2);
+  const nombres = [];
+  let rondas = [];
+  let partidos = [];
+  let resultados = [];
 
-  let intentos = 10000;
-  while (intentos-- > 0 && rondas.length < parejas.length) {
-    const candidatos = [...parejas].sort(() => Math.random() - 0.5);
-    const ronda = [];
-    const usados = new Set();
+  function generarInputs() {
+    const div = document.getElementById('form-jugadores');
+    for (let i = 0; i < 6; i++) {
+      const input = document.createElement('input');
+      input.placeholder = `Jugador ${i + 1}`;
+      input.id = `jugador${i}`;
+      div.appendChild(input);
+    }
+  }
 
-    for (const [a, b] of candidatos) {
-      const key = `${a}-${b}`;
-      if (!usadas.has(key) && !usados.has(a) && !usados.has(b)) {
-        ronda.push([a, b]);
-        usados.add(a);
-        usados.add(b);
-        if (ronda.length === totalParejas) break;
+  function agregarJugador() {
+    const index = document.querySelectorAll('#form-jugadores input').length;
+    const input = document.createElement('input');
+    input.placeholder = `Jugador ${index + 1}`;
+    input.id = `jugador${index}`;
+    document.getElementById('form-jugadores').appendChild(input);
+  }
+
+  function generarRondas() {
+    const inputs = document.querySelectorAll('#form-jugadores input');
+    nombres.length = 0;
+
+    inputs.forEach(input => {
+      const nombre = input.value.trim();
+      if (!nombre) return;
+      nombres.push(nombre);
+    });
+
+    if (nombres.length < 4) {
+      alert("Debe haber al menos 4 jugadores para generar rondas");
+      return;
+    }
+
+    const parejas = [];
+    for (let i = 0; i < nombres.length; i++) {
+      for (let j = i + 1; j < nombres.length; j++) {
+        parejas.push([nombres[i], nombres[j]]);
       }
     }
 
-    if (ronda.length === totalParejas) {
-      ronda.forEach(([a, b]) => usadas.add(`${a}-${b}`));
-      rondas.push(ronda);
+    const esValida = ronda => {
+      const usados = new Set();
+      for (const [a, b] of ronda) {
+        if (usados.has(a) || usados.has(b)) return false;
+        usados.add(a); usados.add(b);
+      }
+      return true;
+    };
+
+    const usadas = new Set();
+    const totalParejas = Math.floor(nombres.length / 2);
+
+    let intentos = 10000;
+    while (intentos-- > 0 && rondas.length < parejas.length) {
+      const candidatos = [...parejas].sort(() => Math.random() - 0.5);
+      const ronda = [];
+      const usados = new Set();
+
+      for (const [a, b] of candidatos) {
+        const key = `${a}-${b}`;
+        if (!usadas.has(key) && !usados.has(a) && !usados.has(b)) {
+          ronda.push([a, b]);
+          usados.add(a);
+          usados.add(b);
+          if (ronda.length === totalParejas) break;
+        }
+      }
+
+      if (ronda.length === totalParejas) {
+        ronda.forEach(([a, b]) => usadas.add(`${a}-${b}`));
+        rondas.push(ronda);
+      }
+    }
+
+    if (rondas.length === 0) {
+      alert("No se pudo generar un calendario válido.");
+      return;
+    }
+
+    partidos = rondas.flat();
+    resultados = Array(partidos.length).fill([null, null]);
+    mostrarSeccion('rondas');
+    mostrarRondas();
+    guardarEstado(); // <- NUEVO
+  }
+
+  function mostrarRondas() {
+    const cont = document.getElementById('lista-rondas');
+    cont.innerHTML = '';
+    rondas.forEach((ronda, i) => {
+      const div = document.createElement('div');
+      div.className = 'ronda-box';
+      div.innerHTML = `<strong>Ronda ${i + 1}</strong>` +
+        ronda.map(([a, b]) => `<div>${a} + ${b}</div>`).join('');
+      cont.appendChild(div);
+    });
+  }
+
+  function mostrarPartidos() {
+    const cont = document.getElementById('partidos-lista');
+    cont.innerHTML = '';
+
+    for (let i = 0; i < partidos.length; i += 2) {
+      const pareja1 = partidos[i];
+      const pareja2 = partidos[i + 1];
+
+      const [a1, a2] = pareja1 ?? ['', ''];
+      const [b1, b2] = pareja2 ?? ['', ''];
+
+      const [g1, g2] = resultados[i] ?? [null, null];
+
+      cont.innerHTML += `
+        <div class="partido">
+          <span>${a1} + ${a2}</span>
+          <div>
+            <input type="number" min="0" value="${g1 ?? ''}" onchange="guardarResultado(${i}, 0, this.value)">
+            <div>vs</div>
+            <input type="number" min="0" value="${g2 ?? ''}" onchange="guardarResultado(${i}, 1, this.value)">
+          </div>
+          <span>${b1 && b2 ? `${b1} + ${b2}` : '<em>(Libre)</em>'}</span>
+        </div>`;
     }
   }
 
-  if (rondas.length === 0) {
-    alert("No se pudo generar un calendario válido.");
-    return;
+  function guardarResultado(i, eq, val) {
+    const [a, b] = resultados[i] ?? [null, null];
+    resultados[i] = eq === 0 ? [parseInt(val), b] : [a, parseInt(val)];
+    guardarEstado(); // <- NUEVO
   }
 
-  window.rondas = rondas;
-  partidos = rondas.flat();
-  resultados = Array(partidos.length).fill([null, null]);
-  mostrarSeccion('rondas');
-  mostrarRondas();
-}
+  function mostrarTabla() {
+    const tabla = {};
+    const indiv = {};
 
-    function mostrarRondas() {
-  const cont = document.getElementById('lista-rondas');
-  cont.innerHTML = '';
-  rondas.forEach((ronda, i) => {
-    const div = document.createElement('div');
-    div.className = 'ronda-box';
-    div.innerHTML = `<strong>Ronda ${i + 1}</strong>` +
-      ronda.map(([a, b]) => `<div>${a} + ${b}</div>`).join('');
-    cont.appendChild(div);
-  });
-}
+    resultados.forEach(([g1, g2], i) => {
+      if (g1 == null || g2 == null) return;
+      const [a1, a2] = partidos[i];
+      const [b1, b2] = partidos[i + 1];
+      i++; // avanzar
 
-    function mostrarPartidos() {
-  const cont = document.getElementById('partidos-lista');
-  cont.innerHTML = '';
+      const nombreA = `${a1} + ${a2}`;
+      const nombreB = `${b1} + ${b2}`;
 
-  for (let i = 0; i < partidos.length; i += 2) {
-    const pareja1 = partidos[i];
-    const pareja2 = partidos[i + 1];
+      [nombreA, nombreB].forEach(n => tabla[n] = tabla[n] || [0, 0, 0]);
+      tabla[nombreA][1]++;
+      tabla[nombreB][1]++;
+      tabla[nombreA][2] += g1 - g2;
+      tabla[nombreB][2] += g2 - g1;
+      if (g1 > g2) tabla[nombreA][0] += 3;
+      else if (g2 > g1) tabla[nombreB][0] += 3;
+      else { tabla[nombreA][0]++; tabla[nombreB][0]++; }
 
-    const [a1, a2] = pareja1 ?? ['', ''];
-    const [b1, b2] = pareja2 ?? ['', ''];
+      [a1, a2, b1, b2].forEach(j => indiv[j] = indiv[j] || [0, 0, 0]);
+      [a1, a2].forEach(j => { indiv[j][1]++; indiv[j][2] += g1 - g2; if (g1 > g2) indiv[j][0] += 3; else if (g1 === g2) indiv[j][0] += 1; });
+      [b1, b2].forEach(j => { indiv[j][1]++; indiv[j][2] += g2 - g1; if (g2 > g1) indiv[j][0] += 3; else if (g1 === g2) indiv[j][0] += 1; });
+    });
 
-    const [g1, g2] = resultados[i] ?? [null, null];
-
-    cont.innerHTML += `
-      <div class="partido">
-        <span>${a1} + ${a2}</span>
-        <div>
-          <input type="number" min="0" value="${g1 ?? ''}" onchange="guardarResultado(${i}, 0, this.value)">
-          <div>vs</div>
-          <input type="number" min="0" value="${g2 ?? ''}" onchange="guardarResultado(${i}, 1, this.value)">
-        </div>
-        <span>${b1 && b2 ? `${b1} + ${b2}` : '<em>(Libre)</em>'}</span>
-      </div>`;
+    const div = document.getElementById('tabla-resultados');
+    div.innerHTML =
+      "<h3>Por Pareja</h3><table><tr><th>Pareja</th><th>Pts</th><th>PJ</th><th>DG</th></tr>" +
+      Object.entries(tabla).sort((a, b) => b[1][0] - a[1][0]).map(([k, v]) =>
+        `<tr><td>${k}</td><td>${v[0]}</td><td>${v[1]}</td><td>${v[2]}</td></tr>`).join("") +
+      "</table><h3>Individual</h3><table><tr><th>Jugador</th><th>Pts</th><th>PJ</th><th>DG</th></tr>" +
+      Object.entries(indiv).sort((a, b) => b[1][0] - a[1][0]).map(([k, v]) =>
+        `<tr><td>${k}</td><td>${v[0]}</td><td>${v[1]}</td><td>${v[2]}</td></tr>`).join("") +
+      "</table>";
   }
-}
 
-    function guardarResultado(i, eq, val) {
-      const [a, b] = resultados[i] ?? [null, null];
-      resultados[i] = eq === 0 ? [parseInt(val), b] : [a, parseInt(val)];
+  // 🔄 NUEVO: Guardar en localStorage
+  function guardarEstado() {
+    localStorage.setItem('jugadores', JSON.stringify(nombres));
+    localStorage.setItem('rondas', JSON.stringify(rondas));
+    localStorage.setItem('resultados', JSON.stringify(resultados));
+  }
+
+  // 💾 NUEVO: Recuperar desde localStorage
+  function cargarEstado() {
+    const j = localStorage.getItem('jugadores');
+    const r = localStorage.getItem('rondas');
+    const res = localStorage.getItem('resultados');
+
+    if (j && r && res) {
+      nombres.length = 0;
+      nombres.push(...JSON.parse(j));
+      rondas = JSON.parse(r);
+      partidos = rondas.flat();
+      resultados = JSON.parse(res);
+      return true;
     }
+    return false;
+  }
 
-    function mostrarTabla() {
-      const tabla = {};
-      const indiv = {};
-
-      resultados.forEach(([g1, g2], i) => {
-        if (g1 == null || g2 == null) return;
-        const [a1, a2] = partidos[i];
-        const [b1, b2] = partidos[i + 1];
-        i++; // avanzar
-
-        const nombreA = `${a1} + ${a2}`;
-        const nombreB = `${b1} + ${b2}`;
-
-        [nombreA, nombreB].forEach(n => tabla[n] = tabla[n] || [0, 0, 0]);
-        tabla[nombreA][1]++;
-        tabla[nombreB][1]++;
-        tabla[nombreA][2] += g1 - g2;
-        tabla[nombreB][2] += g2 - g1;
-        if (g1 > g2) tabla[nombreA][0] += 3;
-        else if (g2 > g1) tabla[nombreB][0] += 3;
-        else { tabla[nombreA][0]++; tabla[nombreB][0]++; }
-
-        [a1, a2, b1, b2].forEach(j => indiv[j] = indiv[j] || [0, 0, 0]);
-        [a1, a2].forEach(j => { indiv[j][1]++; indiv[j][2] += g1 - g2; if (g1 > g2) indiv[j][0] += 3; else if (g1 === g2) indiv[j][0] += 1; });
-        [b1, b2].forEach(j => { indiv[j][1]++; indiv[j][2] += g2 - g1; if (g2 > g1) indiv[j][0] += 3; else if (g1 === g2) indiv[j][0] += 1; });
-      });
-
-      const div = document.getElementById('tabla-resultados');
-      div.innerHTML =
-        "<h3>Por Pareja</h3><table><tr><th>Pareja</th><th>Pts</th><th>PJ</th><th>DG</th></tr>" +
-        Object.entries(tabla).sort((a, b) => b[1][0] - a[1][0]).map(([k, v]) =>
-          `<tr><td>${k}</td><td>${v[0]}</td><td>${v[1]}</td><td>${v[2]}</td></tr>`).join("") +
-        "</table><h3>Individual</h3><table><tr><th>Jugador</th><th>Pts</th><th>PJ</th><th>DG</th></tr>" +
-        Object.entries(indiv).sort((a, b) => b[1][0] - a[1][0]).map(([k, v]) =>
-          `<tr><td>${k}</td><td>${v[0]}</td><td>${v[1]}</td><td>${v[2]}</td></tr>`).join("") +
-        "</table>";
-    }
-  </script>
+  // 🔁 NUEVO: Botón de reinicio total
+  function reiniciarTodo() {
+    localStorage.removeItem('jugadores');
+    localStorage.removeItem('rondas');
+    localStorage.removeItem('resultados');
+    location.reload();
+  }
+</script>
 </body>
 </html>
