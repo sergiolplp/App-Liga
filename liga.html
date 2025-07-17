@@ -300,18 +300,17 @@
       cont.innerHTML = '';
       partidos.forEach(([a, b], i) => {
         const [g1, g2] = resultados[i] ?? [null, null];
-        cont.innerHTML += 
-          <div class="partido">
-            <span>${a}</span>
-            <div>
-              <input type="number" min="0" value="${g1 ?? ''}" onchange="guardarResultado(${i}, 0, this.value)">
-              <div>vs</div>
-              <input type="number" min="0" value="${g2 ?? ''}" onchange="guardarResultado(${i}, 1, this.value)">
-            </div>
-            <span>${b}</span>
-          </div>;
-      });
-    }
+        cont.innerHTML += `
+  <div class="partido">
+    <span>${a}</span>
+    <div>
+      <input type="number" min="0" value="${g1 ?? ''}" onchange="guardarResultado(${i}, 0, this.value)">
+      <div>vs</div>
+      <input type="number" min="0" value="${g2 ?? ''}" onchange="guardarResultado(${i}, 1, this.value)">
+    </div>
+    <span>${b}</span>
+  </div>
+`;
 
     function guardarResultado(i, eq, val) {
       const [a, b] = resultados[i] ?? [null, null];
@@ -338,11 +337,10 @@
       });
 
       const div = document.getElementById('tabla-resultados');
-      div.innerHTML = "<table><tr><th>Jugador</th><th>Pts</th><th>PJ</th><th>DG</th></tr>" +
-        Object.entries(tabla).sort((a, b) => b[1][0] - a[1][0]).map(([k, v]) =>
-          <tr><td>${k}</td><td>${v[0]}</td><td>${v[1]}</td><td>${v[2]}</td></tr>).join("") +
-        "</table>";
-    }
+      div.innerHTML = `<table><tr><th>Jugador</th><th>Pts</th><th>PJ</th><th>DG</th></tr>` +
+  Object.entries(tabla).sort((a, b) => b[1][0] - a[1][0]).map(([k, v]) =>
+    `<tr><td>${k}</td><td>${v[0]}</td><td>${v[1]}</td><td>${v[2]}</td></tr>`).join("") +
+  `</table>`;
 
     function guardarEstado() {
       localStorage.setItem('liga_jugadores', JSON.stringify(jugadores));
