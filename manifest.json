@@ -1,6 +1,6 @@
 {
   "name": "Torneo de los Pibes",
-  "short_name": "Torneo",
+  "short_name": "App-Liga",
   "start_url": "./",
   "display": "standalone",
   "background_color": "#000000",
