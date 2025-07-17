@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Historial de Resultados</title>
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="icon" href="icono_torneo.ico" type="image/x-icon" />
+  <link rel="apple-touch-icon" href="icono_torneo.ico">
+  <meta name="theme-color" content="#ffffff">
+  <style>
+    :root {
+      --fondo: #f5f5f5;
+      --text: #333;
+      --menu-bg: #fff;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: var(--fondo);
+      color: var(--text);
+    }
+
+    header {
+      background-color: #333;
+      color: white;
+      padding: 10px;
+      position: relative;
+    }
+
+    .menu-icon {
+      font-size: 24px;
+      cursor: pointer;
+    }
+
+    .menu {
+      display: none;
+      flex-direction: column;
+      background: var(--menu-bg);
+      position: absolute;
+      top: 50px;
+      left: 0;
+      width: 200px;
+      border: 1px solid #ccc;
+      z-index: 1000;
+    }
+
+    .menu a {
+      padding: 10px;
+      text-decoration: none;
+      color: var(--text);
+      border-bottom: 1px solid #ccc;
+    }
+
+    .menu a:hover {
+      background-color: #eee;
+    }
+
+    h1 {
+      text-align: center;
+      margin-top: 20px;
+    }
+
+    section {
+      padding: 20px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 40px;
+    }
+
+    th, td {
+      border: 1px solid #aaa;
+      padding: 8px;
+      text-align: center;
+    }
+
+    th {
+      background-color: #ddd;
+    }
+
+    footer {
+      text-align: center;
+      padding: 15px;
+      background: #222;
+      color: white;
+      position: fixed;
+      bottom: 0;
+      width: 100%;
+    }
+
+    @media (max-width: 600px) {
+      th, td {
+        font-size: 12px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <span class="menu-icon" onclick="toggleMenu()">☰ Menú</span>
+    <nav class="menu" id="menu">
+      <a href="index.html">Inicio</a>
+      <a href="liga.html">Liga</a>
+      <a href="torneoparejas.html">Torneo por Parejas</a>
+      <a href="historial.html">Historial</a>
+    </nav>
+  </header>
+
+  <h1>Historial de Resultados</h1>
+
+  <section>
+    <h2>Competencia Individual</h2>
+    <table id="tabla-individual">
+      <thead>
+        <tr>
+          <th>Posición</th>
+          <th>Nombre</th>
+          <th>PJ</th>
+          <th>PG</th>
+          <th>PE</th>
+          <th>PP</th>
+          <th>%PG</th>
+          <th>%PE</th>
+          <th>%PP</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- Se llenará por JavaScript -->
+      </tbody>
+    </table>
+
+    <h2>Competencia por Parejas</h2>
+    <table id="tabla-parejas">
+      <thead>
+        <tr>
+          <th>Posición</th>
+          <th>Pareja</th>
+          <th>PJ</th>
+          <th>PG</th>
+          <th>PE</th>
+          <th>PP</th>
+          <th>%PG</th>
+          <th>%PE</th>
+          <th>%PP</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- Se llenará por JavaScript -->
+      </tbody>
+    </table>
+  </section>
+
+  <footer>
+    Desarrollado por SDD
+  </footer>
+
+  <script>
+    function toggleMenu() {
+      const menu = document.getElementById('menu');
+      menu.style.display = (menu.style.display === 'flex') ? 'none' : 'flex';
+    }
+
+    // A continuación agregaremos en otro paso la lógica JS para cargar los datos de liga.html y torneoparejas.html
+  </script>
+
+</body>
+</html>
