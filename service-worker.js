@@ -4,7 +4,7 @@ const urlsToCache = [
   './index.html',
   './liga.html',
   './torneoparejas.html',
-  './historico.html',
+  './historial.html',
   './icono_torneo.ico',
   './manifest.json',
   // Agregá acá todos los demás archivos que uses:
