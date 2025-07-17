@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Torneo de los Pibes - Ligas Individuales</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="icono_torneo.ico" type="image/x-icon" />
+  <link rel="apple-touch-icon" href="icono_torneo.ico">
+  <meta name="theme-color" content="#000000">
+  <style>
+    :root {
+      --bg: #ffffff;
+      --text: #000000;
+      --accent: #3333cc;
+      --menu-bg: #f0f0f0;
+    }
+    [data-theme="dark"] {
+      --bg: #121212;
+      --text: #ffffff;
+      --accent: #3399ff;
+      --menu-bg: #1e1e1e;
+    }
+
+    body {
+      margin: 0;
+      font-family: sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      font-size: 1.3rem;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 20px;
+      background: var(--menu-bg);
+      border-bottom: 1px solid #ccc;
+    }
+
+    .hamburger {
+      font-size: 24px;
+      cursor: pointer;
+    }
+
+    .title {
+      font-weight: bold;
+    }
+
+    .theme-toggle {
+      width: 24px;
+      height: 24px;
+      background: linear-gradient(90deg, #fff 50%, #000 50%);
+      border-radius: 50%;
+      border: 2px solid var(--text);
+      cursor: pointer;
+    }
+
+    .menu {
+      display: none;
+      flex-direction: column;
+      background: var(--menu-bg);
+      position: absolute;
+      top: 50px;
+      left: 0;
+      width: 200px;
+      border: 1px solid #ccc;
+    }
+
+    .menu a {
+      padding: 10px;
+      text-decoration: none;
+      color: var(--text);
+      border-bottom: 1px solid #ccc;
+    }
+
+    main {
+      padding: 1px 20px 100px;
+      max-width: 800px;
+      margin: auto;
+      text-align: center;
+    }
+
+    .section {
+      display: none;
+    }
+
+    .active {
+      display: block;
+    }
+
+    input[type="text"] {
+      margin: 8px;
+      padding: 14px;
+      width: 260px;
+      font-size: 0.8rem;
+      text-align: center;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      touch-action: manipulation;
+    }
+
+    button {
+      display: block;
+      margin: 10px auto;
+      padding: 10px 20px;
+      font-size: 1.2rem;
+      background-color: #006400;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    .boton-rojo {
+      background-color: #cc0000 !important;
+      color: white !important;
+    }
+
+    .partido {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      gap: 8px;
+      align-items: center;
+      margin: 12px 0;
+      text-align: center;
+    }
+
+    .partido span {
+      display: block;
+      word-break: break-word;
+      max-width: 130px;
+      margin: 0 auto;
+    }
+
+    .partido input {
+      width: 40px;
+      text-align: center;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+
+    th, td {
+      border: 1px solid #ccc;
+      padding: 5px;
+      text-align: center;
+    }
+
+    footer {
+      position: fixed;
+      bottom: 0;
+      width: 100%;
+      text-align: center;
+      padding: 4px 8px;
+      background: var(--menu-bg);
+      color: var(--text);
+      border-top: 1px solid #ccc;
+      font-size: 13px;
+      line-height: 1.2;
+    }
+
+    #form-jugadores {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    #partidos-lista,
+    #tabla-resultados {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="hamburger" onclick="toggleMenu()">☰</div>
+    <div class="title">Torneo de los Pibes</div>
+    <div class="theme-toggle" onclick="toggleTheme()"></div>
+  </header>
+
+  <div class="menu" id="menu">
+    <a href="ligasindividuales.html">LIGAS INDIVIDUALES</a>
+    <a href="torneoparejas.html">TORNEOS POR PAREJAS ROTATIVAS</a>
+    <a href="historico.html">HISTÓRICO ENTRE JUGADORES</a>
+  </div>
+
+  <main>
+    <section id="jugadores" class="section active">
+      <h2>Ingresá los jugadores</h2>
+      <div id="form-jugadores"></div>
+      <button onclick="agregarJugador()">+</button>
+
+      <div style="margin-top:10px;">
+        <label>
+          <input type="radio" name="modo" value="ida" checked> Solo ida
+        </label>
+        <label style="margin-left: 20px;">
+          <input type="radio" name="modo" value="vuelta"> Ida y vuelta
+        </label>
+      </div>
+
+      <button onclick="generarLiga()">Generar liga</button>
+    </section>
+
+    <section id="partidos" class="section">
+      <h2>Partidos</h2>
+      <div id="partidos-lista"></div>
+      <button onclick="mostrarSeccion('tabla');mostrarTabla()">Ver tabla</button>
+      <button onclick="mostrarSeccion('jugadores')">Volver</button>
+    </section>
+
+    <section id="tabla" class="section">
+      <h2>Tabla de posiciones</h2>
+      <div id="tabla-resultados"></div>
+      <button onclick="mostrarSeccion('partidos')">Volver a partidos</button>
+      <button class="boton-rojo" onclick="reiniciar()">Reiniciar torneo</button>
+    </section>
+  </main>
+
+  <footer>Desarrollado con I.A.<br>Donaciones al ALIAS: sergiosainz.frances<br>Mail: sergiosainz.proyectos@gmail.com</footer>
+
+  <script>
+    const secciones = ['jugadores', 'partidos', 'tabla'];
+    let jugadores = [];
+    let partidos = [];
+    let resultados = [];
+
+    function toggleMenu() {
+      const menu = document.getElementById('menu');
+      menu.style.display = menu.style.display === 'flex' ? 'none' : 'flex';
+    }
+
+    function toggleTheme() {
+      const t = document.body.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+      document.body.setAttribute('data-theme', t);
+      localStorage.setItem('theme', t);
+    }
+
+    function mostrarSeccion(id) {
+      secciones.forEach(s => document.getElementById(s).classList.remove('active'));
+      document.getElementById(id).classList.add('active');
+    }
+
+    function agregarJugador() {
+      const index = document.querySelectorAll('#form-jugadores input').length;
+      const input = document.createElement('input');
+      input.placeholder = `Jugador ${index + 1}`;
+      input.id = `jugador${index}`;
+      input.type = "text";
+      input.autocomplete = "off";
+      input.autocorrect = "off";
+      input.spellcheck = false;
+      document.getElementById('form-jugadores').appendChild(input);
+    }
+
+    function generarInputs() {
+      for (let i = 0; i < 6; i++) agregarJugador();
+    }
+
+    function generarLiga() {
+      jugadores = [];
+      resultados = [];
+
+      const modo = document.querySelector('input[name="modo"]:checked').value;
+      const inputs = document.querySelectorAll('#form-jugadores input');
+      inputs.forEach(input => {
+        const nombre = input.value.trim();
+        if (nombre) jugadores.push(nombre);
+      });
+
+      if (jugadores.length < 2) {
+        alert("Debe haber al menos 2 jugadores");
+        return;
+      }
+
+      partidos = [];
+
+      for (let i = 0; i < jugadores.length; i++) {
+        for (let j = i + 1; j < jugadores.length; j++) {
+          partidos.push([jugadores[i], jugadores[j]]);
+          if (modo === "vuelta") partidos.push([jugadores[j], jugadores[i]]);
+        }
+      }
+
+      resultados = Array(partidos.length).fill([null, null]);
+      mostrarSeccion('partidos');
+      mostrarPartidos();
+      guardarEstado();
+    }
+
+    function mostrarPartidos() {
+      const cont = document.getElementById('partidos-lista');
+      cont.innerHTML = '';
+      partidos.forEach(([a, b], i) => {
+        const [g1, g2] = resultados[i] ?? [null, null];
+        cont.innerHTML += `
+          <div class="partido">
+            <span>${a}</span>
+            <div>
+              <input type="number" min="0" value="${g1 ?? ''}" onchange="guardarResultado(${i}, 0, this.value)">
+              <div>vs</div>
+              <input type="number" min="0" value="${g2 ?? ''}" onchange="guardarResultado(${i}, 1, this.value)">
+            </div>
+            <span>${b}</span>
+          </div>`;
+      });
+    }
+
+    function guardarResultado(i, eq, val) {
+      const [a, b] = resultados[i] ?? [null, null];
+      resultados[i] = eq === 0 ? [parseInt(val), b] : [a, parseInt(val)];
+      guardarEstado();
+    }
+
+    function mostrarTabla() {
+      const tabla = {};
+      resultados.forEach(([g1, g2], i) => {
+        if (g1 == null || g2 == null) return;
+        const [a, b] = partidos[i];
+
+        [a, b].forEach(n => tabla[n] = tabla[n] || [0, 0, 0]);
+
+        tabla[a][1]++;
+        tabla[b][1]++;
+        tabla[a][2] += g1 - g2;
+        tabla[b][2] += g2 - g1;
+
+        if (g1 > g2) tabla[a][0] += 3;
+        else if (g2 > g1) tabla[b][0] += 3;
+        else { tabla[a][0]++; tabla[b][0]++; }
+      });
+
+      const div = document.getElementById('tabla-resultados');
+      div.innerHTML = "<table><tr><th>Jugador</th><th>Pts</th><th>PJ</th><th>DG</th></tr>" +
+        Object.entries(tabla).sort((a, b) => b[1][0] - a[1][0]).map(([k, v]) =>
+          `<tr><td>${k}</td><td>${v[0]}</td><td>${v[1]}</td><td>${v[2]}</td></tr>`).join("") +
+        "</table>";
+    }
+
+    function guardarEstado() {
+      localStorage.setItem('liga_jugadores', JSON.stringify(jugadores));
+      localStorage.setItem('liga_partidos', JSON.stringify(partidos));
+      localStorage.setItem('liga_resultados', JSON.stringify(resultados));
+    }
+
+    function cargarEstado() {
+      const j = localStorage.getItem('liga_jugadores');
+      const p = localStorage.getItem('liga_partidos');
+      const r = localStorage.getItem('liga_resultados');
+      if (j && p && r) {
+        jugadores = JSON.parse(j);
+        partidos = JSON.parse(p);
+        resultados = JSON.parse(r);
+        return true;
+      }
+      return false;
+    }
+
+    function reiniciar() {
+      if (confirm("¿Seguro que querés reiniciar el torneo?")) {
+        localStorage.removeItem('liga_jugadores');
+        localStorage.removeItem('liga_partidos');
+        localStorage.removeItem('liga_resultados');
+        location.reload();
+      }
+    }
+
+    window.onload = () => {
+      const t = localStorage.getItem('theme') || 'light';
+      document.body.setAttribute('data-theme', t);
+      if (cargarEstado()) {
+        mostrarSeccion('partidos');
+        mostrarPartidos();
+      } else {
+        generarInputs();
+      }
+    };
+
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('service-worker.js')
+        .then(reg => console.log('✔ Service Worker registrado:', reg.scope))
+        .catch(err => console.error('✖ Error al registrar Service Worker:', err));
+    }
+  </script>
+</body>
+</html>
