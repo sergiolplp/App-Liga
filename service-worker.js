@@ -2,7 +2,7 @@ const CACHE_NAME = 'torneo-cache-v1';
 const urlsToCache = [
   './',
   './index.html',
-  './ligasindividuales.html',
+  './ligas.html',
   './torneoparejas.html',
   './historico.html',
   './icono_torneo.ico',
