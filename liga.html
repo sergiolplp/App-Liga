@@ -226,166 +226,170 @@
 
   <footer>Desarrollado con I.A.<br>Donaciones al ALIAS: sergiosainz.frances<br>Mail: sergiosainz.proyectos@gmail.com</footer>
 
-  <script>
-    const secciones = ['jugadores', 'partidos', 'tabla'];
-    let jugadores = [];
-    let partidos = [];
-    let resultados = [];
+ <script>
+  const secciones = ['jugadores', 'partidos', 'tabla'];
+  let jugadores = [];
+  let partidos = [];
+  let resultados = [];
 
-    function toggleMenu() {
-      const menu = document.getElementById('menu');
-      menu.style.display = menu.style.display === 'flex' ? 'none' : 'flex';
+  function toggleMenu() {
+    const menu = document.getElementById('menu');
+    menu.style.display = menu.style.display === 'flex' ? 'none' : 'flex';
+  }
+
+  function toggleTheme() {
+    const t = document.body.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    document.body.setAttribute('data-theme', t);
+    localStorage.setItem('theme', t);
+  }
+
+  function mostrarSeccion(id) {
+    secciones.forEach(s => document.getElementById(s).classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+  }
+
+  function agregarJugador() {
+    const index = document.querySelectorAll('#form-jugadores input').length;
+    const input = document.createElement('input');
+    input.placeholder = `Jugador ${index + 1}`;
+    input.id = `jugador${index}`;
+    input.type = "text";
+    input.autocomplete = "off";
+    input.autocorrect = "off";
+    input.spellcheck = false;
+    document.getElementById('form-jugadores').appendChild(input);
+  }
+
+  function generarInputs() {
+    for (let i = 0; i < 6; i++) agregarJugador();
+  }
+
+  function generarLiga() {
+    jugadores = [];
+    resultados = [];
+
+    const modo = document.querySelector('input[name="modo"]:checked').value;
+    const inputs = document.querySelectorAll('#form-jugadores input');
+    inputs.forEach(input => {
+      const nombre = input.value.trim();
+      if (nombre) jugadores.push(nombre);
+    });
+
+    if (jugadores.length < 2) {
+      alert("Debe haber al menos 2 jugadores");
+      return;
     }
 
-    function toggleTheme() {
-      const t = document.body.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
-      document.body.setAttribute('data-theme', t);
-      localStorage.setItem('theme', t);
-    }
+    partidos = [];
 
-    function mostrarSeccion(id) {
-      secciones.forEach(s => document.getElementById(s).classList.remove('active'));
-      document.getElementById(id).classList.add('active');
-    }
-
-    function agregarJugador() {
-  const index = document.querySelectorAll('#form-jugadores input').length;
-  const input = document.createElement('input');
-  input.placeholder = `Jugador ${index + 1}`;
-  input.id = `jugador${index}`;
-  input.type = "text";
-  input.autocomplete = "off";
-  input.autocorrect = "off";
-  input.spellcheck = false;
-  document.getElementById('form-jugadores').appendChild(input);
-}
-
-    function generarInputs() {
-      for (let i = 0; i < 6; i++) agregarJugador();
-    }
-
-    function generarLiga() {
-      jugadores = [];
-      resultados = [];
-
-      const modo = document.querySelector('input[name="modo"]:checked').value;
-      const inputs = document.querySelectorAll('#form-jugadores input');
-      inputs.forEach(input => {
-        const nombre = input.value.trim();
-        if (nombre) jugadores.push(nombre);
-      });
-
-      if (jugadores.length < 2) {
-        alert("Debe haber al menos 2 jugadores");
-        return;
+    for (let i = 0; i < jugadores.length; i++) {
+      for (let j = i + 1; j < jugadores.length; j++) {
+        partidos.push([jugadores[i], jugadores[j]]);
+        if (modo === "vuelta") partidos.push([jugadores[j], jugadores[i]]);
       }
+    }
 
-      partidos = [];
+    resultados = Array(partidos.length).fill([null, null]);
+    mostrarSeccion('partidos');
+    mostrarPartidos();
+    guardarEstado();
+  }
 
-      for (let i = 0; i < jugadores.length; i++) {
-        for (let j = i + 1; j < jugadores.length; j++) {
-          partidos.push([jugadores[i], jugadores[j]]);
-          if (modo === "vuelta") partidos.push([jugadores[j], jugadores[i]]);
-        }
-      }
+  function mostrarPartidos() {
+    const cont = document.getElementById('partidos-lista');
+    cont.innerHTML = '';
+    partidos.forEach(([a, b], i) => {
+      const [g1, g2] = resultados[i] ?? [null, null];
+      cont.innerHTML += `
+        <div class="partido">
+          <span>${a}</span>
+          <div>
+            <input type="number" min="0" value="${g1 ?? ''}" onchange="guardarResultado(${i}, 0, this.value)">
+            <div>vs</div>
+            <input type="number" min="0" value="${g2 ?? ''}" onchange="guardarResultado(${i}, 1, this.value)">
+          </div>
+          <span>${b}</span>
+        </div>
+      `;
+    });
+  }
 
-      resultados = Array(partidos.length).fill([null, null]);
+  function guardarResultado(i, eq, val) {
+    const [a, b] = resultados[i] ?? [null, null];
+    resultados[i] = eq === 0 ? [parseInt(val), b] : [a, parseInt(val)];
+    guardarEstado();
+  }
+
+  function mostrarTabla() {
+    const tabla = {};
+    resultados.forEach(([g1, g2], i) => {
+      if (g1 == null || g2 == null) return;
+      const [a, b] = partidos[i];
+
+      [a, b].forEach(n => tabla[n] = tabla[n] || [0, 0, 0]);
+
+      tabla[a][1]++;
+      tabla[b][1]++;
+      tabla[a][2] += g1 - g2;
+      tabla[b][2] += g2 - g1;
+
+      if (g1 > g2) tabla[a][0] += 3;
+      else if (g2 > g1) tabla[b][0] += 3;
+      else { tabla[a][0]++; tabla[b][0]++; }
+    });
+
+    const div = document.getElementById('tabla-resultados');
+    div.innerHTML = `<table><tr><th>Jugador</th><th>Pts</th><th>PJ</th><th>DG</th></tr>` +
+      Object.entries(tabla).sort((a, b) => b[1][0] - a[1][0]).map(([k, v]) =>
+        `<tr><td>${k}</td><td>${v[0]}</td><td>${v[1]}</td><td>${v[2]}</td></tr>`).join("") +
+      `</table>`;
+  }
+
+  function guardarEstado() {
+    localStorage.setItem('liga_jugadores', JSON.stringify(jugadores));
+    localStorage.setItem('liga_partidos', JSON.stringify(partidos));
+    localStorage.setItem('liga_resultados', JSON.stringify(resultados));
+  }
+
+  function cargarEstado() {
+    const j = localStorage.getItem('liga_jugadores');
+    const p = localStorage.getItem('liga_partidos');
+    const r = localStorage.getItem('liga_resultados');
+    if (j && p && r) {
+      jugadores = JSON.parse(j);
+      partidos = JSON.parse(p);
+      resultados = JSON.parse(r);
+      return true;
+    }
+    return false;
+  }
+
+  function reiniciar() {
+    if (confirm("¿Seguro que querés reiniciar el torneo?")) {
+      localStorage.removeItem('liga_jugadores');
+      localStorage.removeItem('liga_partidos');
+      localStorage.removeItem('liga_resultados');
+      location.reload();
+    }
+  }
+
+  window.onload = () => {
+    const t = localStorage.getItem('theme') || 'light';
+    document.body.setAttribute('data-theme', t);
+    if (cargarEstado()) {
       mostrarSeccion('partidos');
       mostrarPartidos();
-      guardarEstado();
+    } else {
+      generarInputs();
     }
+  };
 
-    function mostrarPartidos() {
-      const cont = document.getElementById('partidos-lista');
-      cont.innerHTML = '';
-      partidos.forEach(([a, b], i) => {
-        const [g1, g2] = resultados[i] ?? [null, null];
-        cont.innerHTML += `
-  <div class="partido">
-    <span>${a}</span>
-    <div>
-      <input type="number" min="0" value="${g1 ?? ''}" onchange="guardarResultado(${i}, 0, this.value)">
-      <div>vs</div>
-      <input type="number" min="0" value="${g2 ?? ''}" onchange="guardarResultado(${i}, 1, this.value)">
-    </div>
-    <span>${b}</span>
-  </div>
-`;
-
-    function guardarResultado(i, eq, val) {
-      const [a, b] = resultados[i] ?? [null, null];
-      resultados[i] = eq === 0 ? [parseInt(val), b] : [a, parseInt(val)];
-      guardarEstado();
-    }
-
-    function mostrarTabla() {
-      const tabla = {};
-      resultados.forEach(([g1, g2], i) => {
-        if (g1 == null || g2 == null) return;
-        const [a, b] = partidos[i];
-
-        [a, b].forEach(n => tabla[n] = tabla[n] || [0, 0, 0]);
-
-        tabla[a][1]++;
-        tabla[b][1]++;
-        tabla[a][2] += g1 - g2;
-        tabla[b][2] += g2 - g1;
-
-        if (g1 > g2) tabla[a][0] += 3;
-        else if (g2 > g1) tabla[b][0] += 3;
-        else { tabla[a][0]++; tabla[b][0]++; }
-      });
-
-      const div = document.getElementById('tabla-resultados');
-      div.innerHTML = `<table><tr><th>Jugador</th><th>Pts</th><th>PJ</th><th>DG</th></tr>` +
-  Object.entries(tabla).sort((a, b) => b[1][0] - a[1][0]).map(([k, v]) =>
-    `<tr><td>${k}</td><td>${v[0]}</td><td>${v[1]}</td><td>${v[2]}</td></tr>`).join("") +
-  `</table>`;
-
-    function guardarEstado() {
-      localStorage.setItem('liga_jugadores', JSON.stringify(jugadores));
-      localStorage.setItem('liga_partidos', JSON.stringify(partidos));
-      localStorage.setItem('liga_resultados', JSON.stringify(resultados));
-    }
-
-    function cargarEstado() {
-      const j = localStorage.getItem('liga_jugadores');
-      const p = localStorage.getItem('liga_partidos');
-      const r = localStorage.getItem('liga_resultados');
-      if (j && p && r) {
-        jugadores = JSON.parse(j);
-        partidos = JSON.parse(p);
-        resultados = JSON.parse(r);
-        return true;
-      }
-      return false;
-    }
-
-    function reiniciar() {
-      if (confirm("¿Seguro que querés reiniciar el torneo?")) {
-        localStorage.removeItem('liga_jugadores');
-        localStorage.removeItem('liga_partidos');
-        localStorage.removeItem('liga_resultados');
-        location.reload();
-      }
-    }
-
-    window.onload = () => {
-      const t = localStorage.getItem('theme') || 'light';
-      document.body.setAttribute('data-theme', t);
-      if (cargarEstado()) {
-        mostrarSeccion('partidos');
-        mostrarPartidos();
-      } else {
-        generarInputs();
-      }
-    };
-
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('service-worker.js')
-        .then(reg => console.log('✔ Service Worker registrado:', reg.scope))
-        .catch(err => console.error('✖ Error al registrar Service Worker:', err));
-    }
-  </script>
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('service-worker.js')
+      .then(reg => console.log('✔ Service Worker registrado:', reg.scope))
+      .catch(err => console.error('✖ Error al registrar Service Worker:', err));
+  }
+</script>
+    
 </body>
 </html>
