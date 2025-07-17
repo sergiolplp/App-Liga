@@ -249,16 +249,16 @@
     }
 
     function agregarJugador() {
-      const index = document.querySelectorAll('#form-jugadores input').length;
-      const input = document.createElement('input');
-      input.placeholder = Jugador ${index + 1};
-      input.id = jugador${index};
-      input.type = "text";
-      input.autocomplete = "off";
-      input.autocorrect = "off";
-      input.spellcheck = false;
-      document.getElementById('form-jugadores').appendChild(input);
-    }
+  const index = document.querySelectorAll('#form-jugadores input').length;
+  const input = document.createElement('input');
+  input.placeholder = `Jugador ${index + 1}`;
+  input.id = `jugador${index}`;
+  input.type = "text";
+  input.autocomplete = "off";
+  input.autocorrect = "off";
+  input.spellcheck = false;
+  document.getElementById('form-jugadores').appendChild(input);
+}
 
     function generarInputs() {
       for (let i = 0; i < 6; i++) agregarJugador();
