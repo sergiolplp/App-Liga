@@ -470,13 +470,13 @@ Mail: sergiosainz.proyectos@gmail.com</footer>
 
     const div = document.getElementById('tabla-resultados');
     div.innerHTML =
-      "<h3>Por Pareja</h3><table><tr><th>Pareja</th><th>Pts</th><th>PJ</th><th>DG</th></tr>" +
-      Object.entries(tabla).sort((a, b) => b[1][0] - a[1][0]).map(([k, v]) =>
-        `<tr><td>${k}</td><td>${v[0]}</td><td>${v[1]}</td><td>${v[2]}</td></tr>`).join("") +
-      "</table><h3>Individual</h3><table><tr><th>Jugador</th><th>Pts</th><th>PJ</th><th>DG</th></tr>" +
-      Object.entries(indiv).sort((a, b) => b[1][0] - a[1][0]).map(([k, v]) =>
-        `<tr><td>${k}</td><td>${v[0]}</td><td>${v[1]}</td><td>${v[2]}</td></tr>`).join("") +
-      "</table>";
+  "<h3>Por Pareja</h3><table id='tabla-parejas'><tr><th>Pareja</th><th>Pts</th><th>PJ</th><th>DG</th></tr>" +
+  Object.entries(tabla).sort((a, b) => b[1][0] - a[1][0]).map(([k, v]) =>
+    `<tr><td>${k}</td><td>${v[0]}</td><td>${v[1]}</td><td>${v[2]}</td></tr>`).join("") +
+  "</table><h3>Individual</h3><table id='tabla-individual'><tr><th>Jugador</th><th>Pts</th><th>PJ</th><th>DG</th></tr>" +
+  Object.entries(indiv).sort((a, b) => b[1][0] - a[1][0]).map(([k, v]) =>
+    `<tr><td>${k}</td><td>${v[0]}</td><td>${v[1]}</td><td>${v[2]}</td></tr>`).join("") +
+  "</table>";
   }
 
   // 🔄 NUEVO: Guardar en localStorage
@@ -520,31 +520,47 @@ Mail: sergiosainz.proyectos@gmail.com</footer>
       .catch(err => console.error('✖ Error al registrar Service Worker:', err));
   }
   function guardarEnHistorial() {
-  const tabla = document.getElementById('tabla-posiciones');
-  const filas = tabla.querySelectorAll('tbody tr');
-  const tipo = 'parejas'; // clave para identificar el origen
+  const parejas = document.querySelectorAll('#tabla-parejas tr:not(:first-child)');
+  const individual = document.querySelectorAll('#tabla-individual tr:not(:first-child)');
 
-  const historialGuardado = JSON.parse(localStorage.getItem('historial')) || [];
+  const historial = JSON.parse(localStorage.getItem('historial')) || {};
 
-  const nuevoHistorial = Array.from(filas).map(fila => {
-    const columnas = fila.querySelectorAll('td');
-    return {
-      tipo: tipo,
-      posicion: columnas[0].innerText,
-      nombre: columnas[1].innerText,
-      pj: columnas[2].innerText,
-      pg: columnas[3].innerText,
-      pe: columnas[4].innerText,
-      pp: columnas[5].innerText,
-      por_pj: columnas[6].innerText,
-      por_pe: columnas[7].innerText,
-      por_pp: columnas[8].innerText
+  // Iniciar estructura si no existe
+  historial['parejas'] = historial['parejas'] || {};
+  historial['individual'] = historial['individual'] || {};
+
+  // Cargar tabla por pareja
+  parejas.forEach(row => {
+    const cols = row.querySelectorAll('td');
+    const nombre = cols[0].innerText;
+    const pts = parseInt(cols[1]);
+    const pj = parseInt(cols[2]);
+    const dg = parseInt(cols[3]);
+
+    historial['parejas'][nombre] = {
+      pts, pj, dg
     };
   });
 
-  const historialActualizado = historialGuardado.concat(nuevoHistorial);
-  localStorage.setItem('historial', JSON.stringify(historialActualizado));
-  alert("Historial guardado correctamente.");
+  // Cargar tabla individual
+  individual.forEach(row => {
+    const cols = row.querySelectorAll('td');
+    const nombre = cols[0].innerText;
+    const pts = parseInt(cols[1]);
+    const pj = parseInt(cols[2]);
+    const dg = parseInt(cols[3]);
+
+    // Si ya existía, sumamos; si no, iniciamos
+    if (!historial['individual'][nombre]) {
+      historial['individual'][nombre] = { pts: 0, pj: 0, dg: 0 };
+    }
+    historial['individual'][nombre].pts += pts;
+    historial['individual'][nombre].pj += pj;
+    historial['individual'][nombre].dg += dg;
+  });
+
+  localStorage.setItem('historial', JSON.stringify(historial));
+  alert("Historial de parejas guardado correctamente.");
 }
 </script>
 </body>
