@@ -266,6 +266,7 @@
       <h2>Tabla de posiciones</h2>
       <div id="tabla-resultados"></div>
       <button onclick="mostrarSeccion('partidos')">Volver a partidos</button>
+      <button onclick="guardarEnHistorial()" class="boton-historial">GUARDAR HISTORIAL</button>
       <button class="boton-rojo" onclick="confirmarReinicio()">Reiniciar torneo</button>
     </section>
   </main>
@@ -518,6 +519,33 @@ Mail: sergiosainz.proyectos@gmail.com</footer>
       .then(reg => console.log('✔ Service Worker registrado:', reg.scope))
       .catch(err => console.error('✖ Error al registrar Service Worker:', err));
   }
+  function guardarEnHistorial() {
+  const tabla = document.getElementById('tabla-posiciones');
+  const filas = tabla.querySelectorAll('tbody tr');
+  const tipo = 'parejas'; // clave para identificar el origen
+
+  const historialGuardado = JSON.parse(localStorage.getItem('historial')) || [];
+
+  const nuevoHistorial = Array.from(filas).map(fila => {
+    const columnas = fila.querySelectorAll('td');
+    return {
+      tipo: tipo,
+      posicion: columnas[0].innerText,
+      nombre: columnas[1].innerText,
+      pj: columnas[2].innerText,
+      pg: columnas[3].innerText,
+      pe: columnas[4].innerText,
+      pp: columnas[5].innerText,
+      por_pj: columnas[6].innerText,
+      por_pe: columnas[7].innerText,
+      por_pp: columnas[8].innerText
+    };
+  });
+
+  const historialActualizado = historialGuardado.concat(nuevoHistorial);
+  localStorage.setItem('historial', JSON.stringify(historialActualizado));
+  alert("Historial guardado correctamente.");
+}
 </script>
 </body>
 </html>
