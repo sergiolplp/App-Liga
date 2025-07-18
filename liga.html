@@ -220,6 +220,7 @@
       <h2>Tabla de posiciones</h2>
       <div id="tabla-resultados"></div>
       <button onclick="mostrarSeccion('partidos')">Volver a partidos</button>
+      <button onclick="guardarEnHistorial()" class="boton-historial">GUARDAR HISTORIAL</button>
       <button class="boton-rojo" onclick="reiniciar()">Reiniciar torneo</button>
     </section>
   </main>
@@ -389,6 +390,29 @@
       .then(reg => console.log('✔ Service Worker registrado:', reg.scope))
       .catch(err => console.error('✖ Error al registrar Service Worker:', err));
   }
+  function guardarEnHistorial() {
+  const filas = document.querySelectorAll("#tabla-posiciones tbody tr");
+  const resultados = [];
+
+  filas.forEach(fila => {
+    const columnas = fila.querySelectorAll("td");
+    resultados.push({
+      nombre: columnas[1].textContent,
+      PJ: parseInt(columnas[2].textContent),
+      PG: parseInt(columnas[3].textContent),
+      PE: parseInt(columnas[4].textContent),
+      PP: parseInt(columnas[5].textContent)
+    });
+  });
+
+  const historial = JSON.parse(localStorage.getItem("historialTorneos")) || [];
+  const fecha = new Date().toISOString().slice(0, 10);
+
+  historial.push({ tipo: "individual", fecha, resultados });
+  localStorage.setItem("historialTorneos", JSON.stringify(historial));
+
+  alert("¡Historial guardado con éxito!");
+}
 </script>
     
 </body>
