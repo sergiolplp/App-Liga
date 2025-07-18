@@ -442,42 +442,61 @@ Mail: sergiosainz.proyectos@gmail.com</footer>
   }
 
   function mostrarTabla() {
-    const tabla = {};
-    const indiv = {};
+  const tabla = {};
+  const indiv = {};
 
-    resultados.forEach(([g1, g2], i) => {
-      if (g1 == null || g2 == null) return;
-      const [a1, a2] = partidos[i];
-      const [b1, b2] = partidos[i + 1];
-      i++; // avanzar
+  for (let i = 0; i < resultados.length; i += 2) {
+    const res1 = resultados[i];
+    const res2 = resultados[i + 1];
 
-      const nombreA = `${a1} + ${a2}`;
-      const nombreB = `${b1} + ${b2}`;
+    if (!res1 || !res2) continue;
+    const [g1, g2] = res1;
 
-      [nombreA, nombreB].forEach(n => tabla[n] = tabla[n] || [0, 0, 0]);
-      tabla[nombreA][1]++;
-      tabla[nombreB][1]++;
-      tabla[nombreA][2] += g1 - g2;
-      tabla[nombreB][2] += g2 - g1;
-      if (g1 > g2) tabla[nombreA][0] += 3;
-      else if (g2 > g1) tabla[nombreB][0] += 3;
-      else { tabla[nombreA][0]++; tabla[nombreB][0]++; }
+    const [a1, a2] = partidos[i];
+    const [b1, b2] = partidos[i + 1];
 
-      [a1, a2, b1, b2].forEach(j => indiv[j] = indiv[j] || [0, 0, 0]);
-      [a1, a2].forEach(j => { indiv[j][1]++; indiv[j][2] += g1 - g2; if (g1 > g2) indiv[j][0] += 3; else if (g1 === g2) indiv[j][0] += 1; });
-      [b1, b2].forEach(j => { indiv[j][1]++; indiv[j][2] += g2 - g1; if (g2 > g1) indiv[j][0] += 3; else if (g1 === g2) indiv[j][0] += 1; });
+    const nombreA = `${a1} + ${a2}`;
+    const nombreB = `${b1} + ${b2}`;
+
+    tabla[nombreA] = tabla[nombreA] || [0, 0, 0];
+    tabla[nombreB] = tabla[nombreB] || [0, 0, 0];
+
+    tabla[nombreA][1]++;
+    tabla[nombreB][1]++;
+    tabla[nombreA][2] += g1 - g2;
+    tabla[nombreB][2] += g2 - g1;
+
+    if (g1 > g2) tabla[nombreA][0] += 3;
+    else if (g2 > g1) tabla[nombreB][0] += 3;
+    else { tabla[nombreA][0]++; tabla[nombreB][0]++; }
+
+    [a1, a2, b1, b2].forEach(j => indiv[j] = indiv[j] || [0, 0, 0]);
+
+    [a1, a2].forEach(j => {
+      indiv[j][1]++;
+      indiv[j][2] += g1 - g2;
+      if (g1 > g2) indiv[j][0] += 3;
+      else if (g1 === g2) indiv[j][0] += 1;
     });
 
-    const div = document.getElementById('tabla-resultados');
-    div.innerHTML =
-  "<h3>Por Pareja</h3><table id='tabla-parejas'><tr><th>Pareja</th><th>Pts</th><th>PJ</th><th>DG</th></tr>" +
-  Object.entries(tabla).sort((a, b) => b[1][0] - a[1][0]).map(([k, v]) =>
-    `<tr><td>${k}</td><td>${v[0]}</td><td>${v[1]}</td><td>${v[2]}</td></tr>`).join("") +
-  "</table><h3>Individual</h3><table id='tabla-individual'><tr><th>Jugador</th><th>Pts</th><th>PJ</th><th>DG</th></tr>" +
-  Object.entries(indiv).sort((a, b) => b[1][0] - a[1][0]).map(([k, v]) =>
-    `<tr><td>${k}</td><td>${v[0]}</td><td>${v[1]}</td><td>${v[2]}</td></tr>`).join("") +
-  "</table>";
+    [b1, b2].forEach(j => {
+      indiv[j][1]++;
+      indiv[j][2] += g2 - g1;
+      if (g2 > g1) indiv[j][0] += 3;
+      else if (g1 === g2) indiv[j][0] += 1;
+    });
   }
+
+  const div = document.getElementById('tabla-resultados');
+  div.innerHTML =
+    "<h3>Por Pareja</h3><table id='tabla-parejas'><tr><th>Pareja</th><th>Pts</th><th>PJ</th><th>DG</th></tr>" +
+    Object.entries(tabla).sort((a, b) => b[1][0] - a[1][0]).map(([k, v]) =>
+      `<tr><td>${k}</td><td>${v[0]}</td><td>${v[1]}</td><td>${v[2]}</td></tr>`).join("") +
+    "</table><h3>Individual</h3><table id='tabla-individual'><tr><th>Jugador</th><th>Pts</th><th>PJ</th><th>DG</th></tr>" +
+    Object.entries(indiv).sort((a, b) => b[1][0] - a[1][0]).map(([k, v]) =>
+      `<tr><td>${k}</td><td>${v[0]}</td><td>${v[1]}</td><td>${v[2]}</td></tr>`).join("") +
+    "</table>";
+}
 
   // 🔄 NUEVO: Guardar en localStorage
   function guardarEstado() {
