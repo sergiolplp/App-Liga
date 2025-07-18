@@ -316,10 +316,12 @@
   }
 
   function guardarResultado(i, eq, val) {
-    const [a, b] = resultados[i] ?? [null, null];
-    resultados[i] = eq === 0 ? [parseInt(val), b] : [a, parseInt(val)];
-    guardarEstado();
-  }
+  if (val.trim() === "" || isNaN(val) || parseInt(val) < 0) return;
+
+  const [a, b] = resultados[i] ?? [null, null];
+  resultados[i] = eq === 0 ? [parseInt(val), b] : [a, parseInt(val)];
+  guardarEstado();
+}
 
   function mostrarTabla() {
     const tabla = {};
@@ -391,13 +393,14 @@
       .catch(err => console.error('✖ Error al registrar Service Worker:', err));
   }
   function guardarEnHistorial() {
-  const filas = document.querySelectorAll("#tabla-posiciones tbody tr");
+  const filas = document.querySelectorAll("#tabla-resultados table tbody tr");
   const resultados = [];
 
   filas.forEach(fila => {
     const columnas = fila.querySelectorAll("td");
+    if (columnas.length < 6) return;
     resultados.push({
-      nombre: columnas[1].textContent,
+      nombre: columnas[0].textContent,
       PJ: parseInt(columnas[2].textContent),
       PG: parseInt(columnas[3].textContent),
       PE: parseInt(columnas[4].textContent),
@@ -408,9 +411,15 @@
   const historial = JSON.parse(localStorage.getItem("historialTorneos")) || [];
   const fecha = new Date().toISOString().slice(0, 10);
 
-  historial.push({ tipo: "individual", fecha, resultados });
-  localStorage.setItem("historialTorneos", JSON.stringify(historial));
+  const existenteIndex = historial.findIndex(h => h.tipo === "individual" && h.fecha === fecha);
 
+  if (existenteIndex !== -1) {
+    historial[existenteIndex].resultados = resultados;
+  } else {
+    historial.push({ tipo: "individual", fecha, resultados });
+  }
+
+  localStorage.setItem("historialTorneos", JSON.stringify(historial));
   alert("¡Historial guardado con éxito!");
 }
 </script>
