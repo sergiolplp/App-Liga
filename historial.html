@@ -4,33 +4,55 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Historial de Resultados</title>
-  <link rel="stylesheet" href="styles.css" />
   <link rel="icon" href="icono_torneo.ico" type="image/x-icon" />
   <link rel="apple-touch-icon" href="icono_torneo.ico">
-  <meta name="theme-color" content="#ffffff">
+  <meta name="theme-color" content="#000000">
   <style>
     :root {
-      --fondo: #f5f5f5;
-      --text: #333;
-      --menu-bg: #fff;
+      --bg: #ffffff;
+      --text: #000000;
+      --accent: #3333cc;
+      --menu-bg: #f0f0f0;
+    }
+    [data-theme="dark"] {
+      --bg: #121212;
+      --text: #ffffff;
+      --accent: #3399ff;
+      --menu-bg: #1e1e1e;
     }
 
     body {
       margin: 0;
-      font-family: Arial, sans-serif;
-      background: var(--fondo);
+      font-family: sans-serif;
+      background-color: var(--bg);
       color: var(--text);
+      font-size: 1.3rem;
     }
 
     header {
-      background-color: #333;
-      color: white;
-      padding: 10px;
-      position: relative;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 20px;
+      background: var(--menu-bg);
+      border-bottom: 1px solid #ccc;
     }
 
-    .menu-icon {
+    .hamburger {
       font-size: 24px;
+      cursor: pointer;
+    }
+
+    .title {
+      font-weight: bold;
+    }
+
+    .theme-toggle {
+      width: 24px;
+      height: 24px;
+      background: linear-gradient(90deg, #fff 50%, #000 50%);
+      border-radius: 50%;
+      border: 2px solid var(--text);
       cursor: pointer;
     }
 
@@ -43,7 +65,6 @@
       left: 0;
       width: 200px;
       border: 1px solid #ccc;
-      z-index: 1000;
     }
 
     .menu a {
@@ -53,43 +74,40 @@
       border-bottom: 1px solid #ccc;
     }
 
-    .menu a:hover {
-      background-color: #eee;
-    }
-
-    h1 {
+    main {
+      padding: 1px 20px 100px;
+      max-width: 800px;
+      margin: auto;
       text-align: center;
-      margin-top: 20px;
     }
 
-    section {
-      padding: 20px;
+    h2 {
+      margin-top: 40px;
     }
 
     table {
       width: 100%;
       border-collapse: collapse;
-      margin-bottom: 40px;
+      margin-top: 20px;
     }
 
     th, td {
-      border: 1px solid #aaa;
-      padding: 8px;
+      border: 1px solid #ccc;
+      padding: 5px;
       text-align: center;
-    }
-
-    th {
-      background-color: #ddd;
     }
 
     footer {
-      text-align: center;
-      padding: 15px;
-      background: #222;
-      color: white;
       position: fixed;
       bottom: 0;
       width: 100%;
+      text-align: center;
+      padding: 4px 8px;
+      background: var(--menu-bg);
+      color: var(--text);
+      border-top: 1px solid #ccc;
+      font-size: 13px;
+      line-height: 1.2;
     }
 
     @media (max-width: 600px) {
@@ -102,70 +120,83 @@
 <body>
 
   <header>
-    <span class="menu-icon" onclick="toggleMenu()">☰ Menú</span>
-    <nav class="menu" id="menu">
-      <a href="index.html">Inicio</a>
-      <a href="liga.html">Liga</a>
-      <a href="torneoparejas.html">Torneo por Parejas</a>
-      <a href="historial.html">Historial</a>
-    </nav>
+    <div class="hamburger" onclick="toggleMenu()">☰</div>
+    <div class="title">Torneo de los Pibes</div>
+    <div class="theme-toggle" onclick="toggleTheme()"></div>
   </header>
 
-  <h1>Historial de Resultados</h1>
+  <div class="menu" id="menu">
+    <a href="liga.html">LIGAS INDIVIDUALES</a>
+    <a href="torneoparejas.html">TORNEOS POR PAREJAS ROTATIVAS</a>
+    <a href="historial.html">HISTÓRICO ENTRE JUGADORES</a>
+  </div>
 
-  <section>
-    <h2>Competencia Individual</h2>
-    <table id="tabla-individual">
-      <thead>
-        <tr>
-          <th>Posición</th>
-          <th>Nombre</th>
-          <th>PJ</th>
-          <th>PG</th>
-          <th>PE</th>
-          <th>PP</th>
-          <th>%PG</th>
-          <th>%PE</th>
-          <th>%PP</th>
-        </tr>
-      </thead>
-      <tbody>
-        <!-- Se llenará por JavaScript -->
-      </tbody>
-    </table>
+  <main>
+    <h1>Historial de Resultados</h1>
 
-    <h2>Competencia por Parejas</h2>
-    <table id="tabla-parejas">
-      <thead>
-        <tr>
-          <th>Posición</th>
-          <th>Pareja</th>
-          <th>PJ</th>
-          <th>PG</th>
-          <th>PE</th>
-          <th>PP</th>
-          <th>%PG</th>
-          <th>%PE</th>
-          <th>%PP</th>
-        </tr>
-      </thead>
-      <tbody>
-        <!-- Se llenará por JavaScript -->
-      </tbody>
-    </table>
-  </section>
+    <section>
+      <h2>Competencia Individual</h2>
+      <table id="tabla-individual">
+        <thead>
+          <tr>
+            <th>Posición</th>
+            <th>Nombre</th>
+            <th>PJ</th>
+            <th>PG</th>
+            <th>PE</th>
+            <th>PP</th>
+            <th>%PG</th>
+            <th>%PE</th>
+            <th>%PP</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Se llenará con JS -->
+        </tbody>
+      </table>
+
+      <h2>Competencia por Parejas</h2>
+      <table id="tabla-parejas">
+        <thead>
+          <tr>
+            <th>Posición</th>
+            <th>Pareja</th>
+            <th>PJ</th>
+            <th>PG</th>
+            <th>PE</th>
+            <th>PP</th>
+            <th>%PG</th>
+            <th>%PE</th>
+            <th>%PP</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Se llenará con JS -->
+        </tbody>
+      </table>
+    </section>
+  </main>
 
   <footer>
-    Desarrollado por SDD
+    Desarrollado con I.A.<br>Donaciones al ALIAS: sergiosainz.frances<br>Mail: sergiosainz.proyectos@gmail.com
   </footer>
 
   <script>
     function toggleMenu() {
       const menu = document.getElementById('menu');
-      menu.style.display = (menu.style.display === 'flex') ? 'none' : 'flex';
+      menu.style.display = menu.style.display === 'flex' ? 'none' : 'flex';
     }
 
-    // A continuación agregaremos en otro paso la lógica JS para cargar los datos de liga.html y torneoparejas.html
+    function toggleTheme() {
+      const t = document.body.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+      document.body.setAttribute('data-theme', t);
+      localStorage.setItem('theme', t);
+    }
+
+    window.onload = () => {
+      const t = localStorage.getItem('theme') || 'light';
+      document.body.setAttribute('data-theme', t);
+    }
   </script>
 
 </body>
