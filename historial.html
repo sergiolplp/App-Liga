@@ -3,67 +3,212 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Historial de Liga</title>
-  <link rel="stylesheet" href="estilos.css">
-  <link rel="icon" href="icono_torneo.ico" type="image/x-icon" />
+  <title>Historial</title>
+  <link rel="icon" href="icono_torneo.ico" type="image/x-icon"/>
   <link rel="apple-touch-icon" href="icono_torneo.ico">
   <meta name="theme-color" content="#000000">
+  <style>
+    :root {
+      --bg: #ffffff;
+      --text: #000000;
+      --accent: #3333cc;
+      --menu-bg: #f0f0f0;
+    }
+    [data-theme="dark"] {
+      --bg: #121212;
+      --text: #ffffff;
+      --accent: #3399ff;
+      --menu-bg: #1e1e1e;
+    }
+
+    body {
+      margin: 0;
+      font-family: sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      font-size: 1.2rem;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 20px;
+      background: var(--menu-bg);
+      border-bottom: 1px solid #ccc;
+    }
+
+    .hamburger {
+      font-size: 24px;
+      cursor: pointer;
+    }
+
+    .title {
+      font-weight: bold;
+    }
+
+    .theme-toggle {
+      width: 24px;
+      height: 24px;
+      background: linear-gradient(90deg, #fff 50%, #000 50%);
+      border-radius: 50%;
+      border: 2px solid var(--text);
+      cursor: pointer;
+    }
+
+    .menu {
+      display: none;
+      flex-direction: column;
+      background: var(--menu-bg);
+      position: absolute;
+      top: 50px;
+      left: 0;
+      width: 200px;
+      border: 1px solid #ccc;
+    }
+
+    .menu a {
+      padding: 10px;
+      text-decoration: none;
+      color: var(--text);
+      border-bottom: 1px solid #ccc;
+    }
+
+    main {
+      padding: 20px;
+      max-width: 900px;
+      margin: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+      font-size: 1rem;
+    }
+
+    th, td {
+      border: 1px solid #ccc;
+      padding: 4px;
+      text-align: center;
+    }
+
+    h1, h2 {
+      text-align: center;
+    }
+
+    footer {
+      position: fixed;
+      bottom: 0;
+      width: 100%;
+      text-align: center;
+      padding: 4px 8px;
+      background: var(--menu-bg);
+      color: var(--text);
+      border-top: 1px solid #ccc;
+      font-size: 13px;
+      line-height: 1.2;
+    }
+  </style>
 </head>
 <body>
-  <nav class="menu">
-    <a href="index.html">INICIO</a>
-    <a href="liga.html">LIGA</a>
-    <a href="torneoparejas.html">PAREJAS</a>
-    <a href="historial.html" class="activo">HISTORIAL</a>
-  </nav>
+  <header>
+    <div class="hamburger" onclick="toggleMenu()">☰</div>
+    <div class="title">Torneo de los Pibes</div>
+    <div class="theme-toggle" onclick="toggleTheme()"></div>
+  </header>
+
+  <div class="menu" id="menu">
+    <a href="liga.html">LIGAS INDIVIDUALES</a>
+    <a href="torneoparejas.html">TORNEOS POR PAREJAS ROTATIVAS</a>
+    <a href="historial.html">HISTÓRICO ENTRE JUGADORES</a>
+  </div>
 
   <main>
-    <h1>Historial de Liga</h1>
-    <div id="historial-liga"></div>
+    <h1>Historial</h1>
+
+    <h2>Liga Individual</h2>
+    <div id="tabla-liga"></div>
+
+    <h2>Torneo Parejas</h2>
+    <div id="tabla-parejas">(en desarrollo)</div>
   </main>
 
-  <footer>
-    <p>Desarrollado por SDD</p>
-  </footer>
+  <footer>Desarrollado con I.A.<br>Donaciones al ALIAS: sergiosainz.frances<br>Mail: sergiosainz.proyectos@gmail.com</footer>
 
   <script>
-    function mostrarHistorialLiga() {
-      const contenedor = document.getElementById('historial-liga');
-      const historial = JSON.parse(localStorage.getItem('historialLiga')) || [];
+    function toggleMenu() {
+      const menu = document.getElementById('menu');
+      menu.style.display = menu.style.display === 'flex' ? 'none' : 'flex';
+    }
 
-      if (historial.length === 0) {
-        contenedor.innerHTML = "<p>No hay datos guardados aún.</p>";
+    function toggleTheme() {
+      const t = document.body.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+      document.body.setAttribute('data-theme', t);
+      localStorage.setItem('theme', t);
+    }
+
+    function calcularEstadisticas(datos) {
+      const tabla = datos.map(j => {
+        const PJ = j.PJ;
+        const Pts = j.Pts;
+        const PE = Pts - 3 * Math.floor(Pts / 3);
+        const PG = Math.floor((Pts - PE) / 3);
+        const PP = PJ - PG - PE;
+        const pct = n => PJ > 0 ? ((n / PJ) * 100).toFixed(1) + '%' : '0.0%';
+        return {
+          nombre: j.nombre,
+          PJ,
+          PG,
+          PE,
+          PP,
+          pctPG: pct(PG),
+          pctPE: pct(PE),
+          pctPP: pct(PP)
+        };
+      });
+
+      tabla.sort((a, b) => {
+        if (b.PG !== a.PG) return b.PG - a.PG;
+        if (b.PE !== a.PE) return b.PE - a.PE;
+        return a.PP - b.PP;
+      });
+
+      return tabla;
+    }
+
+    function mostrarTablaLiga() {
+      const historial = JSON.parse(localStorage.getItem('historialTorneos')) || [];
+      const liga = historial.find(t => t.tipo === "individual");
+      if (!liga || !liga.resumen || liga.resumen.length === 0) {
+        document.getElementById("tabla-liga").innerHTML = "<p>No hay datos guardados.</p>";
         return;
       }
 
-      let html = "<table>";
-      html += `<tr><th>#</th><th>Nombre</th><th>PJ</th><th>PG</th><th>PE</th><th>PP</th><th>%PG</th><th>%PE</th><th>%PP</th></tr>`;
-
-      historial.sort((a, b) => b.pg - a.pg); // Ordenar por Partidos Ganados
-      historial.forEach((jugador, i) => {
-        const pj = jugador.pj;
-        const pg = jugador.pg;
-        const pe = jugador.pe;
-        const pp = jugador.pp;
-        const porcentaje = n => pj ? ((n / pj) * 100).toFixed(1) + "%" : "0%";
-        html += `<tr>
-          <td>${i + 1}</td>
-          <td>${jugador.nombre}</td>
-          <td>${pj}</td>
-          <td>${pg}</td>
-          <td>${pe}</td>
-          <td>${pp}</td>
-          <td>${porcentaje(pg)}</td>
-          <td>${porcentaje(pe)}</td>
-          <td>${porcentaje(pp)}</td>
-        </tr>`;
-      });
-
-      html += "</table>";
-      contenedor.innerHTML = html;
+      const stats = calcularEstadisticas(liga.resumen);
+      const tabla = `
+        <table>
+          <tr>
+            <th>#</th><th>Nombre</th><th>PJ</th><th>PG</th><th>PE</th><th>PP</th>
+            <th>%PG</th><th>%PE</th><th>%PP</th>
+          </tr>
+          ${stats.map((j, i) => `
+            <tr>
+              <td>${i + 1}</td><td>${j.nombre}</td><td>${j.PJ}</td><td>${j.PG}</td>
+              <td>${j.PE}</td><td>${j.PP}</td><td>${j.pctPG}</td>
+              <td>${j.pctPE}</td><td>${j.pctPP}</td>
+            </tr>
+          `).join("")}
+        </table>
+      `;
+      document.getElementById("tabla-liga").innerHTML = tabla;
     }
 
-    mostrarHistorialLiga();
+    window.onload = () => {
+      const t = localStorage.getItem('theme') || 'light';
+      document.body.setAttribute('data-theme', t);
+      mostrarTablaLiga();
+    };
   </script>
 </body>
 </html>
