@@ -316,12 +316,12 @@
   }
 
   function guardarResultado(i, eq, val) {
-  if (val.trim() === "" || isNaN(val) || parseInt(val) < 0) return;
+    if (val.trim() === "" || isNaN(val) || parseInt(val) < 0) return;
 
-  const [a, b] = resultados[i] ?? [null, null];
-  resultados[i] = eq === 0 ? [parseInt(val), b] : [a, parseInt(val)];
-  guardarEstado();
-}
+    const [a, b] = resultados[i] ?? [null, null];
+    resultados[i] = eq === 0 ? [parseInt(val), b] : [a, parseInt(val)];
+    guardarEstado();
+  }
 
   function mostrarTabla() {
     const tabla = {};
@@ -376,6 +376,69 @@
     }
   }
 
+  function guardarEnHistorial() {
+    const resumenActual = {};
+    resultados.forEach(([g1, g2], i) => {
+      if (g1 == null || g2 == null) return;
+      const [a, b] = partidos[i];
+
+      resumenActual[a] = resumenActual[a] || { pj: 0, pg: 0, pe: 0, pp: 0 };
+      resumenActual[b] = resumenActual[b] || { pj: 0, pg: 0, pe: 0, pp: 0 };
+
+      resumenActual[a].pj++;
+      resumenActual[b].pj++;
+
+      if (g1 > g2) {
+        resumenActual[a].pg++;
+        resumenActual[b].pp++;
+      } else if (g2 > g1) {
+        resumenActual[b].pg++;
+        resumenActual[a].pp++;
+      } else {
+        resumenActual[a].pe++;
+        resumenActual[b].pe++;
+      }
+    });
+
+    // Convertir el resumenActual a array para guardar
+    const resumenArray = Object.entries(resumenActual).map(([nombre, stats]) => ({
+      nombre,
+      PJ: stats.pj,
+      PG: stats.pg,
+      PE: stats.pe,
+      PP: stats.pp,
+      Pts: stats.pg * 3 + stats.pe
+    }));
+
+    const historial = JSON.parse(localStorage.getItem("historialTorneos")) || [];
+
+    // Si ya hay un historial de tipo 'individual', sumarlo
+    const existente = historial.find(t => t.tipo === "individual");
+
+    if (existente) {
+      resumenArray.forEach(nuevo => {
+        const viejo = existente.resumen.find(e => e.nombre === nuevo.nombre);
+        if (viejo) {
+          viejo.PJ += nuevo.PJ;
+          viejo.PG += nuevo.PG;
+          viejo.PE += nuevo.PE;
+          viejo.PP += nuevo.PP;
+          viejo.Pts += nuevo.Pts;
+        } else {
+          existente.resumen.push(nuevo);
+        }
+      });
+    } else {
+      historial.push({
+        tipo: "individual",
+        resumen: resumenArray
+      });
+    }
+
+    localStorage.setItem("historialTorneos", JSON.stringify(historial));
+    alert("Historial guardado con éxito");
+  }
+
   window.onload = () => {
     const t = localStorage.getItem('theme') || 'light';
     document.body.setAttribute('data-theme', t);
@@ -392,73 +455,6 @@
       .then(reg => console.log('✔ Service Worker registrado:', reg.scope))
       .catch(err => console.error('✖ Error al registrar Service Worker:', err));
   }
-  
-  function guardarEnHistorial() {
-  const tabla = {};
-  const detalle = {};
-
-  resultados.forEach(([g1, g2], i) => {
-    if (g1 == null || g2 == null) return;
-    const [a, b] = partidos[i];
-
-    [a, b].forEach(n => {
-      tabla[n] = tabla[n] || [0, 0, 0];
-      detalle[n] = detalle[n] || [0, 0, 0];
-    });
-
-    tabla[a][1]++;
-    tabla[b][1]++;
-    tabla[a][2] += g1 - g2;
-    tabla[b][2] += g2 - g1;
-
-    if (g1 > g2) {
-      tabla[a][0] += 3;
-      detalle[a][0]++;
-      detalle[b][2]++;
-    } else if (g2 > g1) {
-      tabla[b][0] += 3;
-      detalle[b][0]++;
-      detalle[a][2]++;
-    } else {
-      tabla[a][0]++;
-      tabla[b][0]++;
-      detalle[a][1]++;
-      detalle[b][1]++;
-    }
-  });
-
-  // 👉 Construir historial actual (por jugador)
-  const historialActual = {};
-  for (const jugador in tabla) {
-    const [pts, pj, dg] = tabla[jugador];
-    const [pg, pe, pp] = detalle[jugador];
-    historialActual[jugador] = { pj, pg, pe, pp };
-  }
-
-  // 👉 Obtener historial anterior (si existe)
-  const historialAnterior = JSON.parse(localStorage.getItem("historialLiga")) || {};
-
-  // 👉 Combinar datos anteriores con los nuevos
-  for (const jugador in historialActual) {
-    if (historialAnterior[jugador]) {
-      const anterior = historialAnterior[jugador];
-      const actual = historialActual[jugador];
-      historialAnterior[jugador] = {
-        pj: anterior.pj + actual.pj,
-        pg: anterior.pg + actual.pg,
-        pe: anterior.pe + actual.pe,
-        pp: anterior.pp + actual.pp,
-      };
-    } else {
-      historialAnterior[jugador] = historialActual[jugador];
-    }
-  }
-
-  // 👉 Guardar historial acumulado
-  localStorage.setItem("historialLiga", JSON.stringify(historialAnterior));
-  alert("Historial guardado con éxito");
-}
-  
 </script>
     
 </body>
