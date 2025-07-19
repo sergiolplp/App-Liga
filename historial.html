@@ -1,133 +1,69 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Historial Liga</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background-color: #f1f1f1;
-      margin: 0;
-      padding: 20px;
-      color: #333;
-    }
-
-    h1 {
-      text-align: center;
-      color: #007acc;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 20px;
-      background-color: white;
-    }
-
-    th, td {
-      border: 1px solid #ccc;
-      padding: 8px;
-      text-align: center;
-    }
-
-    th {
-      background-color: #007acc;
-      color: white;
-    }
-
-    tr:nth-child(even) {
-      background-color: #f9f9f9;
-    }
-  </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Historial de Liga</title>
+  <link rel="stylesheet" href="estilos.css">
+  <link rel="icon" href="icono_torneo.ico" type="image/x-icon" />
+  <link rel="apple-touch-icon" href="icono_torneo.ico">
+  <meta name="theme-color" content="#000000">
 </head>
 <body>
+  <nav class="menu">
+    <a href="index.html">INICIO</a>
+    <a href="liga.html">LIGA</a>
+    <a href="torneoparejas.html">PAREJAS</a>
+    <a href="historial.html" class="activo">HISTORIAL</a>
+  </nav>
 
-  <h1>Historial - Liga</h1>
-  <div id="historial-container"></div>
+  <main>
+    <h1>Historial de Liga</h1>
+    <div id="historial-liga"></div>
+  </main>
+
+  <footer>
+    <p>Desarrollado por SDD</p>
+  </footer>
 
   <script>
-    function cargarHistorialLiga() {
-      const container = document.getElementById('historial-container');
-      const historialData = JSON.parse(localStorage.getItem('historialLiga'));
+    function mostrarHistorialLiga() {
+      const contenedor = document.getElementById('historial-liga');
+      const historial = JSON.parse(localStorage.getItem('historialLiga')) || [];
 
-      if (!historialData || historialData.length === 0) {
-        container.innerHTML = "<p>No hay datos de historial guardados.</p>";
+      if (historial.length === 0) {
+        contenedor.innerHTML = "<p>No hay datos guardados aún.</p>";
         return;
       }
 
-      // Agrupar estadísticas por jugador
-      const statsPorJugador = {};
+      let html = "<table>";
+      html += `<tr><th>#</th><th>Nombre</th><th>PJ</th><th>PG</th><th>PE</th><th>PP</th><th>%PG</th><th>%PE</th><th>%PP</th></tr>`;
 
-      historialData.forEach((partido) => {
-        partido.forEach((jugador) => {
-          const { nombre, PG, PE, PP } = jugador;
-          if (!statsPorJugador[nombre]) {
-            statsPorJugador[nombre] = { PJ: 0, PG: 0, PE: 0, PP: 0 };
-          }
-          statsPorJugador[nombre].PG += PG;
-          statsPorJugador[nombre].PE += PE;
-          statsPorJugador[nombre].PP += PP;
-          statsPorJugador[nombre].PJ += PG + PE + PP;
-        });
-      });
-
-      // Convertir a array para ordenar
-      const lista = Object.entries(statsPorJugador).map(([nombre, stats]) => {
-        const { PJ, PG, PE, PP } = stats;
-        const porcentaje = (valor) => PJ > 0 ? ((valor / PJ) * 100).toFixed(1) + "%" : "0%";
-        return {
-          nombre,
-          PJ,
-          PG,
-          PE,
-          PP,
-          PPG: porcentaje(PG),
-          PPE: porcentaje(PE),
-          PPP: porcentaje(PP)
-        };
-      });
-
-      // Ordenar por PG descendente
-      lista.sort((a, b) => b.PG - a.PG);
-
-      // Crear tabla
-      let html = `
-        <table>
-          <tr>
-            <th>#</th>
-            <th>Nombre</th>
-            <th>PJ</th>
-            <th>PG</th>
-            <th>PE</th>
-            <th>PP</th>
-            <th>%PG</th>
-            <th>%PE</th>
-            <th>%PP</th>
-          </tr>
-      `;
-
-      lista.forEach((jug, index) => {
-        html += `
-          <tr>
-            <td>${index + 1}</td>
-            <td>${jug.nombre}</td>
-            <td>${jug.PJ}</td>
-            <td>${jug.PG}</td>
-            <td>${jug.PE}</td>
-            <td>${jug.PP}</td>
-            <td>${jug.PPG}</td>
-            <td>${jug.PPE}</td>
-            <td>${jug.PPP}</td>
-          </tr>
-        `;
+      historial.sort((a, b) => b.pg - a.pg); // Ordenar por Partidos Ganados
+      historial.forEach((jugador, i) => {
+        const pj = jugador.pj;
+        const pg = jugador.pg;
+        const pe = jugador.pe;
+        const pp = jugador.pp;
+        const porcentaje = n => pj ? ((n / pj) * 100).toFixed(1) + "%" : "0%";
+        html += `<tr>
+          <td>${i + 1}</td>
+          <td>${jugador.nombre}</td>
+          <td>${pj}</td>
+          <td>${pg}</td>
+          <td>${pe}</td>
+          <td>${pp}</td>
+          <td>${porcentaje(pg)}</td>
+          <td>${porcentaje(pe)}</td>
+          <td>${porcentaje(pp)}</td>
+        </tr>`;
       });
 
       html += "</table>";
-      container.innerHTML = html;
+      contenedor.innerHTML = html;
     }
 
-    cargarHistorialLiga();
+    mostrarHistorialLiga();
   </script>
 </body>
 </html>
