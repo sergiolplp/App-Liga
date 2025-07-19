@@ -117,77 +117,8 @@
     }
   </style>
 </head>
-<script>
-  window.addEventListener("DOMContentLoaded", () => {
-    const data = JSON.parse(localStorage.getItem("historial")) || [];
 
-    const resultadosIndividuales = {};
-    const resultadosParejas = {};
-
-    data.forEach(r => {
-      // Procesar individual
-      [r.jugador1, r.jugador2].forEach((jugador, idx) => {
-        if (!resultadosIndividuales[jugador]) {
-          resultadosIndividuales[jugador] = { pj: 0, pg: 0, pe: 0, pp: 0 };
-        }
-        resultadosIndividuales[jugador].pj++;
-
-        const golesJ = idx === 0 ? r.goles1 : r.goles2;
-        const golesR = idx === 0 ? r.goles2 : r.goles1;
-
-        if (golesJ > golesR) resultadosIndividuales[jugador].pg++;
-        else if (golesJ === golesR) resultadosIndividuales[jugador].pe++;
-        else resultadosIndividuales[jugador].pp++;
-      });
-
-      // Procesar parejas (orden alfabético para evitar duplicados)
-      const pareja = [r.jugador1, r.jugador2].sort().join(" + ");
-      if (!resultadosParejas[pareja]) {
-        resultadosParejas[pareja] = { pj: 0, pg: 0, pe: 0, pp: 0 };
-      }
-      resultadosParejas[pareja].pj++;
-
-      if (r.goles1 > r.goles2) resultadosParejas[pareja].pg++;
-      else if (r.goles1 === r.goles2) resultadosParejas[pareja].pe++;
-      else resultadosParejas[pareja].pp++;
-    });
-
-    function crearFilaHTML(index, nombre, r) {
-      const total = r.pj || 1;
-      return `<tr>
-        <td>${index + 1}</td>
-        <td>${nombre}</td>
-        <td>${r.pj}</td>
-        <td>${r.pg}</td>
-        <td>${r.pe}</td>
-        <td>${r.pp}</td>
-        <td>${((r.pg / total) * 100).toFixed(1)}%</td>
-        <td>${((r.pe / total) * 100).toFixed(1)}%</td>
-        <td>${((r.pp / total) * 100).toFixed(1)}%</td>
-      </tr>`;
-    }
-
-    // Insertar en tabla de individuales
-    const tablaIndividual = document.querySelector("#tabla-individual tbody");
-    const jugadores = Object.keys(resultadosIndividuales).sort((a, b) =>
-      resultadosIndividuales[b].pg - resultadosIndividuales[a].pg
-    );
-    jugadores.forEach((j, i) => {
-      tablaIndividual.innerHTML += crearFilaHTML(i, j, resultadosIndividuales[j]);
-    });
-
-    // Insertar en tabla de parejas
-    const tablaParejas = document.querySelector("#tabla-parejas tbody");
-    const parejas = Object.keys(resultadosParejas).sort((a, b) =>
-      resultadosParejas[b].pg - resultadosParejas[a].pg
-    );
-    parejas.forEach((p, i) => {
-      tablaParejas.innerHTML += crearFilaHTML(i, p, resultadosParejas[p]);
-    });
-  });
-</script>
 <body>
-
   <header>
     <div class="hamburger" onclick="toggleMenu()">☰</div>
     <div class="title">Torneo de los Pibes</div>
@@ -265,8 +196,70 @@
     window.onload = () => {
       const t = localStorage.getItem('theme') || 'light';
       document.body.setAttribute('data-theme', t);
-    }
-  </script>
 
+      const data = JSON.parse(localStorage.getItem("historial")) || [];
+
+      const resultadosIndividuales = {};
+      const resultadosParejas = {};
+
+      data.forEach(r => {
+        // Individual
+        [r.jugador1, r.jugador2].forEach((jugador, idx) => {
+          if (!resultadosIndividuales[jugador]) {
+            resultadosIndividuales[jugador] = { pj: 0, pg: 0, pe: 0, pp: 0 };
+          }
+          resultadosIndividuales[jugador].pj++;
+
+          const golesJ = idx === 0 ? r.goles1 : r.goles2;
+          const golesR = idx === 0 ? r.goles2 : r.goles1;
+
+          if (golesJ > golesR) resultadosIndividuales[jugador].pg++;
+          else if (golesJ === golesR) resultadosIndividuales[jugador].pe++;
+          else resultadosIndividuales[jugador].pp++;
+        });
+
+        // Parejas
+        const pareja = [r.jugador1, r.jugador2].sort().join(" + ");
+        if (!resultadosParejas[pareja]) {
+          resultadosParejas[pareja] = { pj: 0, pg: 0, pe: 0, pp: 0 };
+        }
+        resultadosParejas[pareja].pj++;
+        if (r.goles1 > r.goles2) resultadosParejas[pareja].pg++;
+        else if (r.goles1 === r.goles2) resultadosParejas[pareja].pe++;
+        else resultadosParejas[pareja].pp++;
+      });
+
+      function crearFilaHTML(index, nombre, r) {
+        const total = r.pj || 1;
+        return `<tr>
+          <td>${index + 1}</td>
+          <td>${nombre}</td>
+          <td>${r.pj}</td>
+          <td>${r.pg}</td>
+          <td>${r.pe}</td>
+          <td>${r.pp}</td>
+          <td>${((r.pg / total) * 100).toFixed(1)}%</td>
+          <td>${((r.pe / total) * 100).toFixed(1)}%</td>
+          <td>${((r.pp / total) * 100).toFixed(1)}%</td>
+        </tr>`;
+      }
+
+      const tablaIndividual = document.querySelector("#tabla-individual tbody");
+      const jugadores = Object.keys(resultadosIndividuales).sort((a, b) =>
+        resultadosIndividuales[b].pg - resultadosIndividuales[a].pg
+      );
+      jugadores.forEach((j, i) => {
+        tablaIndividual.innerHTML += crearFilaHTML(i, j, resultadosIndividuales[j]);
+      });
+
+      const tablaParejas = document.querySelector("#tabla-parejas tbody");
+      const parejas = Object.keys(resultadosParejas).sort((a, b) =>
+        resultadosParejas[b].pg - resultadosParejas[a].pg
+      );
+      parejas.forEach((p, i) => {
+        tablaParejas.innerHTML += crearFilaHTML(i, p, resultadosParejas[p]);
+      });
+    };
+  </script>
 </body>
 </html>
