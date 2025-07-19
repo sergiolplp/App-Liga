@@ -3,61 +3,197 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Historial Liga</title>
+  <title>Historial de Ligas</title>
+  <link rel="icon" href="icono_torneo.ico" type="image/x-icon" />
+  <link rel="apple-touch-icon" href="icono_torneo.ico">
+  <meta name="theme-color" content="#000000">
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      padding: 20px;
-      background-color: #f4f4f4;
+    :root {
+      --bg: #ffffff;
+      --text: #000000;
+      --accent: #3333cc;
+      --menu-bg: #f0f0f0;
     }
-    h1 {
+
+    [data-theme="dark"] {
+      --bg: #121212;
+      --text: #ffffff;
+      --accent: #3399ff;
+      --menu-bg: #1e1e1e;
+    }
+
+    body {
+      margin: 0;
+      font-family: sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      font-size: 1.2rem;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 20px;
+      background: var(--menu-bg);
+      border-bottom: 1px solid #ccc;
+    }
+
+    .hamburger {
+      font-size: 24px;
+      cursor: pointer;
+    }
+
+    .title {
+      font-weight: bold;
+    }
+
+    .theme-toggle {
+      width: 24px;
+      height: 24px;
+      background: linear-gradient(90deg, #fff 50%, #000 50%);
+      border-radius: 50%;
+      border: 2px solid var(--text);
+      cursor: pointer;
+    }
+
+    .menu {
+      display: none;
+      flex-direction: column;
+      background: var(--menu-bg);
+      position: absolute;
+      top: 50px;
+      left: 0;
+      width: 200px;
+      border: 1px solid #ccc;
+    }
+
+    .menu a {
+      padding: 10px;
+      text-decoration: none;
+      color: var(--text);
+      border-bottom: 1px solid #ccc;
+    }
+
+    main {
+      padding: 1px 20px 100px;
+      max-width: 800px;
+      margin: auto;
       text-align: center;
     }
-    .partido {
-      background-color: white;
-      padding: 10px;
-      margin: 10px 0;
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+
+    th, td {
       border: 1px solid #ccc;
-      border-radius: 8px;
+      padding: 6px;
+      text-align: center;
+    }
+
+    th {
+      background-color: var(--menu-bg);
+    }
+
+    footer {
+      position: fixed;
+      bottom: 0;
+      width: 100%;
+      text-align: center;
+      padding: 4px 8px;
+      background: var(--menu-bg);
+      color: var(--text);
+      border-top: 1px solid #ccc;
+      font-size: 13px;
+      line-height: 1.2;
     }
   </style>
 </head>
 <body>
-  <h1>Historial de Partidos (Liga)</h1>
-  <div id="historial"></div>
+  <header>
+    <div class="hamburger" onclick="toggleMenu()">☰</div>
+    <div class="title">Torneo de los Pibes</div>
+    <div class="theme-toggle" onclick="toggleTheme()"></div>
+  </header>
+
+  <div class="menu" id="menu">
+    <a href="liga.html">LIGAS INDIVIDUALES</a>
+    <a href="torneoparejas.html">TORNEOS POR PAREJAS ROTATIVAS</a>
+    <a href="historial.html">HISTÓRICO ENTRE JUGADORES</a>
+  </div>
+
+  <main>
+    <h1>Historial de Partidos (Liga)</h1>
+    <div id="contenido"></div>
+  </main>
+
+  <footer>
+    Desarrollado con I.A.<br>Donaciones al ALIAS: sergiosainz.frances<br>Mail: sergiosainz.proyectos@gmail.com
+  </footer>
 
   <script>
-    // Simulamos los partidos jugados
-    const partidos = [
-      ["Juan", "Pedro"],
-      ["Ana", "Luis"],
-      ["Carlos", "Marta"],
-      ["Diego", "Sofía"],
-      ["Juan", "Luis"],
-      ["Pedro", "Ana"],
-      ["Carlos", "Diego"],
-      ["Marta", "Sofía"]
-    ];
-
-    // Obtenemos los resultados guardados desde liga.html
-    const resultados = JSON.parse(localStorage.getItem('historialLiga')) || [];
-
-    const contenedor = document.getElementById("historial");
-
-    if (resultados.length === 0) {
-      contenedor.innerHTML = "<p>No hay resultados guardados.</p>";
-    } else {
-      for (let i = 0; i < resultados.length; i++) {
-        const [g1, g2] = resultados[i] || [];
-        const [j1, j2] = partidos[i] || [];
-        if (g1 == null || g2 == null) continue;
-
-        const div = document.createElement("div");
-        div.className = "partido";
-        div.innerText = `${j1} y ${j2}: ${g1} - ${g2}`;
-        contenedor.appendChild(div);
-      }
+    function toggleMenu() {
+      const menu = document.getElementById('menu');
+      menu.style.display = menu.style.display === 'flex' ? 'none' : 'flex';
     }
+
+    function toggleTheme() {
+      const t = document.body.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+      document.body.setAttribute('data-theme', t);
+      localStorage.setItem('theme', t);
+    }
+
+    window.onload = () => {
+      const t = localStorage.getItem('theme') || 'light';
+      document.body.setAttribute('data-theme', t);
+
+      const resultados = JSON.parse(localStorage.getItem("historialLiga")) || [];
+      const jugadores = JSON.parse(localStorage.getItem("liga_jugadores")) || [];
+      const partidos = JSON.parse(localStorage.getItem("liga_partidos")) || [];
+
+      if (!resultados.length || !partidos.length) {
+        document.getElementById("contenido").innerHTML = "<p>No hay historial guardado.</p>";
+        return;
+      }
+
+      const tabla = {};
+
+      resultados.forEach(([g1, g2], i) => {
+        const [j1, j2] = partidos[i];
+
+        [j1, j2].forEach(j => tabla[j] = tabla[j] || [0, 0, 0]);
+
+        tabla[j1][1]++;
+        tabla[j2][1]++;
+        tabla[j1][2] += g1 - g2;
+        tabla[j2][2] += g2 - g1;
+
+        if (g1 > g2) tabla[j1][0] += 3;
+        else if (g2 > g1) tabla[j2][0] += 3;
+        else { tabla[j1][0]++; tabla[j2][0]++; }
+      });
+
+      const html = `
+        <table>
+          <thead>
+            <tr><th>Jugador</th><th>Puntos</th><th>PJ</th><th>DG</th></tr>
+          </thead>
+          <tbody>
+            ${
+              Object.entries(tabla)
+                .sort((a, b) => b[1][0] - a[1][0])
+                .map(([nombre, [pts, pj, dg]]) =>
+                  `<tr><td>${nombre}</td><td>${pts}</td><td>${pj}</td><td>${dg}</td></tr>`
+                ).join("")
+            }
+          </tbody>
+        </table>
+      `;
+      document.getElementById("contenido").innerHTML = html;
+    };
   </script>
 </body>
 </html>
