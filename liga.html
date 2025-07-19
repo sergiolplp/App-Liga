@@ -392,39 +392,73 @@
       .then(reg => console.log('✔ Service Worker registrado:', reg.scope))
       .catch(err => console.error('✖ Error al registrar Service Worker:', err));
   }
+  
   function guardarEnHistorial() {
-  const filas = document.querySelectorAll("#tabla-resultados table tbody tr");
-  const resumen = [];
+  const tabla = {};
+  const detalle = {};
 
-  filas.forEach(fila => {
-    const columnas = fila.querySelectorAll("td");
-    if (columnas.length < 4) return;
-    resumen.push({
-      nombre: columnas[0].textContent,
-      Pts: parseInt(columnas[1].textContent),
-      PJ: parseInt(columnas[2].textContent),
-      DG: parseInt(columnas[3].textContent)
+  resultados.forEach(([g1, g2], i) => {
+    if (g1 == null || g2 == null) return;
+    const [a, b] = partidos[i];
+
+    [a, b].forEach(n => {
+      tabla[n] = tabla[n] || [0, 0, 0];
+      detalle[n] = detalle[n] || [0, 0, 0];
     });
+
+    tabla[a][1]++;
+    tabla[b][1]++;
+    tabla[a][2] += g1 - g2;
+    tabla[b][2] += g2 - g1;
+
+    if (g1 > g2) {
+      tabla[a][0] += 3;
+      detalle[a][0]++;
+      detalle[b][2]++;
+    } else if (g2 > g1) {
+      tabla[b][0] += 3;
+      detalle[b][0]++;
+      detalle[a][2]++;
+    } else {
+      tabla[a][0]++;
+      tabla[b][0]++;
+      detalle[a][1]++;
+      detalle[b][1]++;
+    }
   });
 
-  const historial = JSON.parse(localStorage.getItem("historialTorneos")) || [];
-  const fecha = new Date().toISOString().slice(0, 10);
-
-  const existenteIndex = historial.findIndex(h => h.tipo === "individual" && h.fecha === fecha);
-
-  if (existenteIndex !== -1) {
-    historial[existenteIndex].resumen = resumen;
-  } else {
-    historial.push({ tipo: "individual", fecha, resumen });
+  // 👉 Construir historial actual (por jugador)
+  const historialActual = {};
+  for (const jugador in tabla) {
+    const [pts, pj, dg] = tabla[jugador];
+    const [pg, pe, pp] = detalle[jugador];
+    historialActual[jugador] = { pj, pg, pe, pp };
   }
 
-  localStorage.setItem("historialTorneos", JSON.stringify(historial));
+  // 👉 Obtener historial anterior (si existe)
+  const historialAnterior = JSON.parse(localStorage.getItem("historialLiga")) || {};
 
-  // 🔽 Esta línea es CLAVE para historial.html
-  localStorage.setItem('historialLiga', JSON.stringify(resultados));
+  // 👉 Combinar datos anteriores con los nuevos
+  for (const jugador in historialActual) {
+    if (historialAnterior[jugador]) {
+      const anterior = historialAnterior[jugador];
+      const actual = historialActual[jugador];
+      historialAnterior[jugador] = {
+        pj: anterior.pj + actual.pj,
+        pg: anterior.pg + actual.pg,
+        pe: anterior.pe + actual.pe,
+        pp: anterior.pp + actual.pp,
+      };
+    } else {
+      historialAnterior[jugador] = historialActual[jugador];
+    }
+  }
 
-  alert("¡Historial guardado con éxito!");
+  // 👉 Guardar historial acumulado
+  localStorage.setItem("historialLiga", JSON.stringify(historialAnterior));
+  alert("Historial guardado con éxito");
 }
+  
 </script>
     
 </body>
