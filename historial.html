@@ -3,263 +3,61 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Historial de Resultados</title>
-  <link rel="icon" href="icono_torneo.ico" type="image/x-icon" />
-  <link rel="apple-touch-icon" href="icono_torneo.ico">
-  <meta name="theme-color" content="#000000">
+  <title>Historial Liga</title>
   <style>
-    :root {
-      --bg: #ffffff;
-      --text: #000000;
-      --accent: #3333cc;
-      --menu-bg: #f0f0f0;
-    }
-    [data-theme="dark"] {
-      --bg: #121212;
-      --text: #ffffff;
-      --accent: #3399ff;
-      --menu-bg: #1e1e1e;
-    }
-
     body {
-      margin: 0;
-      font-family: sans-serif;
-      background-color: var(--bg);
-      color: var(--text);
-      font-size: 1.3rem;
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      background-color: #f4f4f4;
     }
-
-    header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 10px 20px;
-      background: var(--menu-bg);
-      border-bottom: 1px solid #ccc;
+    h1 {
+      text-align: center;
     }
-
-    .hamburger {
-      font-size: 24px;
-      cursor: pointer;
-    }
-
-    .title {
-      font-weight: bold;
-    }
-
-    .theme-toggle {
-      width: 24px;
-      height: 24px;
-      background: linear-gradient(90deg, #fff 50%, #000 50%);
-      border-radius: 50%;
-      border: 2px solid var(--text);
-      cursor: pointer;
-    }
-
-    .menu {
-      display: none;
-      flex-direction: column;
-      background: var(--menu-bg);
-      position: absolute;
-      top: 50px;
-      left: 0;
-      width: 200px;
-      border: 1px solid #ccc;
-    }
-
-    .menu a {
+    .partido {
+      background-color: white;
       padding: 10px;
-      text-decoration: none;
-      color: var(--text);
-      border-bottom: 1px solid #ccc;
-    }
-
-    main {
-      padding: 1px 20px 100px;
-      max-width: 800px;
-      margin: auto;
-      text-align: center;
-    }
-
-    h2 {
-      margin-top: 40px;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 20px;
-    }
-
-    th, td {
+      margin: 10px 0;
       border: 1px solid #ccc;
-      padding: 5px;
-      text-align: center;
-    }
-
-    footer {
-      position: fixed;
-      bottom: 0;
-      width: 100%;
-      text-align: center;
-      padding: 4px 8px;
-      background: var(--menu-bg);
-      color: var(--text);
-      border-top: 1px solid #ccc;
-      font-size: 13px;
-      line-height: 1.2;
-    }
-
-    @media (max-width: 600px) {
-      th, td {
-        font-size: 12px;
-      }
+      border-radius: 8px;
     }
   </style>
 </head>
-
 <body>
-  <header>
-    <div class="hamburger" onclick="toggleMenu()">☰</div>
-    <div class="title">Torneo de los Pibes</div>
-    <div class="theme-toggle" onclick="toggleTheme()"></div>
-  </header>
-
-  <div class="menu" id="menu">
-    <a href="liga.html">LIGAS INDIVIDUALES</a>
-    <a href="torneoparejas.html">TORNEOS POR PAREJAS ROTATIVAS</a>
-    <a href="historial.html">HISTÓRICO ENTRE JUGADORES</a>
-  </div>
-
-  <main>
-    <h1>Historial de Resultados</h1>
-
-    <section>
-      <h2>Competencia Individual</h2>
-      <table id="tabla-individual">
-        <thead>
-          <tr>
-            <th>#</th>
-            <th>Nombre</th>
-            <th>PJ</th>
-            <th>PG</th>
-            <th>PE</th>
-            <th>PP</th>
-            <th>%PG</th>
-            <th>%PE</th>
-            <th>%PP</th>
-          </tr>
-        </thead>
-        <tbody>
-          <!-- Se llenará con JS -->
-        </tbody>
-      </table>
-
-      <h2>Competencia por Parejas</h2>
-      <table id="tabla-parejas">
-        <thead>
-          <tr>
-            <th>#</th>
-            <th>Pareja</th>
-            <th>PJ</th>
-            <th>PG</th>
-            <th>PE</th>
-            <th>PP</th>
-            <th>%PG</th>
-            <th>%PE</th>
-            <th>%PP</th>
-          </tr>
-        </thead>
-        <tbody>
-          <!-- Se llenará con JS -->
-        </tbody>
-      </table>
-    </section>
-  </main>
-
-  <footer>
-    Desarrollado con I.A.<br>Donaciones al ALIAS: sergiosainz.frances<br>Mail: sergiosainz.proyectos@gmail.com
-  </footer>
+  <h1>Historial de Partidos (Liga)</h1>
+  <div id="historial"></div>
 
   <script>
-    function toggleMenu() {
-      const menu = document.getElementById('menu');
-      menu.style.display = menu.style.display === 'flex' ? 'none' : 'flex';
-    }
+    // Simulamos los partidos jugados
+    const partidos = [
+      ["Juan", "Pedro"],
+      ["Ana", "Luis"],
+      ["Carlos", "Marta"],
+      ["Diego", "Sofía"],
+      ["Juan", "Luis"],
+      ["Pedro", "Ana"],
+      ["Carlos", "Diego"],
+      ["Marta", "Sofía"]
+    ];
 
-    function toggleTheme() {
-      const t = document.body.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
-      document.body.setAttribute('data-theme', t);
-      localStorage.setItem('theme', t);
-    }
+    // Obtenemos los resultados guardados desde liga.html
+    const resultados = JSON.parse(localStorage.getItem('historialLiga')) || [];
 
-    window.onload = () => {
-      const t = localStorage.getItem('theme') || 'light';
-      document.body.setAttribute('data-theme', t);
+    const contenedor = document.getElementById("historial");
 
-      const data = JSON.parse(localStorage.getItem("historial")) || [];
+    if (resultados.length === 0) {
+      contenedor.innerHTML = "<p>No hay resultados guardados.</p>";
+    } else {
+      for (let i = 0; i < resultados.length; i++) {
+        const [g1, g2] = resultados[i] || [];
+        const [j1, j2] = partidos[i] || [];
+        if (g1 == null || g2 == null) continue;
 
-      const resultadosIndividuales = {};
-      const resultadosParejas = {};
-
-      data.forEach(r => {
-        // Individual
-        [r.jugador1, r.jugador2].forEach((jugador, idx) => {
-          if (!resultadosIndividuales[jugador]) {
-            resultadosIndividuales[jugador] = { pj: 0, pg: 0, pe: 0, pp: 0 };
-          }
-          resultadosIndividuales[jugador].pj++;
-
-          const golesJ = idx === 0 ? r.goles1 : r.goles2;
-          const golesR = idx === 0 ? r.goles2 : r.goles1;
-
-          if (golesJ > golesR) resultadosIndividuales[jugador].pg++;
-          else if (golesJ === golesR) resultadosIndividuales[jugador].pe++;
-          else resultadosIndividuales[jugador].pp++;
-        });
-
-        // Parejas
-        const pareja = [r.jugador1, r.jugador2].sort().join(" + ");
-        if (!resultadosParejas[pareja]) {
-          resultadosParejas[pareja] = { pj: 0, pg: 0, pe: 0, pp: 0 };
-        }
-        resultadosParejas[pareja].pj++;
-        if (r.goles1 > r.goles2) resultadosParejas[pareja].pg++;
-        else if (r.goles1 === r.goles2) resultadosParejas[pareja].pe++;
-        else resultadosParejas[pareja].pp++;
-      });
-
-      function crearFilaHTML(index, nombre, r) {
-        const total = r.pj || 1;
-        return `<tr>
-          <td>${index + 1}</td>
-          <td>${nombre}</td>
-          <td>${r.pj}</td>
-          <td>${r.pg}</td>
-          <td>${r.pe}</td>
-          <td>${r.pp}</td>
-          <td>${((r.pg / total) * 100).toFixed(1)}%</td>
-          <td>${((r.pe / total) * 100).toFixed(1)}%</td>
-          <td>${((r.pp / total) * 100).toFixed(1)}%</td>
-        </tr>`;
+        const div = document.createElement("div");
+        div.className = "partido";
+        div.innerText = `${j1} y ${j2}: ${g1} - ${g2}`;
+        contenedor.appendChild(div);
       }
-
-      const tablaIndividual = document.querySelector("#tabla-individual tbody");
-      const jugadores = Object.keys(resultadosIndividuales).sort((a, b) =>
-        resultadosIndividuales[b].pg - resultadosIndividuales[a].pg
-      );
-      jugadores.forEach((j, i) => {
-        tablaIndividual.innerHTML += crearFilaHTML(i, j, resultadosIndividuales[j]);
-      });
-
-      const tablaParejas = document.querySelector("#tabla-parejas tbody");
-      const parejas = Object.keys(resultadosParejas).sort((a, b) =>
-        resultadosParejas[b].pg - resultadosParejas[a].pg
-      );
-      parejas.forEach((p, i) => {
-        tablaParejas.innerHTML += crearFilaHTML(i, p, resultadosParejas[p]);
-      });
-    };
+    }
   </script>
 </body>
 </html>
