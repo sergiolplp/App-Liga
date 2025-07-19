@@ -394,17 +394,16 @@
   }
   function guardarEnHistorial() {
   const filas = document.querySelectorAll("#tabla-resultados table tbody tr");
-  const resultados = [];
+  const resumen = [];
 
   filas.forEach(fila => {
     const columnas = fila.querySelectorAll("td");
-    if (columnas.length < 6) return;
-    resultados.push({
+    if (columnas.length < 4) return;
+    resumen.push({
       nombre: columnas[0].textContent,
+      Pts: parseInt(columnas[1].textContent),
       PJ: parseInt(columnas[2].textContent),
-      PG: parseInt(columnas[3].textContent),
-      PE: parseInt(columnas[4].textContent),
-      PP: parseInt(columnas[5].textContent)
+      DG: parseInt(columnas[3].textContent)
     });
   });
 
@@ -414,12 +413,16 @@
   const existenteIndex = historial.findIndex(h => h.tipo === "individual" && h.fecha === fecha);
 
   if (existenteIndex !== -1) {
-    historial[existenteIndex].resultados = resultados;
+    historial[existenteIndex].resumen = resumen;
   } else {
-    historial.push({ tipo: "individual", fecha, resultados });
+    historial.push({ tipo: "individual", fecha, resumen });
   }
 
   localStorage.setItem("historialTorneos", JSON.stringify(historial));
+
+  // 🔽 Esta línea es CLAVE para historial.html
+  localStorage.setItem('historialLiga', JSON.stringify(resultados));
+
   alert("¡Historial guardado con éxito!");
 }
 </script>
