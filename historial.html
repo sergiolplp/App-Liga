@@ -137,78 +137,96 @@
   <footer>Desarrollado con I.A.<br>Donaciones al ALIAS: sergiosainz.frances<br>Mail: sergiosainz.proyectos@gmail.com</footer>
 
   <script>
-    function toggleMenu() {
-      const menu = document.getElementById('menu');
-      menu.style.display = menu.style.display === 'flex' ? 'none' : 'flex';
-    }
+  function toggleMenu() {
+    const menu = document.getElementById('menu');
+    menu.style.display = menu.style.display === 'flex' ? 'none' : 'flex';
+  }
 
-    function toggleTheme() {
-      const t = document.body.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
-      document.body.setAttribute('data-theme', t);
-      localStorage.setItem('theme', t);
-    }
+  function toggleTheme() {
+    const t = document.body.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    document.body.setAttribute('data-theme', t);
+    localStorage.setItem('theme', t);
+  }
 
-    function calcularEstadisticas(datos) {
-      const tabla = datos.map(j => {
-        const PJ = j.PJ;
-        const Pts = j.Pts;
-        const PE = Pts - 3 * Math.floor(Pts / 3);
-        const PG = Math.floor((Pts - PE) / 3);
-        const PP = PJ - PG - PE;
-        const pct = n => PJ > 0 ? ((n / PJ) * 100).toFixed(1) + '%' : '0.0%';
-        return {
-          nombre: j.nombre,
-          PJ,
-          PG,
-          PE,
-          PP,
-          pctPG: pct(PG),
-          pctPE: pct(PE),
-          pctPP: pct(PP)
-        };
+  function calcularEstadisticasAcumuladas(historial) {
+    const acumulado = {};
+
+    historial
+      .filter(t => t.tipo === "individual")
+      .forEach(t => {
+        t.resumen.forEach(j => {
+          const nombre = j.nombre;
+          const Pts = j.Pts;
+          const PJ = j.PJ;
+
+          const PE = Pts - 3 * Math.floor(Pts / 3);
+          const PG = Math.floor((Pts - PE) / 3);
+          const PP = PJ - PG - PE;
+
+          if (!acumulado[nombre]) {
+            acumulado[nombre] = { PJ: 0, PG: 0, PE: 0, PP: 0 };
+          }
+
+          acumulado[nombre].PJ += PJ;
+          acumulado[nombre].PG += PG;
+          acumulado[nombre].PE += PE;
+          acumulado[nombre].PP += PP;
+        });
       });
 
-      tabla.sort((a, b) => {
-        if (b.PG !== a.PG) return b.PG - a.PG;
-        if (b.PE !== a.PE) return b.PE - a.PE;
-        return a.PP - b.PP;
-      });
+    const jugadores = Object.entries(acumulado).map(([nombre, stats]) => {
+      const { PJ, PG, PE, PP } = stats;
+      const pct = n => PJ > 0 ? ((n / PJ) * 100).toFixed(1) + "%" : "0.0%";
+      return {
+        nombre, PJ, PG, PE, PP,
+        pctPG: pct(PG),
+        pctPE: pct(PE),
+        pctPP: pct(PP)
+      };
+    });
 
-      return tabla;
+    jugadores.sort((a, b) => {
+      if (b.PG !== a.PG) return b.PG - a.PG;
+      if (b.PE !== a.PE) return b.PE - a.PE;
+      return a.PP - b.PP;
+    });
+
+    return jugadores;
+  }
+
+  function mostrarTablaLiga() {
+    const historial = JSON.parse(localStorage.getItem('historialTorneos')) || [];
+    const jugadores = calcularEstadisticasAcumuladas(historial);
+
+    if (jugadores.length === 0) {
+      document.getElementById("tabla-liga").innerHTML = "<p>No hay datos guardados.</p>";
+      return;
     }
 
-    function mostrarTablaLiga() {
-      const historial = JSON.parse(localStorage.getItem('historialTorneos')) || [];
-      const liga = historial.find(t => t.tipo === "individual");
-      if (!liga || !liga.resumen || liga.resumen.length === 0) {
-        document.getElementById("tabla-liga").innerHTML = "<p>No hay datos guardados.</p>";
-        return;
-      }
-
-      const stats = calcularEstadisticas(liga.resumen);
-      const tabla = `
-        <table>
+    const tabla = `
+      <table>
+        <tr>
+          <th>#</th><th>Nombre</th><th>PJ</th><th>PG</th><th>PE</th><th>PP</th>
+          <th>%PG</th><th>%PE</th><th>%PP</th>
+        </tr>
+        ${jugadores.map((j, i) => `
           <tr>
-            <th>#</th><th>Nombre</th><th>PJ</th><th>PG</th><th>PE</th><th>PP</th>
-            <th>%PG</th><th>%PE</th><th>%PP</th>
+            <td>${i + 1}</td><td>${j.nombre}</td><td>${j.PJ}</td><td>${j.PG}</td>
+            <td>${j.PE}</td><td>${j.PP}</td>
+            <td>${j.pctPG}</td><td>${j.pctPE}</td><td>${j.pctPP}</td>
           </tr>
-          ${stats.map((j, i) => `
-            <tr>
-              <td>${i + 1}</td><td>${j.nombre}</td><td>${j.PJ}</td><td>${j.PG}</td>
-              <td>${j.PE}</td><td>${j.PP}</td><td>${j.pctPG}</td>
-              <td>${j.pctPE}</td><td>${j.pctPP}</td>
-            </tr>
-          `).join("")}
-        </table>
-      `;
-      document.getElementById("tabla-liga").innerHTML = tabla;
-    }
+        `).join("")}
+      </table>
+    `;
 
-    window.onload = () => {
-      const t = localStorage.getItem('theme') || 'light';
-      document.body.setAttribute('data-theme', t);
-      mostrarTablaLiga();
-    };
-  </script>
+    document.getElementById("tabla-liga").innerHTML = tabla;
+  }
+
+  window.onload = () => {
+    const t = localStorage.getItem('theme') || 'light';
+    document.body.setAttribute('data-theme', t);
+    mostrarTablaLiga();
+  };
+</script>
 </body>
 </html>
