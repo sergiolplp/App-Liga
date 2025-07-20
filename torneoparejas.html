@@ -538,49 +538,41 @@ Mail: sergiosainz.proyectos@gmail.com</footer>
       .then(reg => console.log('✔ Service Worker registrado:', reg.scope))
       .catch(err => console.error('✖ Error al registrar Service Worker:', err));
   }
-  function guardarEnHistorial() {
-  const parejas = document.querySelectorAll('#tabla-parejas tr:not(:first-child)');
-  const individual = document.querySelectorAll('#tabla-individual tr:not(:first-child)');
+  
+  <!-- Botón para guardar historial -->
+<button onclick="guardarHistorialParejas()">Guardar historial</button>
 
-  const historial = JSON.parse(localStorage.getItem('historial')) || {};
+<script>
+  function guardarHistorialParejas() {
+    const tabla = document.getElementById('tabla-parejas');
+    const filas = tabla.querySelectorAll('tbody tr');
+    let historial = JSON.parse(localStorage.getItem('historialParejas')) || {};
 
-  // Iniciar estructura si no existe
-  historial['parejas'] = historial['parejas'] || {};
-  historial['individual'] = historial['individual'] || {};
+    filas.forEach(fila => {
+      const columnas = fila.querySelectorAll('td');
+      if (columnas.length === 9) {
+        const nombre = columnas[1].textContent;
+        const pj = parseInt(columnas[2].textContent);
+        const pg = parseInt(columnas[3].textContent);
+        const pe = parseInt(columnas[4].textContent);
+        const pp = parseInt(columnas[5].textContent);
 
-  // Cargar tabla por pareja
-  parejas.forEach(row => {
-    const cols = row.querySelectorAll('td');
-    const nombre = cols[0].innerText;
-    const pts = parseInt(cols[1]);
-    const pj = parseInt(cols[2]);
-    const dg = parseInt(cols[3]);
+        if (!historial[nombre]) {
+          historial[nombre] = { pj: 0, pg: 0, pe: 0, pp: 0 };
+        }
 
-    historial['parejas'][nombre] = {
-      pts, pj, dg
-    };
-  });
+        historial[nombre].pj += pj;
+        historial[nombre].pg += pg;
+        historial[nombre].pe += pe;
+        historial[nombre].pp += pp;
+      }
+    });
 
-  // Cargar tabla individual
-  individual.forEach(row => {
-    const cols = row.querySelectorAll('td');
-    const nombre = cols[0].innerText;
-    const pts = parseInt(cols[1]);
-    const pj = parseInt(cols[2]);
-    const dg = parseInt(cols[3]);
-
-    // Si ya existía, sumamos; si no, iniciamos
-    if (!historial['individual'][nombre]) {
-      historial['individual'][nombre] = { pts: 0, pj: 0, dg: 0 };
-    }
-    historial['individual'][nombre].pts += pts;
-    historial['individual'][nombre].pj += pj;
-    historial['individual'][nombre].dg += dg;
-  });
-
-  localStorage.setItem('historial', JSON.stringify(historial));
-  alert("Historial de parejas guardado correctamente.");
-}
+    localStorage.setItem('historialParejas', JSON.stringify(historial));
+    alert('Historial de parejas guardado correctamente.');
+  }
+</script>
+  
 </script>
 </body>
 </html>
