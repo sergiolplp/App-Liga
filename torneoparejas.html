@@ -2,44 +2,99 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Torneo de Parejas</title>
-  <link rel="stylesheet" href="estilos.css" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Torneo por Parejas</title>
+  <link rel="icon" href="icono_torneo.ico" type="image/x-icon" />
+  <link rel="apple-touch-icon" href="icono_torneo.ico">
+  <meta name="theme-color" content="#ffffff">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+
+    header, footer {
+      background-color: #333;
+      color: white;
+      padding: 10px;
+      text-align: center;
+    }
+
+    nav {
+      background-color: #444;
+      overflow: hidden;
+    }
+
+    nav a {
+      float: left;
+      display: block;
+      color: white;
+      padding: 14px 16px;
+      text-decoration: none;
+    }
+
+    nav a:hover {
+      background-color: #ddd;
+      color: black;
+    }
+
+    main {
+      padding: 20px;
+    }
+
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      margin-bottom: 30px;
+    }
+
+    table, th, td {
+      border: 1px solid #999;
+    }
+
+    th, td {
+      padding: 8px;
+      text-align: center;
+    }
+
+    .input-section {
+      margin-bottom: 20px;
+    }
+
+    button {
+      padding: 10px 20px;
+      margin-top: 10px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+  </style>
 </head>
 <body>
-  <!-- Barra de navegación -->
+
+  <header>
+    <h1>Torneo por Parejas</h1>
+  </header>
+
   <nav>
-    <ul>
-      <li><a href="index.html">Inicio</a></li>
-      <li><a href="liga.html">Liga</a></li>
-      <li><a href="torneoparejas.html" class="activo">Torneo Parejas</a></li>
-      <li><a href="historial.html">Historial</a></li>
-    </ul>
+    <a href="index.html">Inicio</a>
+    <a href="liga.html">Liga</a>
+    <a href="torneoparejas.html">Torneo por Parejas</a>
+    <a href="historial.html">Historial</a>
   </nav>
 
   <main>
-    <h1>Torneo de Parejas</h1>
-
-    <!-- Formulario de ingreso de resultados -->
-    <section id="ingreso-resultados">
-      <h2>Ingresar Resultado</h2>
-      <input type="text" id="pareja1" placeholder="Pareja 1 (Ej: Ana y Luis)" />
-      <input type="number" id="goles1" placeholder="Goles Pareja 1" />
-      <input type="text" id="pareja2" placeholder="Pareja 2 (Ej: Sol y Max)" />
-      <input type="number" id="goles2" placeholder="Goles Pareja 2" />
-      <button onclick="agregarResultado()">Agregar</button>
+    <section class="input-section">
+      <label for="pareja1">Pareja 1:</label>
+      <input type="text" id="pareja1" />
+      <label for="pareja2">Pareja 2:</label>
+      <input type="text" id="pareja2" />
+      <button onclick="registrarPartido()">Registrar Partido</button>
     </section>
 
-    <!-- Lista de partidos -->
     <section>
-      <h2>Partidos Jugados</h2>
-      <ul id="lista-partidos"></ul>
-    </section>
-
-    <!-- Tablas -->
-    <section id="tabla">
-      <h2>Tabla de Posiciones (Por Parejas)</h2>
-      <table id="tabla-parejas" border="1">
+      <h2>Tabla por Parejas</h2>
+      <table id="tabla-parejas">
         <thead>
           <tr>
             <th>#</th>
@@ -48,176 +103,191 @@
             <th>PG</th>
             <th>PE</th>
             <th>PP</th>
-            <th>%PG</th>
-            <th>%PE</th>
-            <th>%PP</th>
+            <th>% PG</th>
+            <th>% PE</th>
+            <th>% PP</th>
           </tr>
         </thead>
-        <tbody></tbody>
+        <tbody>
+        </tbody>
       </table>
 
+      <button onclick="guardarHistorialParejas()">Guardar Historial</button>
+    </section>
+
+    <section>
       <h2>Tabla Individual</h2>
-      <table id="tabla-individual" border="1">
+      <table id="tabla-individual">
         <thead>
           <tr>
             <th>#</th>
-            <th>Jugador/a</th>
+            <th>Jugador</th>
             <th>PJ</th>
             <th>PG</th>
             <th>PE</th>
             <th>PP</th>
-            <th>%PG</th>
-            <th>%PE</th>
-            <th>%PP</th>
+            <th>% PG</th>
+            <th>% PE</th>
+            <th>% PP</th>
           </tr>
         </thead>
-        <tbody></tbody>
+        <tbody>
+        </tbody>
       </table>
-    </section>
-
-    <!-- Botón para guardar historial -->
-    <section>
-      <button onclick="guardarHistorialParejas()">Guardar historial</button>
     </section>
   </main>
 
-  <!-- Footer -->
   <footer>
     <p>Desarrollado por SDD</p>
   </footer>
 
   <script>
-    const partidos = [];
+    let partidos = [];
 
-    function agregarResultado() {
-      const p1 = document.getElementById('pareja1').value.trim();
-      const g1 = parseInt(document.getElementById('goles1').value);
-      const p2 = document.getElementById('pareja2').value.trim();
-      const g2 = parseInt(document.getElementById('goles2').value);
+    function registrarPartido() {
+      const pareja1 = document.getElementById('pareja1').value.trim();
+      const pareja2 = document.getElementById('pareja2').value.trim();
 
-      if (!p1 || isNaN(g1) || !p2 || isNaN(g2)) {
-        alert("Por favor completá todos los campos correctamente.");
+      if (!pareja1 || !pareja2 || pareja1 === pareja2) {
+        alert('Ingresá nombres válidos para ambas parejas.');
         return;
       }
 
-      partidos.push({ pareja1: p1, goles1: g1, pareja2: p2, goles2: g2 });
-      mostrarPartidos();
-      actualizarTablas();
-      limpiarInputs();
-    }
+      const resultado = prompt(`Resultado (ganó ${pareja1}, ganó ${pareja2} o empate):`).toLowerCase();
 
-    function mostrarPartidos() {
-      const lista = document.getElementById('lista-partidos');
-      lista.innerHTML = '';
-      partidos.forEach((partido, index) => {
-        const item = document.createElement('li');
-        item.textContent = `${partido.pareja1} (${partido.goles1}) vs ${partido.pareja2} (${partido.goles2})`;
-        lista.appendChild(item);
-      });
+      if (!['ganó ' + pareja1, 'ganó ' + pareja2, 'empate'].includes(resultado)) {
+        alert('Resultado inválido.');
+        return;
+      }
+
+      partidos.push({ pareja1, pareja2, resultado });
+      actualizarTablas();
     }
 
     function actualizarTablas() {
-      const statsParejas = {};
-      const statsJugadores = {};
+      const datosParejas = {};
+      const datosJugadores = {};
 
-      partidos.forEach(p => {
-        const resultado1 = p.goles1 > p.goles2 ? 'G' : p.goles1 < p.goles2 ? 'P' : 'E';
-        const resultado2 = p.goles2 > p.goles1 ? 'G' : p.goles2 < p.goles1 ? 'P' : 'E';
-
-        [ [p.pareja1, resultado1], [p.pareja2, resultado2] ].forEach(([pareja, res]) => {
-          if (!statsParejas[pareja]) statsParejas[pareja] = { pj: 0, pg: 0, pe: 0, pp: 0 };
-          statsParejas[pareja].pj++;
-          if (res === 'G') statsParejas[pareja].pg++;
-          else if (res === 'E') statsParejas[pareja].pe++;
-          else statsParejas[pareja].pp++;
-
-          const jugadores = pareja.split(' y ');
-          jugadores.forEach(j => {
-            if (!statsJugadores[j]) statsJugadores[j] = { pj: 0, pg: 0, pe: 0, pp: 0 };
-            statsJugadores[j].pj++;
-            if (res === 'G') statsJugadores[j].pg++;
-            else if (res === 'E') statsJugadores[j].pe++;
-            else statsJugadores[j].pp++;
-          });
+      partidos.forEach(({ pareja1, pareja2, resultado }) => {
+        [pareja1, pareja2].forEach(p => {
+          if (!datosParejas[p]) datosParejas[p] = { pj: 0, pg: 0, pe: 0, pp: 0 };
+          datosParejas[p].pj++;
         });
+
+        if (resultado === 'ganó ' + pareja1) {
+          datosParejas[pareja1].pg++;
+          datosParejas[pareja2].pp++;
+        } else if (resultado === 'ganó ' + pareja2) {
+          datosParejas[pareja2].pg++;
+          datosParejas[pareja1].pp++;
+        } else {
+          datosParejas[pareja1].pe++;
+          datosParejas[pareja2].pe++;
+        }
+
+        // Individual
+        pareja1.split(' y ').forEach(j => {
+          if (!datosJugadores[j]) datosJugadores[j] = { pj: 0, pg: 0, pe: 0, pp: 0 };
+          datosJugadores[j].pj++;
+        });
+        pareja2.split(' y ').forEach(j => {
+          if (!datosJugadores[j]) datosJugadores[j] = { pj: 0, pg: 0, pe: 0, pp: 0 };
+          datosJugadores[j].pj++;
+        });
+
+        if (resultado === 'ganó ' + pareja1) {
+          pareja1.split(' y ').forEach(j => datosJugadores[j].pg++);
+          pareja2.split(' y ').forEach(j => datosJugadores[j].pp++);
+        } else if (resultado === 'ganó ' + pareja2) {
+          pareja2.split(' y ').forEach(j => datosJugadores[j].pg++);
+          pareja1.split(' y ').forEach(j => datosJugadores[j].pp++);
+        } else {
+          pareja1.split(' y ').forEach(j => datosJugadores[j].pe++);
+          pareja2.split(' y ').forEach(j => datosJugadores[j].pe++);
+        }
       });
 
-      renderTabla('tabla-parejas', statsParejas);
-      renderTabla('tabla-individual', statsJugadores);
-    }
-
-    function renderTabla(id, data) {
-      const tbody = document.querySelector(`#${id} tbody`);
-      tbody.innerHTML = '';
-
-      const lista = Object.entries(data).map(([nombre, s]) => {
-        const pj = s.pj || 1;
-        return {
-          nombre,
-          pj: s.pj,
-          pg: s.pg,
-          pe: s.pe,
-          pp: s.pp,
-          pctPg: ((s.pg / pj) * 100).toFixed(1),
-          pctPe: ((s.pe / pj) * 100).toFixed(1),
-          pctPp: ((s.pp / pj) * 100).toFixed(1),
-        };
-      });
-
-      lista.sort((a, b) => b.pg - a.pg);
-
-      lista.forEach((d, i) => {
+      const tbodyParejas = document.querySelector('#tabla-parejas tbody');
+      tbodyParejas.innerHTML = '';
+      let index = 1;
+      for (const [pareja, stats] of Object.entries(datosParejas)) {
+        const { pj, pg, pe, pp } = stats;
         const tr = document.createElement('tr');
         tr.innerHTML = `
-          <td>${i + 1}</td>
-          <td>${d.nombre}</td>
-          <td>${d.pj}</td>
-          <td>${d.pg}</td>
-          <td>${d.pe}</td>
-          <td>${d.pp}</td>
-          <td>${d.pctPg}%</td>
-          <td>${d.pctPe}%</td>
-          <td>${d.pctPp}%</td>
+          <td>${index++}</td>
+          <td>${pareja}</td>
+          <td>${pj}</td>
+          <td>${pg}</td>
+          <td>${pe}</td>
+          <td>${pp}</td>
+          <td>${((pg / pj) * 100).toFixed(1)}%</td>
+          <td>${((pe / pj) * 100).toFixed(1)}%</td>
+          <td>${((pp / pj) * 100).toFixed(1)}%</td>
         `;
-        tbody.appendChild(tr);
-      });
-    }
+        tbodyParejas.appendChild(tr);
+      }
 
-    function limpiarInputs() {
-      document.getElementById('pareja1').value = '';
-      document.getElementById('goles1').value = '';
-      document.getElementById('pareja2').value = '';
-      document.getElementById('goles2').value = '';
+      const tbodyJugadores = document.querySelector('#tabla-individual tbody');
+      tbodyJugadores.innerHTML = '';
+      index = 1;
+      for (const [jugador, stats] of Object.entries(datosJugadores)) {
+        const { pj, pg, pe, pp } = stats;
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${index++}</td>
+          <td>${jugador}</td>
+          <td>${pj}</td>
+          <td>${pg}</td>
+          <td>${pe}</td>
+          <td>${pp}</td>
+          <td>${((pg / pj) * 100).toFixed(1)}%</td>
+          <td>${((pe / pj) * 100).toFixed(1)}%</td>
+          <td>${((pp / pj) * 100).toFixed(1)}%</td>
+        `;
+        tbodyJugadores.appendChild(tr);
+      }
     }
 
     function guardarHistorialParejas() {
       const tabla = document.getElementById('tabla-parejas');
       const filas = tabla.querySelectorAll('tbody tr');
-      let historial = JSON.parse(localStorage.getItem('historialParejas')) || {};
+      const historialGuardado = JSON.parse(localStorage.getItem('historialParejas')) || [];
 
       filas.forEach(fila => {
-        const columnas = fila.querySelectorAll('td');
-        if (columnas.length === 9) {
-          const nombre = columnas[1].textContent;
-          const pj = parseInt(columnas[2].textContent);
-          const pg = parseInt(columnas[3].textContent);
-          const pe = parseInt(columnas[4].textContent);
-          const pp = parseInt(columnas[5].textContent);
+        const celdas = fila.querySelectorAll('td');
+        const nombrePareja = celdas[1].textContent;
+        const pj = parseInt(celdas[2].textContent);
+        const pg = parseInt(celdas[3].textContent);
+        const pe = parseInt(celdas[4].textContent);
+        const pp = parseInt(celdas[5].textContent);
 
-          if (!historial[nombre]) {
-            historial[nombre] = { pj: 0, pg: 0, pe: 0, pp: 0 };
-          }
+        const parejaExistente = historialGuardado.find(p => p.nombre === nombrePareja);
 
-          historial[nombre].pj += pj;
-          historial[nombre].pg += pg;
-          historial[nombre].pe += pe;
-          historial[nombre].pp += pp;
+        if (parejaExistente) {
+          parejaExistente.pj += pj;
+          parejaExistente.pg += pg;
+          parejaExistente.pe += pe;
+          parejaExistente.pp += pp;
+
+          const totalPJ = parejaExistente.pj;
+          parejaExistente.pgPct = ((parejaExistente.pg / totalPJ) * 100).toFixed(1);
+          parejaExistente.pePct = ((parejaExistente.pe / totalPJ) * 100).toFixed(1);
+          parejaExistente.ppPct = ((parejaExistente.pp / totalPJ) * 100).toFixed(1);
+        } else {
+          historialGuardado.push({
+            nombre: nombrePareja,
+            pj, pg, pe, pp,
+            pgPct: ((pg / pj) * 100).toFixed(1),
+            pePct: ((pe / pj) * 100).toFixed(1),
+            ppPct: ((pp / pj) * 100).toFixed(1)
+          });
         }
       });
 
-      localStorage.setItem('historialParejas', JSON.stringify(historial));
-      alert('Historial de parejas guardado correctamente.');
+      localStorage.setItem('historialParejas', JSON.stringify(historialGuardado));
+      alert('Historial de parejas guardado correctamente');
     }
   </script>
+
 </body>
 </html>
