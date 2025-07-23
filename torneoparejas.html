@@ -315,8 +315,8 @@ Mail: sergiosainz.proyectos@gmail.com</footer>
     const div = document.getElementById('form-jugadores');
     for (let i = 0; i < 6; i++) {
       const input = document.createElement('input');
-      input.placeholder = Jugador ${i + 1};
-      input.id = jugador${i};
+      input.placeholder = `Jugador ${i + 1}`; // ✅ Usar backticks
+input.id = `jugador${i}`;               // ✅ Usar backticks
       div.appendChild(input);
     }
   }
@@ -324,8 +324,8 @@ Mail: sergiosainz.proyectos@gmail.com</footer>
   function agregarJugador() {
     const index = document.querySelectorAll('#form-jugadores input').length;
     const input = document.createElement('input');
-    input.placeholder = Jugador ${index + 1};
-    input.id = jugador${index};
+    input.placeholder = `Jugador ${index + 1}`; // ✅
+input.id = `jugador${index}`;               // ✅
     document.getElementById('form-jugadores').appendChild(input);
   }
 
