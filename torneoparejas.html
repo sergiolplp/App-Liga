@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+p<!DOCTYPE html>
 <html lang="es">
 <head>
   <link rel="manifest" href="manifest.json">
@@ -291,13 +291,18 @@ function toggleTheme() {
 }
 
 function agregarJugador() {
-  // Ejemplo simple: agregar un input para un jugador nuevo
   const contenedor = document.getElementById('form-jugadores');
   const input = document.createElement('input');
   input.type = 'text';
   input.placeholder = 'Nombre del jugador';
   contenedor.appendChild(input);
 }
+
+function generarInputs() {
+  for (let i = 0; i < 6; i++) agregarJugador();
+}
+
+window.onload = generarInputs;
 
 function generarRondas(jugadores) {
   const rondas = [];
