@@ -280,6 +280,17 @@ const input = document.getElementById('jugadores');
 const cont = document.getElementById('partidos-lista');
 const tabla = document.getElementById('tabla-posiciones').querySelector('tbody');
 
+function toggleMenu() {
+  const menu = document.getElementById('menu');
+  menu.style.display = (menu.style.display === 'flex') ? 'none' : 'flex';
+}
+
+function toggleTheme() {
+  const currentTheme = document.documentElement.getAttribute('data-theme');
+  document.documentElement.setAttribute('data-theme', currentTheme === 'dark' ? 'light' : 'dark');
+}
+
+
 function generarRondas(jugadores) {
   const rondas = [];
   const usadas = new Set();
