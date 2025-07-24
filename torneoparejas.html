@@ -4,61 +4,35 @@
   <meta charset="UTF-8">
   <title>Torneo por Parejas</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="icon" href="icono_torneo.ico" type="image/x-icon">
   <link rel="stylesheet" href="estilos.css">
 </head>
 <body>
   <header>
-    <h1>Torneo por Parejas</h1>
     <nav>
-      <a href="index.html">Inicio</a>
-      <a href="liga.html">Liga</a>
-      <a href="torneoparejas.html">Parejas</a>
-      <a href="historial.html">Historial</a>
+      <ul class="menu">
+        <li><a href="index.html">Inicio</a></li>
+        <li><a href="liga.html">Liga</a></li>
+        <li><a href="torneoparejas.html" class="activo">Torneo por Parejas</a></li>
+        <li><a href="historial.html">Historial</a></li>
+      </ul>
     </nav>
   </header>
 
   <main>
-    <section>
-      <label for="jugadores">Nombres (mínimo 4, separados por coma):</label>
-      <input type="text" id="jugadores" placeholder="Ej: Ana,Juan,Luis,Camila">
-      <button onclick="iniciarTorneo()">Iniciar Torneo</button>
+    <h1>Torneo por Parejas</h1>
+
+    <section id="formulario">
+      <label for="jugadores">Lista de jugadores (uno por línea):</label><br>
+      <textarea id="jugadores" rows="10" cols="30" placeholder="Ejemplo: Juan&#10;Ana&#10;Luis&#10;Carla"></textarea><br><br>
+      <button onclick="generarFixture()">Generar Fixture</button>
     </section>
 
-    <section id="rondas"></section>
-    <section id="partidos"></section>
+    <section id="fixture"></section>
+    <section id="tabla-resultados"></section>
 
-    <section id="tabla">
-      <h2>Tabla por Parejas</h2>
-      <table id="tabla-parejas">
-        <thead>
-          <tr>
-            <th>Pareja</th>
-            <th>PJ</th>
-            <th>PG</th>
-            <th>PP</th>
-            <th>Pts</th>
-          </tr>
-        </thead>
-        <tbody></tbody>
-      </table>
-
-      <h2>Tabla Individual</h2>
-      <table id="tabla-individual">
-        <thead>
-          <tr>
-            <th>Jugador</th>
-            <th>PJ</th>
-            <th>PG</th>
-            <th>PP</th>
-            <th>Pts</th>
-          </tr>
-        </thead>
-        <tbody></tbody>
-      </table>
-    </section>
-
-    <button onclick="guardarEnHistorial()">Guardar Historial</button>
+    <div style="text-align: center; margin-top: 20px;">
+      <button onclick="guardarEnHistorial()">Guardar en historial</button>
+    </div>
   </main>
 
   <footer>
@@ -67,144 +41,161 @@
 
   <script>
     let parejas = [];
-    let resultadosParejas = {};
-    let resultadosIndividuales = {};
 
-    function iniciarTorneo() {
+    function mezclarArray(array) {
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+      }
+    }
+
+    function generarFixture() {
       const input = document.getElementById("jugadores").value.trim();
-      const nombres = input.split(",").map(n => n.trim()).filter(n => n);
-      if (nombres.length < 4 || nombres.length % 2 !== 0) {
-        alert("Debe ingresar al menos 4 nombres y en cantidad par.");
+      if (!input) {
+        alert("Por favor, ingresa una lista de jugadores.");
         return;
       }
 
-      // Formar parejas
+      const nombres = input.split("\n").map(n => n.trim()).filter(n => n !== "");
+      if (nombres.length % 2 !== 0) {
+        alert("Debe haber un número par de jugadores.");
+        return;
+      }
+
+      mezclarArray(nombres);
       parejas = [];
+
       for (let i = 0; i < nombres.length; i += 2) {
-        parejas.push([nombres[i], nombres[i + 1]]);
+        parejas.push(nombres[i] + " y " + nombres[i + 1]);
       }
 
-      resultadosParejas = {};
-      resultadosIndividuales = {};
-      mostrarRondas();
-      mostrarTablas();
+      const partidos = [];
+      for (let i = 0; i < parejas.length - 1; i++) {
+        for (let j = i + 1; j < parejas.length; j++) {
+          partidos.push([parejas[i], parejas[j]]);
+        }
+      }
+
+      mostrarFixture(partidos);
+      mostrarTablaParejas();
     }
 
-    function mostrarRondas() {
-      const cont = document.getElementById("rondas");
-      cont.innerHTML = "<h2>Rondas</h2>";
+    function mostrarFixture(partidos) {
+      const contenedor = document.getElementById("fixture");
+      contenedor.innerHTML = "<h2>Fixture</h2>";
 
-      let ronda = 1;
-      let cantidadPartidos = Math.floor(parejas.length / 2);
-      let usados = [...parejas];
-
-      for (let i = 0; i < cantidadPartidos; i++) {
-        if (usados.length < 2) break;
-
-        const [a1, a2] = usados.shift();
-        const [b1, b2] = usados.shift();
-
-        cont.innerHTML += `
-          <div class="partido">
-            <h3>Ronda ${ronda++}</h3>
-            <p>${a1} y ${a2} vs ${b1} y ${b2}</p>
-            <button onclick="registrarResultado('${a1}', '${a2}', '${b1}', '${b2}', true)">Ganaron ${a1} y ${a2}</button>
-            <button onclick="registrarResultado('${a1}', '${a2}', '${b1}', '${b2}', false)">Ganaron ${b1} y ${b2}</button>
-          </div>`;
-      }
-    }
-
-    function registrarResultado(a1, a2, b1, b2, ganaA) {
-      const parejaA = `${a1} y ${a2}`;
-      const parejaB = `${b1} y ${b2}`;
-
-      if (!resultadosParejas[parejaA]) resultadosParejas[parejaA] = { pj: 0, pg: 0, pp: 0, pts: 0 };
-      if (!resultadosParejas[parejaB]) resultadosParejas[parejaB] = { pj: 0, pg: 0, pp: 0, pts: 0 };
-
-      resultadosParejas[parejaA].pj++;
-      resultadosParejas[parejaB].pj++;
-
-      if (ganaA) {
-        resultadosParejas[parejaA].pg++;
-        resultadosParejas[parejaA].pts += 3;
-        resultadosParejas[parejaB].pp++;
-      } else {
-        resultadosParejas[parejaB].pg++;
-        resultadosParejas[parejaB].pts += 3;
-        resultadosParejas[parejaA].pp++;
-      }
-
-      [a1, a2, b1, b2].forEach(j => {
-        if (!resultadosIndividuales[j]) resultadosIndividuales[j] = { pj: 0, pg: 0, pp: 0, pts: 0 };
-        resultadosIndividuales[j].pj++;
+      partidos.forEach((partido, index) => {
+        const div = document.createElement("div");
+        div.classList.add("partido");
+        div.innerHTML = `
+          <span>${partido[0]} vs ${partido[1]}</span><br>
+          <input type="number" id="g${index}a" placeholder="${partido[0]}" min="0">
+          <input type="number" id="g${index}b" placeholder="${partido[1]}" min="0">
+        `;
+        contenedor.appendChild(div);
       });
 
-      if (ganaA) {
-        [a1, a2].forEach(j => { resultadosIndividuales[j].pg++; resultadosIndividuales[j].pts += 3; });
-        [b1, b2].forEach(j => resultadosIndividuales[j].pp++);
-      } else {
-        [b1, b2].forEach(j => { resultadosIndividuales[j].pg++; resultadosIndividuales[j].pts += 3; });
-        [a1, a2].forEach(j => resultadosIndividuales[j].pp++);
-      }
-
-      mostrarTablas();
+      const boton = document.createElement("button");
+      boton.textContent = "Calcular Resultados";
+      boton.onclick = calcularResultados;
+      contenedor.appendChild(boton);
     }
 
-    function mostrarTablas() {
-      const cuerpoParejas = document.querySelector("#tabla-parejas tbody");
-      cuerpoParejas.innerHTML = "";
-      for (const pareja in resultadosParejas) {
-        const r = resultadosParejas[pareja];
-        cuerpoParejas.innerHTML += `
-          <tr>
-            <td>${pareja}</td>
-            <td>${r.pj}</td>
-            <td>${r.pg}</td>
-            <td>${r.pp}</td>
-            <td>${r.pts}</td>
-          </tr>`;
-      }
+    function calcularResultados() {
+      const resultados = {};
+      parejas.forEach(p => {
+        resultados[p] = { pts: 0, pj: 0, dg: 0 };
+      });
 
-      const cuerpoInd = document.querySelector("#tabla-individual tbody");
-      cuerpoInd.innerHTML = "";
-      for (const j in resultadosIndividuales) {
-        const r = resultadosIndividuales[j];
-        cuerpoInd.innerHTML += `
-          <tr>
-            <td>${j}</td>
-            <td>${r.pj}</td>
-            <td>${r.pg}</td>
-            <td>${r.pp}</td>
-            <td>${r.pts}</td>
-          </tr>`;
-      }
-    }
+      const partidos = document.querySelectorAll(".partido");
+      partidos.forEach((div, index) => {
+        const golesA = parseInt(document.getElementById(`g${index}a`).value);
+        const golesB = parseInt(document.getElementById(`g${index}b`).value);
+        const texto = div.querySelector("span").innerText;
+        const [equipoA, equipoB] = texto.split(" vs ");
 
-    function guardarEnHistorial() {
-      const tabla = document.querySelector("#tabla-parejas tbody");
-      const filas = tabla.querySelectorAll("tr");
+        if (!isNaN(golesA) && !isNaN(golesB)) {
+          resultados[equipoA].pj++;
+          resultados[equipoB].pj++;
+          resultados[equipoA].dg += (golesA - golesB);
+          resultados[equipoB].dg += (golesB - golesA);
 
-      let historial = JSON.parse(localStorage.getItem("historialTorneoParejas")) || {};
-
-      filas.forEach(fila => {
-        const celdas = fila.querySelectorAll("td");
-        const nombre = celdas[0].textContent;
-        const pj = parseInt(celdas[1].textContent);
-        const pg = parseInt(celdas[2].textContent);
-        const pp = parseInt(celdas[3].textContent);
-        const pts = parseInt(celdas[4].textContent);
-
-        if (!historial[nombre]) {
-          historial[nombre] = { pj, pg, pp, pts };
-        } else {
-          historial[nombre].pj += pj;
-          historial[nombre].pg += pg;
-          historial[nombre].pp += pp;
-          historial[nombre].pts += pts;
+          if (golesA > golesB) {
+            resultados[equipoA].pts += 3;
+          } else if (golesB > golesA) {
+            resultados[equipoB].pts += 3;
+          } else {
+            resultados[equipoA].pts += 1;
+            resultados[equipoB].pts += 1;
+          }
         }
       });
 
-      localStorage.setItem("historialTorneoParejas", JSON.stringify(historial));
+      const arreglo = Object.keys(resultados).map(nombre => {
+        return {
+          nombre,
+          ...resultados[nombre]
+        };
+      });
+
+      arreglo.sort((a, b) => b.pts - a.pts || b.dg - a.dg);
+
+      mostrarTabla(arreglo);
+    }
+
+    function mostrarTabla(arreglo) {
+      const contenedor = document.getElementById("tabla-resultados");
+      contenedor.innerHTML = "<h2>Tabla de Posiciones (Por Pareja)</h2>";
+
+      const tabla = document.createElement("table");
+      tabla.innerHTML = `
+        <tr>
+          <th>Pareja</th>
+          <th>Pts</th>
+          <th>PJ</th>
+          <th>DG</th>
+        </tr>
+      `;
+
+      arreglo.forEach(equipo => {
+        const fila = document.createElement("tr");
+        fila.innerHTML = `
+          <td>${equipo.nombre}</td>
+          <td>${equipo.pts}</td>
+          <td>${equipo.pj}</td>
+          <td>${equipo.dg}</td>
+        `;
+        tabla.appendChild(fila);
+      });
+
+      contenedor.appendChild(tabla);
+    }
+
+    function guardarEnHistorial() {
+      const tabla = document.querySelector("#tabla-resultados table");
+      if (!tabla) {
+        alert("Primero generá y calculá los resultados.");
+        return;
+      }
+
+      const filas = tabla.querySelectorAll("tr");
+      const historialGuardado = JSON.parse(localStorage.getItem('historial')) || [];
+
+      const nuevoHistorial = [];
+
+      for (let i = 1; i < filas.length; i++) {
+        const columnas = filas[i].querySelectorAll('td');
+        nuevoHistorial.push({
+          tipo: "parejas",
+          nombre: columnas[0].innerText,
+          pts: columnas[1].innerText,
+          pj: columnas[2].innerText,
+          dg: columnas[3].innerText
+        });
+      }
+
+      const historialActualizado = historialGuardado.concat(nuevoHistorial);
+      localStorage.setItem('historial', JSON.stringify(historialActualizado));
       alert("Historial guardado correctamente.");
     }
   </script>
