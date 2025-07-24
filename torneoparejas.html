@@ -519,31 +519,42 @@ input.id = `jugador${index}`;               // ✅
       .then(reg => console.log('✔ Service Worker registrado:', reg.scope))
       .catch(err => console.error('✖ Error al registrar Service Worker:', err));
   }
+  
   function guardarEnHistorial() {
-  const tabla = document.getElementById('tabla-posiciones');
+  const tabla = document.getElementById('tablaParejas'); // ID correcto
   const filas = tabla.querySelectorAll('tbody tr');
-  const tipo = 'parejas'; // clave para identificar el origen
+  let historial = JSON.parse(localStorage.getItem('historialParejas')) || [];
 
-  const historialGuardado = JSON.parse(localStorage.getItem('historial')) || [];
-
-  const nuevoHistorial = Array.from(filas).map(fila => {
+  filas.forEach(fila => {
     const columnas = fila.querySelectorAll('td');
-    return {
-      tipo: tipo,
-      posicion: columnas[0].innerText,
-      nombre: columnas[1].innerText,
-      pj: columnas[2].innerText,
-      pg: columnas[3].innerText,
-      pe: columnas[4].innerText,
-      pp: columnas[5].innerText,
-      por_pj: columnas[6].innerText,
-      por_pe: columnas[7].innerText,
-      por_pp: columnas[8].innerText
-    };
+    const nombrePareja = columnas[0].textContent.trim();
+    const puntos = parseInt(columnas[1].textContent.trim(), 10) || 0;
+    const partidosJugados = parseInt(columnas[2].textContent.trim(), 10) || 0;
+    const partidosGanados = parseInt(columnas[3].textContent.trim(), 10) || 0;
+    const partidosEmpatados = parseInt(columnas[4].textContent.trim(), 10) || 0;
+    const partidosPerdidos = parseInt(columnas[5].textContent.trim(), 10) || 0;
+
+    const existente = historial.find(p => p.nombre === nombrePareja);
+
+    if (existente) {
+      existente.puntos += puntos;
+      existente.jugados += partidosJugados;
+      existente.ganados += partidosGanados;
+      existente.empatados += partidosEmpatados;
+      existente.perdidos += partidosPerdidos;
+    } else {
+      historial.push({
+        nombre: nombrePareja,
+        puntos: puntos,
+        jugados: partidosJugados,
+        ganados: partidosGanados,
+        empatados: partidosEmpatados,
+        perdidos: partidosPerdidos
+      });
+    }
   });
 
-  const historialActualizado = historialGuardado.concat(nuevoHistorial);
-  localStorage.setItem('historial', JSON.stringify(historialActualizado));
+  localStorage.setItem('historialParejas', JSON.stringify(historial));
   alert("Historial guardado correctamente.");
 }
 </script>
