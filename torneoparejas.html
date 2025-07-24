@@ -275,7 +275,7 @@
 Donaciones al ALIAS: sergiosainz.frances GRACIAS!
 Mail: sergiosainz.proyectos@gmail.com</footer>
 
-  <script>
+<script>
   const secciones = ['jugadores', 'rondas', 'partidos', 'tabla'];
 
   function mostrarSeccion(id) {
@@ -285,7 +285,8 @@ Mail: sergiosainz.proyectos@gmail.com</footer>
 
   function toggleMenu() {
     const menu = document.getElementById('menu');
-    menu.style.display = menu.style.display === 'flex' ? 'none' : 'flex';
+    const isVisible = window.getComputedStyle(menu).display !== 'none';
+    menu.style.display = isVisible ? 'none' : 'flex';
   }
 
   function toggleTheme() {
@@ -315,8 +316,8 @@ Mail: sergiosainz.proyectos@gmail.com</footer>
     const div = document.getElementById('form-jugadores');
     for (let i = 0; i < 6; i++) {
       const input = document.createElement('input');
-      input.placeholder = Jugador ${i + 1};
-      input.id = jugador${i};
+      input.placeholder = `Jugador ${i + 1}`;
+      input.id = `jugador${i}`;
       div.appendChild(input);
     }
   }
@@ -324,8 +325,8 @@ Mail: sergiosainz.proyectos@gmail.com</footer>
   function agregarJugador() {
     const index = document.querySelectorAll('#form-jugadores input').length;
     const input = document.createElement('input');
-    input.placeholder = Jugador ${index + 1};
-    input.id = jugador${index};
+    input.placeholder = `Jugador ${index + 1}`;
+    input.id = `jugador${index}`;
     document.getElementById('form-jugadores').appendChild(input);
   }
 
@@ -370,7 +371,7 @@ Mail: sergiosainz.proyectos@gmail.com</footer>
       const usados = new Set();
 
       for (const [a, b] of candidatos) {
-        const key = ${a}-${b};
+        const key = `${a}-${b}`;
         if (!usadas.has(key) && !usados.has(a) && !usados.has(b)) {
           ronda.push([a, b]);
           usados.add(a);
@@ -380,7 +381,7 @@ Mail: sergiosainz.proyectos@gmail.com</footer>
       }
 
       if (ronda.length === totalParejas) {
-        ronda.forEach(([a, b]) => usadas.add(${a}-${b}));
+        ronda.forEach(([a, b]) => usadas.add(`${a}-${b}`));
         rondas.push(ronda);
       }
     }
@@ -394,7 +395,7 @@ Mail: sergiosainz.proyectos@gmail.com</footer>
     resultados = Array(partidos.length).fill([null, null]);
     mostrarSeccion('rondas');
     mostrarRondas();
-    guardarEstado(); // <- NUEVO
+    guardarEstado();
   }
 
   function mostrarRondas() {
@@ -403,8 +404,8 @@ Mail: sergiosainz.proyectos@gmail.com</footer>
     rondas.forEach((ronda, i) => {
       const div = document.createElement('div');
       div.className = 'ronda-box';
-      div.innerHTML = <strong>Ronda ${i + 1}</strong> +
-        ronda.map(([a, b]) => <div>${a} + ${b}</div>).join('');
+      div.innerHTML = `<strong>Ronda ${i + 1}</strong>` +
+        ronda.map(([a, b]) => `<div>${a} + ${b}</div>`).join('');
       cont.appendChild(div);
     });
   }
@@ -423,89 +424,87 @@ Mail: sergiosainz.proyectos@gmail.com</footer>
       const [g1, g2] = resultados[i] ?? [null, null];
 
       cont.innerHTML += 
-        <div class="partido">
+        `<div class="partido">
           <span>${a1} + ${a2}</span>
           <div>
             <input type="number" min="0" value="${g1 ?? ''}" onchange="guardarResultado(${i}, 0, this.value)">
             <div>vs</div>
             <input type="number" min="0" value="${g2 ?? ''}" onchange="guardarResultado(${i}, 1, this.value)">
           </div>
-          <span>${b1 && b2 ? ${b1} + ${b2} : '<em>(Libre)</em>'}</span>
-        </div>;
+          <span>${b1 && b2 ? `${b1} + ${b2}` : '<em>(Libre)</em>'}</span>
+        </div>`;
     }
   }
 
   function guardarResultado(i, eq, val) {
     const [a, b] = resultados[i] ?? [null, null];
     resultados[i] = eq === 0 ? [parseInt(val), b] : [a, parseInt(val)];
-    guardarEstado(); // <- NUEVO
+    guardarEstado();
   }
 
   function mostrarTabla() {
-  const tabla = {};
-  const indiv = {};
+    const tabla = {};
+    const indiv = {};
 
-  for (let i = 0; i < resultados.length; i += 2) {
-    const res1 = resultados[i];
-    const res2 = resultados[i + 1];
+    for (let i = 0; i < resultados.length; i += 2) {
+      const res1 = resultados[i];
+      const res2 = resultados[i + 1];
 
-    if (!res1 || !res2) continue;
-    const [g1, g2] = res1;
+      if (!res1 || !res2) continue;
+      const [g1, g2] = res1;
 
-    const [a1, a2] = partidos[i];
-    const [b1, b2] = partidos[i + 1];
+      const [a1, a2] = partidos[i];
+      const [b1, b2] = partidos[i + 1];
 
-    const nombreA = ${a1} + ${a2};
-    const nombreB = ${b1} + ${b2};
+      const nombreA = `${a1} + ${a2}`;
+      const nombreB = `${b1} + ${b2}`;
 
-    tabla[nombreA] = tabla[nombreA] || [0, 0, 0];
-    tabla[nombreB] = tabla[nombreB] || [0, 0, 0];
+      tabla[nombreA] = tabla[nombreA] || [0, 0, 0];
+      tabla[nombreB] = tabla[nombreB] || [0, 0, 0];
 
-    tabla[nombreA][1]++;
-    tabla[nombreB][1]++;
-    tabla[nombreA][2] += g1 - g2;
-    tabla[nombreB][2] += g2 - g1;
+      tabla[nombreA][1]++;
+      tabla[nombreB][1]++;
+      tabla[nombreA][2] += g1 - g2;
+      tabla[nombreB][2] += g2 - g1;
 
-    if (g1 > g2) tabla[nombreA][0] += 3;
-    else if (g2 > g1) tabla[nombreB][0] += 3;
-    else { tabla[nombreA][0]++; tabla[nombreB][0]++; }
+      if (g1 > g2) tabla[nombreA][0] += 3;
+      else if (g2 > g1) tabla[nombreB][0] += 3;
+      else { tabla[nombreA][0]++; tabla[nombreB][0]++; }
 
-    [a1, a2, b1, b2].forEach(j => indiv[j] = indiv[j] || [0, 0, 0]);
+      [a1, a2, b1, b2].forEach(j => indiv[j] = indiv[j] || [0, 0, 0]);
 
-    [a1, a2].forEach(j => {
-      indiv[j][1]++;
-      indiv[j][2] += g1 - g2;
-      if (g1 > g2) indiv[j][0] += 3;
-      else if (g1 === g2) indiv[j][0] += 1;
-    });
+      [a1, a2].forEach(j => {
+        indiv[j][1]++;
+        indiv[j][2] += g1 - g2;
+        if (g1 > g2) indiv[j][0] += 3;
+        else if (g1 === g2) indiv[j][0] += 1;
+      });
 
-    [b1, b2].forEach(j => {
-      indiv[j][1]++;
-      indiv[j][2] += g2 - g1;
-      if (g2 > g1) indiv[j][0] += 3;
-      else if (g1 === g2) indiv[j][0] += 1;
-    });
+      [b1, b2].forEach(j => {
+        indiv[j][1]++;
+        indiv[j][2] += g2 - g1;
+        if (g2 > g1) indiv[j][0] += 3;
+        else if (g1 === g2) indiv[j][0] += 1;
+      });
+    }
+
+    const div = document.getElementById('tabla-resultados');
+    div.innerHTML =
+      "<h3>Por Pareja</h3><table id='tabla-parejas'><tr><th>Pareja</th><th>Pts</th><th>PJ</th><th>DG</th></tr>" +
+      Object.entries(tabla).sort((a, b) => b[1][0] - a[1][0]).map(([k, v]) =>
+        `<tr><td>${k}</td><td>${v[0]}</td><td>${v[1]}</td><td>${v[2]}</td></tr>`).join("") +
+      "</table><h3>Individual</h3><table id='tabla-individual'><tr><th>Jugador</th><th>Pts</th><th>PJ</th><th>DG</th></tr>" +
+      Object.entries(indiv).sort((a, b) => b[1][0] - a[1][0]).map(([k, v]) =>
+        `<tr><td>${k}</td><td>${v[0]}</td><td>${v[1]}</td><td>${v[2]}</td></tr>`).join("") +
+      "</table>";
   }
 
-  const div = document.getElementById('tabla-resultados');
-  div.innerHTML =
-    "<h3>Por Pareja</h3><table id='tabla-parejas'><tr><th>Pareja</th><th>Pts</th><th>PJ</th><th>DG</th></tr>" +
-    Object.entries(tabla).sort((a, b) => b[1][0] - a[1][0]).map(([k, v]) =>
-      <tr><td>${k}</td><td>${v[0]}</td><td>${v[1]}</td><td>${v[2]}</td></tr>).join("") +
-    "</table><h3>Individual</h3><table id='tabla-individual'><tr><th>Jugador</th><th>Pts</th><th>PJ</th><th>DG</th></tr>" +
-    Object.entries(indiv).sort((a, b) => b[1][0] - a[1][0]).map(([k, v]) =>
-      <tr><td>${k}</td><td>${v[0]}</td><td>${v[1]}</td><td>${v[2]}</td></tr>).join("") +
-    "</table>";
-}
-
-  // 🔄 NUEVO: Guardar en localStorage
   function guardarEstado() {
     localStorage.setItem('jugadores', JSON.stringify(nombres));
     localStorage.setItem('rondas', JSON.stringify(rondas));
     localStorage.setItem('resultados', JSON.stringify(resultados));
   }
 
-  // 💾 NUEVO: Recuperar desde localStorage
   function cargarEstado() {
     const j = localStorage.getItem('jugadores');
     const r = localStorage.getItem('rondas');
@@ -522,65 +521,61 @@ Mail: sergiosainz.proyectos@gmail.com</footer>
     return false;
   }
 
-  // 🔁 NUEVO: Botón de reinicio total
   function confirmarReinicio() {
-  const seguro = confirm("¿Vas a reiniciar todo?");
-  if (seguro) {
-    localStorage.removeItem('jugadores');
-    localStorage.removeItem('rondas');
-    localStorage.removeItem('resultados');
-    location.reload();
+    const seguro = confirm("¿Vas a reiniciar todo?");
+    if (seguro) {
+      localStorage.removeItem('jugadores');
+      localStorage.removeItem('rondas');
+      localStorage.removeItem('resultados');
+      location.reload();
+    }
   }
-}
 
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('service-worker.js')
       .then(reg => console.log('✔ Service Worker registrado:', reg.scope))
       .catch(err => console.error('✖ Error al registrar Service Worker:', err));
   }
+
   function guardarEnHistorial() {
-  const parejas = document.querySelectorAll('#tabla-parejas tr:not(:first-child)');
-  const individual = document.querySelectorAll('#tabla-individual tr:not(:first-child)');
+    const parejas = document.querySelectorAll('#tabla-parejas tr:not(:first-child)');
+    const individual = document.querySelectorAll('#tabla-individual tr:not(:first-child)');
 
-  const historial = JSON.parse(localStorage.getItem('historial')) || {};
+    const historial = JSON.parse(localStorage.getItem('historial')) || {};
 
-  // Iniciar estructura si no existe
-  historial['parejas'] = historial['parejas'] || {};
-  historial['individual'] = historial['individual'] || {};
+    historial['parejas'] = historial['parejas'] || {};
+    historial['individual'] = historial['individual'] || {};
 
-  // Cargar tabla por pareja
-  parejas.forEach(row => {
-    const cols = row.querySelectorAll('td');
-    const nombre = cols[0].innerText;
-    const pts = parseInt(cols[1]);
-    const pj = parseInt(cols[2]);
-    const dg = parseInt(cols[3]);
+    parejas.forEach(row => {
+      const cols = row.querySelectorAll('td');
+      const nombre = cols[0].innerText;
+      const pts = parseInt(cols[1]);
+      const pj = parseInt(cols[2]);
+      const dg = parseInt(cols[3]);
 
-    historial['parejas'][nombre] = {
-      pts, pj, dg
-    };
-  });
+      historial['parejas'][nombre] = { pts, pj, dg };
+    });
 
-  // Cargar tabla individual
-  individual.forEach(row => {
-    const cols = row.querySelectorAll('td');
-    const nombre = cols[0].innerText;
-    const pts = parseInt(cols[1]);
-    const pj = parseInt(cols[2]);
-    const dg = parseInt(cols[3]);
+    individual.forEach(row => {
+      const cols = row.querySelectorAll('td');
+      const nombre = cols[0].innerText;
+      const pts = parseInt(cols[1]);
+      const pj = parseInt(cols[2]);
+      const dg = parseInt(cols[3]);
 
-    // Si ya existía, sumamos; si no, iniciamos
-    if (!historial['individual'][nombre]) {
-      historial['individual'][nombre] = { pts: 0, pj: 0, dg: 0 };
-    }
-    historial['individual'][nombre].pts += pts;
-    historial['individual'][nombre].pj += pj;
-    historial['individual'][nombre].dg += dg;
-  });
+      if (!historial['individual'][nombre]) {
+        historial['individual'][nombre] = { pts: 0, pj: 0, dg: 0 };
+      }
+      historial['individual'][nombre].pts += pts;
+      historial['individual'][nombre].pj += pj;
+      historial['individual'][nombre].dg += dg;
+    });
 
-  localStorage.setItem('historial', JSON.stringify(historial));
-  alert("Historial de parejas guardado correctamente.");
-}
+    localStorage.setItem('historial', JSON.stringify(historial));
+    alert("Historial de parejas guardado correctamente.");
+  }
 </script>
+
+  
 </body>
 </html>
