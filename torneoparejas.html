@@ -538,42 +538,39 @@ Mail: sergiosainz.proyectos@gmail.com</footer>
   }
 
   function guardarEnHistorial() {
-    const parejas = document.querySelectorAll('#tabla-parejas tr:not(:first-child)');
-    const individual = document.querySelectorAll('#tabla-individual tr:not(:first-child)');
+  const parejas = document.querySelectorAll('#tabla-parejas tr:not(:first-child)');
+  const individual = document.querySelectorAll('#tabla-individual tr:not(:first-child)');
 
-    const historial = JSON.parse(localStorage.getItem('historial')) || {};
+  const nuevoHistorial = {
+    tipo: "parejas",
+    parejas: {},
+    individual: {}
+  };
 
-    historial['parejas'] = historial['parejas'] || {};
-    historial['individual'] = historial['individual'] || {};
+  parejas.forEach(row => {
+    const cols = row.querySelectorAll('td');
+    const nombre = cols[0].innerText;
+    const pts = parseInt(cols[1]);
+    const pj = parseInt(cols[2]);
+    const dg = parseInt(cols[3]);
+    nuevoHistorial.parejas[nombre] = { pts, pj, dg };
+  });
 
-    parejas.forEach(row => {
-      const cols = row.querySelectorAll('td');
-      const nombre = cols[0].innerText;
-      const pts = parseInt(cols[1]);
-      const pj = parseInt(cols[2]);
-      const dg = parseInt(cols[3]);
+  individual.forEach(row => {
+    const cols = row.querySelectorAll('td');
+    const nombre = cols[0].innerText;
+    const pts = parseInt(cols[1]);
+    const pj = parseInt(cols[2]);
+    const dg = parseInt(cols[3]);
+    nuevoHistorial.individual[nombre] = { pts, pj, dg };
+  });
 
-      historial['parejas'][nombre] = { pts, pj, dg };
-    });
+  const historial = JSON.parse(localStorage.getItem('historial')) || [];
+  historial.push(nuevoHistorial);
+  localStorage.setItem('historial', JSON.stringify(historial));
 
-    individual.forEach(row => {
-      const cols = row.querySelectorAll('td');
-      const nombre = cols[0].innerText;
-      const pts = parseInt(cols[1]);
-      const pj = parseInt(cols[2]);
-      const dg = parseInt(cols[3]);
-
-      if (!historial['individual'][nombre]) {
-        historial['individual'][nombre] = { pts: 0, pj: 0, dg: 0 };
-      }
-      historial['individual'][nombre].pts += pts;
-      historial['individual'][nombre].pj += pj;
-      historial['individual'][nombre].dg += dg;
-    });
-
-    localStorage.setItem('historial', JSON.stringify(historial));
-    alert("Historial de parejas guardado correctamente.");
-  }
+  alert("Historial de parejas guardado correctamente.");
+}
 </script>
 
   
