@@ -537,33 +537,29 @@ Mail: sergiosainz.proyectos@gmail.com</footer>
       .catch(err => console.error('✖ Error al registrar Service Worker:', err));
   }
 
+  <script>
   function guardarEnHistorial() {
-  const tabla = document.getElementById('tabla-parejas');
-  if (!tabla) {
-    alert("No se encontró la tabla de parejas.");
-    return;
+    const tabla = document.getElementById('tabla-parejas');
+    if (!tabla || tabla.innerHTML.trim() === '') {
+      alert('No hay datos para guardar.');
+      return;
+    }
+
+    const historialGuardado = localStorage.getItem('historialParejas');
+    const historialDiv = document.createElement('div');
+    if (historialGuardado) {
+      historialDiv.innerHTML = historialGuardado;
+    }
+
+    const nuevaTabla = tabla.cloneNode(true);
+    const separador = document.createElement('hr');
+    historialDiv.appendChild(separador);
+    historialDiv.appendChild(nuevaTabla);
+
+    localStorage.setItem('historialParejas', historialDiv.innerHTML);
+    alert('¡Historial guardado exitosamente!');
   }
-
-  const filas = tabla.querySelectorAll('tr:not(:first-child)');
-  const tipo = 'parejas';
-
-  const historialGuardado = JSON.parse(localStorage.getItem('historial')) || [];
-
-  const nuevoHistorial = Array.from(filas).map(fila => {
-    const columnas = fila.querySelectorAll('td');
-    return {
-      tipo: tipo,
-      pareja: columnas[0]?.innerText || '',
-      pts: columnas[1]?.innerText || '',
-      pj: columnas[2]?.innerText || '',
-      dg: columnas[3]?.innerText || ''
-    };
-  });
-
-  const historialActualizado = historialGuardado.concat(nuevoHistorial);
-  localStorage.setItem('historial', JSON.stringify(historialActualizado));
-  alert("Historial de parejas guardado correctamente.");
-}
+</script>
 </script>
 
   
