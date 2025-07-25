@@ -234,53 +234,49 @@ window.onload = () => {
 <script>
 
   function calcularHistorialParejas(historial) {
-    const acumulado = {};
+  const acumulado = {};
 
-    historial
-      .filter(t => t.tipo === "parejas")
-      .forEach(t => {
-        t.resumen.forEach(p => {
-          const nombre = p.nombre;
-          const pts = p.pts;
-          const pj = p.pj;
+  historial
+    .filter(t => t.tipo === "parejas")
+    .forEach(t => {
+      const datos = t.parejas;
+      Object.entries(datos).forEach(([nombre, stats]) => {
+        const { pj, pg, pe, pp } = stats;
 
-          const pe = pts - 3 * Math.floor(pts / 3);
-          const pg = Math.floor((pts - pe) / 3);
-          const pp = pj - pg - pe;
+        if (!acumulado[nombre]) {
+          acumulado[nombre] = { pj: 0, pg: 0, pe: 0, pp: 0 };
+        }
 
-          if (!acumulado[nombre]) {
-            acumulado[nombre] = { pj: 0, pg: 0, pe: 0, pp: 0 };
-          }
-
-          acumulado[nombre].pj += pj;
-          acumulado[nombre].pg += pg;
-          acumulado[nombre].pe += pe;
-          acumulado[nombre].pp += pp;
-        });
+        acumulado[nombre].pj += pj;
+        acumulado[nombre].pg += pg;
+        acumulado[nombre].pe += pe;
+        acumulado[nombre].pp += pp;
       });
-
-    const parejas = Object.entries(acumulado).map(([nombre, stats]) => {
-      const { pj, pg, pe, pp } = stats;
-      const pct = n => pj > 0 ? ((n / pj) * 100).toFixed(1) + "%" : "0.0%";
-      return {
-        nombre, pj, pg, pe, pp,
-        pctPG: pct(pg),
-        pctPE: pct(pe),
-        pctPP: pct(pp)
-      };
     });
 
-    parejas.sort((a, b) => {
-      if (b.pg !== a.pg) return b.pg - a.pg;
-      if (b.pe !== a.pe) return b.pe - a.pe;
-      return a.pp - b.pp;
-    });
+  const parejas = Object.entries(acumulado).map(([nombre, stats], i) => {
+    const { pj, pg, pe, pp } = stats;
+    const pct = n => pj > 0 ? ((n / pj) * 100).toFixed(1) + "%" : "0.0%";
+    return {
+      nombre,
+      pj, pg, pe, pp,
+      pctPG: pct(pg),
+      pctPE: pct(pe),
+      pctPP: pct(pp)
+    };
+  });
 
-    return parejas;
-  }
+  parejas.sort((a, b) => {
+    if (b.pg !== a.pg) return b.pg - a.pg;
+    if (b.pe !== a.pe) return b.pe - a.pe;
+    return a.pp - b.pp;
+  });
+
+  return parejas;
+}
 
   function mostrarTablaParejas() {
-    const historial = JSON.parse(localStorage.getItem('historialTorneos')) || [];
+    const historial = JSON.parse(localStorage.getItem('historial')) || [];
     const parejas = calcularHistorialParejas(historial);
 
     if (parejas.length === 0) {
