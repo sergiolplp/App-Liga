@@ -532,43 +532,37 @@ Mail: sergiosainz.proyectos@gmail.com</footer>
   }
 
   function guardarEnHistorial() {
-    const tabla = document.getElementById('tabla-parejas');
-    if (!tabla) {
-      alert('No se encontró la tabla de parejas.');
-      return;
-    }
-
-    const filas = tabla.querySelectorAll('tbody tr');
-    if (filas.length === 0) {
-      alert('No hay datos para guardar.');
-      return;
-    }
-
-    const datosActuales = Array.from(filas).map(fila => {
-      const columnas = fila.querySelectorAll('td');
-      return {
-        nombre: columnas[1]?.textContent || '',
-        pj: columnas[2]?.textContent || '',
-        pg: columnas[3]?.textContent || '',
-        pe: columnas[4]?.textContent || '',
-        pp: columnas[5]?.textContent || '',
-        pgp: columnas[6]?.textContent || '',
-        pep: columnas[7]?.textContent || '',
-        ppp: columnas[8]?.textContent || ''
-      };
-    });
-
-    // Cargar historial anterior si existe
-    const historialGuardado = JSON.parse(localStorage.getItem('historialParejas') || '[]');
-
-    // Agregar los nuevos datos al final del historial
-    const nuevoHistorial = historialGuardado.concat(datosActuales);
-
-    // Guardar en localStorage
-    localStorage.setItem('historialParejas', JSON.stringify(nuevoHistorial));
-
-    alert('Historial guardado correctamente.');
+  const tabla = document.getElementById('tabla-parejas');
+  if (!tabla) {
+    alert('No se encontró la tabla de parejas.');
+    return;
   }
+
+  const filas = tabla.querySelectorAll('tbody tr');
+  if (filas.length === 0) {
+    alert('No hay datos para guardar.');
+    return;
+  }
+
+  const datosActuales = Array.from(filas).map(fila => {
+    const columnas = fila.querySelectorAll('td');
+    return {
+      nombre: columnas[0]?.textContent || '',
+      pj: columnas[2]?.textContent || '',
+      pg: '-', // No está disponible directamente
+      pe: '-', // No está disponible directamente
+      pp: '-', // No está disponible directamente
+      pgp: '-', // No está disponible directamente
+      pep: '-', // No está disponible directamente
+      ppp: '-'  // No está disponible directamente
+    };
+  });
+
+  const historialAnterior = JSON.parse(localStorage.getItem('historialParejas') || '[]');
+  const historialActualizado = historialAnterior.concat(datosActuales);
+  localStorage.setItem('historialParejas', JSON.stringify(historialActualizado));
+  alert('Historial guardado correctamente.');
+}
 </script>
 
 </body>
