@@ -311,5 +311,59 @@ window.onload = () => {
   };
 </script>
 
+<script>
+  function mostrarHistorialParejas() {
+    const contenedor = document.getElementById('tabla-parejas');
+    if (!contenedor) return;
+
+    const historial = JSON.parse(localStorage.getItem('historialParejas') || '[]');
+    if (historial.length === 0) {
+      contenedor.innerHTML = '<p>No hay historial guardado para torneo en pareja.</p>';
+      return;
+    }
+
+    let tablaHTML = `
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Nombre</th>
+            <th>PJ</th>
+            <th>PG</th>
+            <th>PE</th>
+            <th>PP</th>
+            <th>%PG</th>
+            <th>%PE</th>
+            <th>%PP</th>
+          </tr>
+        </thead>
+        <tbody>
+    `;
+
+    historial.forEach((item, index) => {
+      tablaHTML += `
+        <tr>
+          <td>${index + 1}</td>
+          <td>${item.nombre}</td>
+          <td>${item.pj}</td>
+          <td>${item.pg}</td>
+          <td>${item.pe}</td>
+          <td>${item.pp}</td>
+          <td>${item.pgp}</td>
+          <td>${item.pep}</td>
+          <td>${item.ppp}</td>
+        </tr>
+      `;
+    });
+
+    tablaHTML += '</tbody></table>';
+    contenedor.innerHTML = tablaHTML;
+  }
+
+  window.onload = function () {
+    mostrarHistorialParejas();
+  };
+</script>
+
 </body>
 </html>
