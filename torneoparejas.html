@@ -531,13 +531,6 @@ Mail: sergiosainz.proyectos@gmail.com</footer>
     }
   }
 
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('service-worker.js')
-      .then(reg => console.log('✔ Service Worker registrado:', reg.scope))
-      .catch(err => console.error('✖ Error al registrar Service Worker:', err));
-  }
-
-  <script>
   function guardarEnHistorial() {
     const tabla = document.getElementById('tabla-parejas');
     if (!tabla || tabla.innerHTML.trim() === '') {
@@ -558,6 +551,12 @@ Mail: sergiosainz.proyectos@gmail.com</footer>
 
     localStorage.setItem('historialParejas', historialDiv.innerHTML);
     alert('¡Historial guardado exitosamente!');
+  }
+
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('service-worker.js')
+      .then(reg => console.log('✔ Service Worker registrado:', reg.scope))
+      .catch(err => console.error('✖ Error al registrar Service Worker:', err));
   }
 </script>
 
