@@ -365,5 +365,81 @@ window.onload = () => {
   };
 </script>
 
+<script>
+function mostrarHistorialLigaIndividual() {
+  const contenedor = document.getElementById('tabla-liga');
+  if (!contenedor) return;
+
+  const historial = JSON.parse(localStorage.getItem('historial') || '[]');
+  if (historial.length === 0) {
+    contenedor.innerHTML = '<p>No hay historial guardado de liga individual.</p>';
+    return;
+  }
+
+  const acumulado = {};
+
+  historial.forEach(item => {
+    for (const nombre in item) {
+      if (!acumulado[nombre]) {
+        acumulado[nombre] = { pj: 0, pg: 0, pe: 0, pp: 0 };
+      }
+
+      acumulado[nombre].pj += item[nombre].pj;
+      acumulado[nombre].pg += item[nombre].pg || 0;
+      acumulado[nombre].pe += item[nombre].pe || 0;
+      acumulado[nombre].pp += item[nombre].pp || 0;
+    }
+  });
+
+  let tablaHTML = `
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Nombre</th>
+          <th>PJ</th>
+          <th>PG</th>
+          <th>PE</th>
+          <th>PP</th>
+          <th>%PG</th>
+          <th>%PE</th>
+          <th>%PP</th>
+        </tr>
+      </thead>
+      <tbody>
+  `;
+
+  const nombresOrdenados = Object.keys(acumulado).sort();
+  nombresOrdenados.forEach((nombre, i) => {
+    const datos = acumulado[nombre];
+    const pj = datos.pj || 0;
+    const pg = datos.pg || 0;
+    const pe = datos.pe || 0;
+    const pp = datos.pp || 0;
+
+    const pgp = pj ? Math.round((pg / pj) * 100) : 0;
+    const pep = pj ? Math.round((pe / pj) * 100) : 0;
+    const ppp = pj ? Math.round((pp / pj) * 100) : 0;
+
+    tablaHTML += `
+      <tr>
+        <td>${i + 1}</td>
+        <td>${nombre}</td>
+        <td>${pj}</td>
+        <td>${pg}</td>
+        <td>${pe}</td>
+        <td>${pp}</td>
+        <td>${pgp}%</td>
+        <td>${pep}%</td>
+        <td>${ppp}%</td>
+      </tr>
+    `;
+  });
+
+  tablaHTML += '</tbody></table>';
+  contenedor.innerHTML = tablaHTML;
+}
+</script>
+
 </body>
 </html>
