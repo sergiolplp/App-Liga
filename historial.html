@@ -222,16 +222,7 @@
     document.getElementById("tabla-liga").innerHTML = tabla;
   }
 
-  /*
-window.onload = () => {
-  const t = localStorage.getItem('theme') || 'light';
-  document.body.setAttribute('data-theme', t);
-};
-*/
 
-</script>
-
-<script>
 
   function calcularHistorialParejas(historial) {
   const acumulado = {};
@@ -303,15 +294,8 @@ window.onload = () => {
     document.getElementById("tabla-parejas").innerHTML = tabla;
   }
 
-  window.onload = () => {
-    const t = localStorage.getItem('theme') || 'light';
-    document.body.setAttribute('data-theme', t);
-    mostrarTablaLiga();
-    mostrarTablaParejas(); // <<--- AGREGAMOS ESTO
-  };
-</script>
+  
 
-<script>
   function mostrarHistorialParejas() {
     const contenedor = document.getElementById('tabla-parejas');
     if (!contenedor) return;
@@ -360,12 +344,7 @@ window.onload = () => {
     contenedor.innerHTML = tablaHTML;
   }
 
-  window.onload = function () {
-    mostrarHistorialParejas();
-  };
-</script>
 
-<script>
 function mostrarHistorialLigaIndividual() {
   const contenedor = document.getElementById('tabla-liga');
   if (!contenedor) return;
@@ -439,6 +418,18 @@ function mostrarHistorialLigaIndividual() {
   tablaHTML += '</tbody></table>';
   contenedor.innerHTML = tablaHTML;
 }
+
+window.onload = function () {
+  const t = localStorage.getItem('theme') || 'light';
+  document.body.setAttribute('data-theme', t);
+
+  mostrarTablaLiga();
+  mostrarTablaParejas();
+
+  mostrarHistorialLigaIndividual();
+  mostrarHistorialParejas();
+};
+
 </script>
 
 </body>
