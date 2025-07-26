@@ -276,7 +276,7 @@ window.onload = () => {
 }
 
   function mostrarTablaParejas() {
-    const historial = JSON.parse(localStorage.getItem('historial')) || [];
+    const historial = JSON.parse(localStorage.getItem('historialParejas')) || [];
     const parejas = calcularHistorialParejas(historial);
 
     if (parejas.length === 0) {
