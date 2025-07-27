@@ -561,15 +561,15 @@ function guardarEnHistorial() {
     return;
   }
 
-  const historialParejas = JSON.parse(localStorage.getItem('historialParejas') || '[]');
+  const historialTorneos = JSON.parse(localStorage.getItem('historialTorneos') || '[]');
 
-  historialParejas.push({
+  historialTorneos.push({
     tipo: 'parejas',
     fecha: new Date().toISOString().slice(0, 10),
     datos: datosActuales
   });
 
-  localStorage.setItem('historialParejas', JSON.stringify(historialParejas));
+  localStorage.setItem('historialTorneos', JSON.stringify(historialTorneos));
   alert('Historial guardado correctamente.');
 }
   
