@@ -544,19 +544,21 @@ Mail: sergiosainz.proyectos@gmail.com</footer>
     return;
   }
 
-  const datosActuales = Array.from(filas).map(fila => {
+  const datosActuales = Array.from(filas)
+  .map(fila => {
     const columnas = fila.querySelectorAll('td');
     return {
-      nombre: columnas[0]?.textContent || '',
-      pj: columnas[2]?.textContent || '',
-      pg: '-', // No está disponible directamente
-      pe: '-', // No está disponible directamente
-      pp: '-', // No está disponible directamente
-      pgp: '-', // No está disponible directamente
-      pep: '-', // No está disponible directamente
-      ppp: '-'  // No está disponible directamente
+      nombre: columnas[0]?.textContent.trim() || '',
+      pj: columnas[2]?.textContent.trim() || '',
+      pg: '-',
+      pe: '-',
+      pp: '-',
+      pgp: '-',
+      pep: '-',
+      ppp: '-'
     };
-  });
+  })
+  .filter(d => d.nombre && d.pj); // ❗ Filtra las filas sin datos válidos
 
   const historialTorneos = JSON.parse(localStorage.getItem('historialTorneos') || '[]');
   historialTorneos.push({
