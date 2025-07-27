@@ -150,71 +150,61 @@
   }
 
   function calcularEstadisticasAcumuladas(historial) {
-    const acumulado = {};
+  const acumulado = {};
 
-    historial
-      .filter(t => t.tipo === "individual")
-      .forEach(t => {
-        t.resumen.forEach(j => {
-          const nombre = j.nombre;
-          const Pts = j.Pts;
-          const PJ = j.PJ;
+  historial
+    .filter(t => t.tipo === "individual")
+    .forEach(t => {
+      t.resumen.forEach(j => {
+        const nombre = j.nombre;
+        const PJ = j.PJ;
+        const PG = j.PG;
+        const PE = j.PE;
+        const PP = j.PP;
 
-          const PE = Pts - 3 * Math.floor(Pts / 3);
-          const PG = Math.floor((Pts - PE) / 3);
-          const PP = PJ - PG - PE;
+        if (!acumulado[nombre]) {
+          acumulado[nombre] = { PJ: 0, PG: 0, PE: 0, PP: 0 };
+        }
 
-          if (!acumulado[nombre]) {
-            acumulado[nombre] = { PJ: 0, PG: 0, PE: 0, PP: 0 };
-          }
-
-          acumulado[nombre].PJ += PJ;
-          acumulado[nombre].PG += PG;
-          acumulado[nombre].PE += PE;
-          acumulado[nombre].PP += PP;
-        });
+        acumulado[nombre].PJ += PJ;
+        acumulado[nombre].PG += PG;
+        acumulado[nombre].PE += PE;
+        acumulado[nombre].PP += PP;
       });
-
-    const jugadores = Object.entries(acumulado).map(([nombre, stats]) => {
-      const { PJ, PG, PE, PP } = stats;
-      const pct = n => PJ > 0 ? ((n / PJ) * 100).toFixed(1) + "%" : "0.0%";
-      return {
-        nombre, PJ, PG, PE, PP,
-        pctPG: pct(PG),
-        pctPE: pct(PE),
-        pctPP: pct(PP)
-      };
     });
 
-    jugadores.sort((a, b) => {
-      if (b.PG !== a.PG) return b.PG - a.PG;
-      if (b.PE !== a.PE) return b.PE - a.PE;
-      return a.PP - b.PP;
-    });
+  const jugadores = Object.entries(acumulado).map(([nombre, stats]) => {
+    const { PJ, PG, PE, PP } = stats;
+    const PTS = PG * 3 + PE;
+    const pct = n => PJ > 0 ? ((n / PJ) * 100).toFixed(1) + "%" : "0.0%";
+    return {
+      nombre, PTS, PJ, PG, PE, PP,
+      pctPG: pct(PG),
+      pctPE: pct(PE),
+      pctPP: pct(PP)
+    };
+  });
 
-    return jugadores;
-  }
+  jugadores.sort((a, b) => b.PTS - a.PTS);
+  return jugadores;
+}
 
   function mostrarTablaLiga() {
-  const historial = JSON.parse(localStorage.getItem('historialTorneos') || '[]');
-  const jugadores = calcularEstadisticasAcumuladas(historial);
+  const jugadores = calcularEstadisticasAcumuladas(JSON.parse(localStorage.getItem('historialTorneos') || '[]'));
   const contenedor = document.getElementById('tabla-liga');
   contenedor.innerHTML = '';
-
-  if (jugadores.length === 0) {
-    contenedor.innerHTML = "<p>No hay datos de torneos individuales.</p>";
-    return;
-  }
 
   const tabla = document.createElement('table');
   tabla.innerHTML = `
     <thead>
-      <tr><th>Nombre</th><th>PJ</th><th>PG</th><th>PE</th><th>PP</th><th>%PG</th><th>%PE</th><th>%PP</th></tr>
+      <tr><th>#</th><th>Nombre</th><th>PTS</th><th>PJ</th><th>PG</th><th>PE</th><th>PP</th><th>%PG</th><th>%PE</th><th>%PP</th></tr>
     </thead>
     <tbody>
-      ${jugadores.map(j => `
+      ${jugadores.map((j, i) => `
         <tr>
+          <td>${i + 1}</td>
           <td>${j.nombre}</td>
+          <td>${j.PTS}</td>
           <td>${j.PJ}</td>
           <td>${j.PG}</td>
           <td>${j.PE}</td>
@@ -224,18 +214,16 @@
           <td>${j.pctPP}</td>
         </tr>
       `).join('')}
-    </tbody>
-  `;
+    </tbody>`;
   contenedor.appendChild(tabla);
 }
-
+  
   function calcularHistorialParejas(historial) {
   const acumulado = {};
 
   historial
     .filter(t => t.tipo === "parejas")
     .forEach(t => {
-      // Soporta el formato nuevo (t.datos) y el viejo (t.parejas)
       const datos = t.datos
         ? t.datos
         : Object.entries(t.parejas || {}).map(([nombre, s]) => ({
@@ -257,45 +245,37 @@
 
   const parejas = Object.entries(acumulado).map(([nombre, stats]) => {
     const { pj, pg, pe, pp } = stats;
+    const pts = pg * 3 + pe;
     const pct = n => pj > 0 ? ((n / pj) * 100).toFixed(1) + "%" : "0.0%";
     return {
       nombre,
-      pj, pg, pe, pp,
+      pts, pj, pg, pe, pp,
       pctPG: pct(pg),
       pctPE: pct(pe),
       pctPP: pct(pp)
     };
   });
 
-  parejas.sort((a, b) => {
-    if (b.pg !== a.pg) return b.pg - a.pg;
-    if (b.pe !== a.pe) return b.pe - a.pe;
-    return a.pp - b.pp;
-  });
-
+  parejas.sort((a, b) => b.pts - a.pts);
   return parejas;
 }
 
   function mostrarTablaParejas() {
-  const historial = JSON.parse(localStorage.getItem('historialTorneos') || '[]');
-  const parejas = calcularHistorialParejas(historial);
+  const parejas = calcularHistorialParejas(JSON.parse(localStorage.getItem('historialTorneos') || '[]'));
   const contenedor = document.getElementById('tabla-parejas');
   contenedor.innerHTML = '';
-
-  if (parejas.length === 0) {
-    contenedor.innerHTML = "<p>No hay datos de torneos por parejas.</p>";
-    return;
-  }
 
   const tabla = document.createElement('table');
   tabla.innerHTML = `
     <thead>
-      <tr><th>Pareja</th><th>PJ</th><th>PG</th><th>PE</th><th>PP</th><th>%PG</th><th>%PE</th><th>%PP</th></tr>
+      <tr><th>#</th><th>Pareja</th><th>PTS</th><th>PJ</th><th>PG</th><th>PE</th><th>PP</th><th>%PG</th><th>%PE</th><th>%PP</th></tr>
     </thead>
     <tbody>
-      ${parejas.map(p => `
+      ${parejas.map((p, i) => `
         <tr>
+          <td>${i + 1}</td>
           <td>${p.nombre}</td>
+          <td>${p.pts}</td>
           <td>${p.pj}</td>
           <td>${p.pg}</td>
           <td>${p.pe}</td>
@@ -305,8 +285,7 @@
           <td>${p.pctPP}</td>
         </tr>
       `).join('')}
-    </tbody>
-  `;
+    </tbody>`;
   contenedor.appendChild(tabla);
 }
 
