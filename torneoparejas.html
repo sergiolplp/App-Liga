@@ -548,11 +548,14 @@ function guardarEnHistorial() {
     .map(fila => {
       const columnas = fila.querySelectorAll('td');
       return {
-        nombre: columnas[0]?.textContent.trim() || '',
-        pj: columnas[2]?.textContent.trim() || '',
-        pg: '0', pe: '0', pp: '0',
-        pgp: '0', pep: '0', ppp: '0'
-      };
+  nombre: columnas[0]?.textContent.trim() || '',
+  pts: parseInt(columnas[1]?.textContent.trim()) || 0,
+  pj: parseInt(columnas[2]?.textContent.trim()) || 0,
+  dg: parseInt(columnas[3]?.textContent.trim()) || 0,
+  pg: parseInt(columnas[4]?.textContent.trim()) || 0,
+  pe: parseInt(columnas[5]?.textContent.trim()) || 0,
+  pp: parseInt(columnas[6]?.textContent.trim()) || 0
+};
     })
     .filter(d => d.nombre && d.pj); // ❗ Elimina filas vacías
 
