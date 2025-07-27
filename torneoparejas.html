@@ -275,6 +275,7 @@
 Donaciones al ALIAS: sergiosainz.frances GRACIAS!
 Mail: sergiosainz.proyectos@gmail.com</footer>
 
+
 <script>
   const secciones = ['jugadores', 'rondas', 'partidos', 'tabla'];
 
@@ -298,7 +299,6 @@ Mail: sergiosainz.proyectos@gmail.com</footer>
   window.onload = () => {
     const t = localStorage.getItem('theme') || 'light';
     document.body.setAttribute('data-theme', t);
-
     if (cargarEstado()) {
       mostrarSeccion('rondas');
       mostrarRondas();
@@ -363,13 +363,11 @@ Mail: sergiosainz.proyectos@gmail.com</footer>
 
     const usadas = new Set();
     const totalParejas = Math.floor(nombres.length / 2);
-
     let intentos = 10000;
     while (intentos-- > 0 && rondas.length < parejas.length) {
       const candidatos = [...parejas].sort(() => Math.random() - 0.5);
       const ronda = [];
       const usados = new Set();
-
       for (const [a, b] of candidatos) {
         const key = `${a}-${b}`;
         if (!usadas.has(key) && !usados.has(a) && !usados.has(b)) {
@@ -379,7 +377,6 @@ Mail: sergiosainz.proyectos@gmail.com</footer>
           if (ronda.length === totalParejas) break;
         }
       }
-
       if (ronda.length === totalParejas) {
         ronda.forEach(([a, b]) => usadas.add(`${a}-${b}`));
         rondas.push(ronda);
@@ -413,18 +410,15 @@ Mail: sergiosainz.proyectos@gmail.com</footer>
   function mostrarPartidos() {
     const cont = document.getElementById('partidos-lista');
     cont.innerHTML = '';
-
     for (let i = 0; i < partidos.length; i += 2) {
       const pareja1 = partidos[i];
       const pareja2 = partidos[i + 1];
-
       const [a1, a2] = pareja1 ?? ['', ''];
       const [b1, b2] = pareja2 ?? ['', ''];
-
       const [g1, g2] = resultados[i] ?? [null, null];
 
-      cont.innerHTML += 
-        `<div class="partido">
+      cont.innerHTML += `
+        <div class="partido">
           <span>${a1} + ${a2}</span>
           <div>
             <input type="number" min="0" value="${g1 ?? ''}" onchange="guardarResultado(${i}, 0, this.value)">
@@ -449,53 +443,72 @@ Mail: sergiosainz.proyectos@gmail.com</footer>
     for (let i = 0; i < resultados.length; i += 2) {
       const res1 = resultados[i];
       const res2 = resultados[i + 1];
-
       if (!res1 || !res2) continue;
-      const [g1, g2] = res1;
 
+      const [g1, g2] = res1;
       const [a1, a2] = partidos[i];
       const [b1, b2] = partidos[i + 1];
-
       const nombreA = `${a1} + ${a2}`;
       const nombreB = `${b1} + ${b2}`;
 
-      tabla[nombreA] = tabla[nombreA] || [0, 0, 0];
-      tabla[nombreB] = tabla[nombreB] || [0, 0, 0];
+      tabla[nombreA] = tabla[nombreA] || { pts: 0, pj: 0, dg: 0, pg: 0, pe: 0, pp: 0 };
+      tabla[nombreB] = tabla[nombreB] || { pts: 0, pj: 0, dg: 0, pg: 0, pe: 0, pp: 0 };
 
-      tabla[nombreA][1]++;
-      tabla[nombreB][1]++;
-      tabla[nombreA][2] += g1 - g2;
-      tabla[nombreB][2] += g2 - g1;
+      tabla[nombreA].pj++;
+      tabla[nombreB].pj++;
+      tabla[nombreA].dg += g1 - g2;
+      tabla[nombreB].dg += g2 - g1;
 
-      if (g1 > g2) tabla[nombreA][0] += 3;
-      else if (g2 > g1) tabla[nombreB][0] += 3;
-      else { tabla[nombreA][0]++; tabla[nombreB][0]++; }
+      if (g1 > g2) {
+        tabla[nombreA].pts += 3;
+        tabla[nombreA].pg++;
+        tabla[nombreB].pp++;
+      } else if (g2 > g1) {
+        tabla[nombreB].pts += 3;
+        tabla[nombreB].pg++;
+        tabla[nombreA].pp++;
+      } else {
+        tabla[nombreA].pts++;
+        tabla[nombreB].pts++;
+        tabla[nombreA].pe++;
+        tabla[nombreB].pe++;
+      }
 
-      [a1, a2, b1, b2].forEach(j => indiv[j] = indiv[j] || [0, 0, 0]);
+      [a1, a2, b1, b2].forEach(j => {
+        indiv[j] = indiv[j] || { pts: 0, pj: 0, dg: 0, pg: 0, pe: 0, pp: 0 };
+      });
 
       [a1, a2].forEach(j => {
-        indiv[j][1]++;
-        indiv[j][2] += g1 - g2;
-        if (g1 > g2) indiv[j][0] += 3;
-        else if (g1 === g2) indiv[j][0] += 1;
+        indiv[j].pj++;
+        indiv[j].dg += g1 - g2;
+        if (g1 > g2) { indiv[j].pts += 3; indiv[j].pg++; }
+        else if (g1 === g2) { indiv[j].pts += 1; indiv[j].pe++; }
+        else { indiv[j].pp++; }
       });
 
       [b1, b2].forEach(j => {
-        indiv[j][1]++;
-        indiv[j][2] += g2 - g1;
-        if (g2 > g1) indiv[j][0] += 3;
-        else if (g1 === g2) indiv[j][0] += 1;
+        indiv[j].pj++;
+        indiv[j].dg += g2 - g1;
+        if (g2 > g1) { indiv[j].pts += 3; indiv[j].pg++; }
+        else if (g1 === g2) { indiv[j].pts += 1; indiv[j].pe++; }
+        else { indiv[j].pp++; }
       });
     }
 
     const div = document.getElementById('tabla-resultados');
     div.innerHTML =
-      "<h3>Por Pareja</h3><table id='tabla-parejas'><tr><th>Pareja</th><th>Pts</th><th>PJ</th><th>DG</th></tr>" +
-      Object.entries(tabla).sort((a, b) => b[1][0] - a[1][0]).map(([k, v]) =>
-        `<tr><td>${k}</td><td>${v[0]}</td><td>${v[1]}</td><td>${v[2]}</td></tr>`).join("") +
-      "</table><h3>Individual</h3><table id='tabla-individual'><tr><th>Jugador</th><th>Pts</th><th>PJ</th><th>DG</th></tr>" +
-      Object.entries(indiv).sort((a, b) => b[1][0] - a[1][0]).map(([k, v]) =>
-        `<tr><td>${k}</td><td>${v[0]}</td><td>${v[1]}</td><td>${v[2]}</td></tr>`).join("") +
+      `<h3>Por Pareja</h3><table id='tabla-parejas'>
+        <tr><th>Pareja</th><th>PTS</th><th>PJ</th><th>DG</th><th>PG</th><th>PE</th><th>PP</th></tr>` +
+      Object.entries(tabla)
+        .sort((a, b) => b[1].pts - a[1].pts)
+        .map(([k, v]) => `<tr><td>${k}</td><td>${v.pts}</td><td>${v.pj}</td><td>${v.dg}</td><td>${v.pg}</td><td>${v.pe}</td><td>${v.pp}</td></tr>`)
+        .join("") +
+      `</table><h3>Individual</h3><table id='tabla-individual'>
+        <tr><th>Jugador</th><th>PTS</th><th>PJ</th><th>DG</th><th>PG</th><th>PE</th><th>PP</th></tr>` +
+      Object.entries(indiv)
+        .sort((a, b) => b[1].pts - a[1].pts)
+        .map(([k, v]) => `<tr><td>${k}</td><td>${v.pts}</td><td>${v.pj}</td><td>${v.dg}</td><td>${v.pg}</td><td>${v.pe}</td><td>${v.pp}</td></tr>`)
+        .join("") +
       "</table>";
   }
 
@@ -509,7 +522,6 @@ Mail: sergiosainz.proyectos@gmail.com</footer>
     const j = localStorage.getItem('jugadores');
     const r = localStorage.getItem('rondas');
     const res = localStorage.getItem('resultados');
-
     if (j && r && res) {
       nombres.length = 0;
       nombres.push(...JSON.parse(j));
@@ -531,52 +543,52 @@ Mail: sergiosainz.proyectos@gmail.com</footer>
     }
   }
 
-function guardarEnHistorial() {
-  const tabla = document.getElementById('tabla-parejas');
-  if (!tabla) {
-    alert('No se encontró la tabla de parejas.');
-    return;
+  function guardarEnHistorial() {
+    const tabla = document.getElementById('tabla-parejas');
+    if (!tabla) {
+      alert('No se encontró la tabla de parejas.');
+      return;
+    }
+
+    const filas = tabla.querySelectorAll('tbody tr');
+    if (filas.length === 0) {
+      alert('No hay datos para guardar.');
+      return;
+    }
+
+    const datosActuales = Array.from(filas)
+      .map(fila => {
+        const columnas = fila.querySelectorAll('td');
+        return {
+          nombre: columnas[0]?.textContent.trim() || '',
+          pts: parseInt(columnas[1]?.textContent.trim()) || 0,
+          pj: parseInt(columnas[2]?.textContent.trim()) || 0,
+          dg: parseInt(columnas[3]?.textContent.trim()) || 0,
+          pg: parseInt(columnas[4]?.textContent.trim()) || 0,
+          pe: parseInt(columnas[5]?.textContent.trim()) || 0,
+          pp: parseInt(columnas[6]?.textContent.trim()) || 0
+        };
+      })
+      .filter(d => d.nombre && d.pj);
+
+    if (datosActuales.length === 0) {
+      alert('No hay datos válidos para guardar.');
+      return;
+    }
+
+    const historialTorneos = JSON.parse(localStorage.getItem('historialTorneos') || '[]');
+
+    historialTorneos.push({
+      tipo: 'parejas',
+      fecha: new Date().toISOString().slice(0, 10),
+      datos: datosActuales
+    });
+
+    localStorage.setItem('historialTorneos', JSON.stringify(historialTorneos));
+    alert('Historial guardado correctamente.');
   }
-
-  const filas = tabla.querySelectorAll('tbody tr');
-  if (filas.length === 0) {
-    alert('No hay datos para guardar.');
-    return;
-  }
-
-  const datosActuales = Array.from(filas)
-    .map(fila => {
-      const columnas = fila.querySelectorAll('td');
-      return {
-  nombre: columnas[0]?.textContent.trim() || '',
-  pts: parseInt(columnas[1]?.textContent.trim()) || 0,
-  pj: parseInt(columnas[2]?.textContent.trim()) || 0,
-  dg: parseInt(columnas[3]?.textContent.trim()) || 0,
-  pg: parseInt(columnas[4]?.textContent.trim()) || 0,
-  pe: parseInt(columnas[5]?.textContent.trim()) || 0,
-  pp: parseInt(columnas[6]?.textContent.trim()) || 0
-};
-    })
-    .filter(d => d.nombre && d.pj); // ❗ Elimina filas vacías
-
-  if (datosActuales.length === 0) {
-    alert('No hay datos válidos para guardar.');
-    return;
-  }
-
-  const historialTorneos = JSON.parse(localStorage.getItem('historialTorneos') || '[]');
-
-  historialTorneos.push({
-    tipo: 'parejas',
-    fecha: new Date().toISOString().slice(0, 10),
-    datos: datosActuales
-  });
-
-  localStorage.setItem('historialTorneos', JSON.stringify(historialTorneos));
-  alert('Historial guardado correctamente.');
-}
-  
 </script>
+
 
 <button onclick="mostrarLocalStorage()">Ver historialTorneos</button>
 <script>
