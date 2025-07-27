@@ -568,6 +568,20 @@ Mail: sergiosainz.proyectos@gmail.com</footer>
 
   alert('Historial guardado correctamente.');
 }
+
+<button onclick="mostrarLocalStorage()">Ver historialTorneos</button>
+<script>
+  function mostrarLocalStorage() {
+    const data = localStorage.getItem('historialTorneos');
+    if (!data) {
+      alert('No hay datos guardados en historialTorneos');
+      return;
+    }
+    const parsed = JSON.parse(data);
+    console.log(parsed); // Por si podés ver la consola después
+    alert(JSON.stringify(parsed, null, 2).slice(0, 500)); // Mostramos un resumen
+  }
+</script>
 </script>
 
 </body>
