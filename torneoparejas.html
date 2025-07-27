@@ -531,7 +531,7 @@ Mail: sergiosainz.proyectos@gmail.com</footer>
     }
   }
 
-  function guardarEnHistorial() {
+function guardarEnHistorial() {
   const tabla = document.getElementById('tabla-parejas');
   if (!tabla) {
     alert('No se encontró la tabla de parejas.');
@@ -545,31 +545,34 @@ Mail: sergiosainz.proyectos@gmail.com</footer>
   }
 
   const datosActuales = Array.from(filas)
-  .map(fila => {
-    const columnas = fila.querySelectorAll('td');
-    return {
-      nombre: columnas[0]?.textContent.trim() || '',
-      pj: columnas[2]?.textContent.trim() || '',
-      pg: '-',
-      pe: '-',
-      pp: '-',
-      pgp: '-',
-      pep: '-',
-      ppp: '-'
-    };
-  })
-  .filter(d => d.nombre && d.pj); // ❗ Filtra las filas sin datos válidos
+    .map(fila => {
+      const columnas = fila.querySelectorAll('td');
+      return {
+        nombre: columnas[0]?.textContent.trim() || '',
+        pj: columnas[2]?.textContent.trim() || '',
+        pg: '-', pe: '-', pp: '-',
+        pgp: '-', pep: '-', ppp: '-'
+      };
+    })
+    .filter(d => d.nombre && d.pj); // ❗ Elimina filas vacías
 
-  const historialTorneos = JSON.parse(localStorage.getItem('historialTorneos') || '[]');
-  historialTorneos.push({
+  if (datosActuales.length === 0) {
+    alert('No hay datos válidos para guardar.');
+    return;
+  }
+
+  const historialParejas = JSON.parse(localStorage.getItem('historialParejas') || '[]');
+
+  historialParejas.push({
     tipo: 'parejas',
     fecha: new Date().toISOString().slice(0, 10),
     datos: datosActuales
   });
-  localStorage.setItem('historialTorneos', JSON.stringify(historialTorneos));
 
+  localStorage.setItem('historialParejas', JSON.stringify(historialParejas));
   alert('Historial guardado correctamente.');
 }
+  
 </script>
 
 <button onclick="mostrarLocalStorage()">Ver historialTorneos</button>
