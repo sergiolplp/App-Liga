@@ -197,32 +197,36 @@
 
   function mostrarTablaLiga() {
   const historial = JSON.parse(localStorage.getItem('historialTorneos') || '[]');
+  const jugadores = calcularEstadisticasAcumuladas(historial);
   const contenedor = document.getElementById('tabla-liga');
-  contenedor.innerHTML = ''; // Limpiar contenido previo
+  contenedor.innerHTML = '';
 
-  historial
-    .filter(t => t.tipo === 'individual' && Array.isArray(t.resumen))
-    .forEach(torneo => {
-      const tabla = document.createElement('table');
-      tabla.innerHTML = `
-        <caption>INDIVIDUAL - ${torneo.fecha || 'Sin fecha'}</caption>
-        <thead>
-          <tr><th>Nombre</th><th>PJ</th><th>PG</th><th>PE</th><th>PP</th><th>Pts</th></tr>
-        </thead>
-        <tbody>
-          ${torneo.resumen.map(j => `
-            <tr>
-              <td>${j.nombre}</td>
-              <td>${j.PJ}</td>
-              <td>${j.PG}</td>
-              <td>${j.PE}</td>
-              <td>${j.PP}</td>
-              <td>${j.Pts}</td>
-            </tr>
-          `).join('')}
-        </tbody>`;
-      contenedor.appendChild(tabla);
-    });
+  if (jugadores.length === 0) {
+    contenedor.innerHTML = "<p>No hay datos de torneos individuales.</p>";
+    return;
+  }
+
+  const tabla = document.createElement('table');
+  tabla.innerHTML = `
+    <thead>
+      <tr><th>Nombre</th><th>PJ</th><th>PG</th><th>PE</th><th>PP</th><th>%PG</th><th>%PE</th><th>%PP</th></tr>
+    </thead>
+    <tbody>
+      ${jugadores.map(j => `
+        <tr>
+          <td>${j.nombre}</td>
+          <td>${j.PJ}</td>
+          <td>${j.PG}</td>
+          <td>${j.PE}</td>
+          <td>${j.PP}</td>
+          <td>${j.pctPG}</td>
+          <td>${j.pctPE}</td>
+          <td>${j.pctPP}</td>
+        </tr>
+      `).join('')}
+    </tbody>
+  `;
+  contenedor.appendChild(tabla);
 }
 
   function calcularHistorialParejas(historial) {
@@ -274,41 +278,36 @@
 
   function mostrarTablaParejas() {
   const historial = JSON.parse(localStorage.getItem('historialTorneos') || '[]');
+  const parejas = calcularHistorialParejas(historial);
   const contenedor = document.getElementById('tabla-parejas');
-  contenedor.innerHTML = ''; // Limpiar contenido previo
+  contenedor.innerHTML = '';
 
-  historial
-    .filter(t => t.tipo === 'parejas' && (t.datos || t.parejas))
-    .forEach(torneo => {
-      const parejas = torneo.datos
-        ? torneo.datos
-        : Object.entries(torneo.parejas || {}).map(([nombre, s]) => ({
-            nombre,
-            pj: s.pj || 0,
-            pg: s.pg || 0,
-            pe: s.pe || 0,
-            pp: s.pp || 0
-          }));
+  if (parejas.length === 0) {
+    contenedor.innerHTML = "<p>No hay datos de torneos por parejas.</p>";
+    return;
+  }
 
-      const tabla = document.createElement('table');
-      tabla.innerHTML = `
-        <caption>PAREJAS - ${torneo.fecha || 'Sin fecha'}</caption>
-        <thead>
-          <tr><th>Pareja</th><th>PJ</th><th>PG</th><th>PE</th><th>PP</th></tr>
-        </thead>
-        <tbody>
-          ${parejas.map(p => `
-            <tr>
-              <td>${p.nombre}</td>
-              <td>${p.pj}</td>
-              <td>${p.pg}</td>
-              <td>${p.pe}</td>
-              <td>${p.pp}</td>
-            </tr>
-          `).join('')}
-        </tbody>`;
-      contenedor.appendChild(tabla);
-    });
+  const tabla = document.createElement('table');
+  tabla.innerHTML = `
+    <thead>
+      <tr><th>Pareja</th><th>PJ</th><th>PG</th><th>PE</th><th>PP</th><th>%PG</th><th>%PE</th><th>%PP</th></tr>
+    </thead>
+    <tbody>
+      ${parejas.map(p => `
+        <tr>
+          <td>${p.nombre}</td>
+          <td>${p.pj}</td>
+          <td>${p.pg}</td>
+          <td>${p.pe}</td>
+          <td>${p.pp}</td>
+          <td>${p.pctPG}</td>
+          <td>${p.pctPE}</td>
+          <td>${p.pctPP}</td>
+        </tr>
+      `).join('')}
+    </tbody>
+  `;
+  contenedor.appendChild(tabla);
 }
 
 window.onload = function () {
