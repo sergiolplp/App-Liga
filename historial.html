@@ -229,14 +229,19 @@
   historial
     .filter(t => t.tipo === "parejas")
     .forEach(t => {
-      const datos = t.datos;
-      datos.forEach(j => {
-        const { nombre, pj, pg, pe, pp } = j;
+      // Soporta el formato nuevo (t.datos) y el viejo (t.parejas)
+      const datos = t.datos
+        ? t.datos
+        : Object.entries(t.parejas || {}).map(([nombre, s]) => ({
+            nombre,
+            pj: s.pj || 0,
+            pg: s.pg || 0,
+            pe: s.pe || 0,
+            pp: s.pp || 0
+          }));
 
-        if (!acumulado[nombre]) {
-          acumulado[nombre] = { pj: 0, pg: 0, pe: 0, pp: 0 };
-        }
-
+      datos.forEach(({ nombre, pj, pg, pe, pp }) => {
+        if (!acumulado[nombre]) acumulado[nombre] = { pj: 0, pg: 0, pe: 0, pp: 0 };
         acumulado[nombre].pj += parseInt(pj) || 0;
         acumulado[nombre].pg += parseInt(pg) || 0;
         acumulado[nombre].pe += parseInt(pe) || 0;
@@ -266,40 +271,32 @@
 }
 
   function mostrarTablaParejas() {
-    const historial = JSON.parse(localStorage.getItem('historialParejas')) || [];
-    const parejas = calcularHistorialParejas(historial);
+  const historialTorneos = JSON.parse(localStorage.getItem('historialTorneos') || '[]');
+  const parejas = calcularHistorialParejas(historialTorneos);
 
-    if (parejas.length === 0) {
-      document.getElementById("tabla-parejas").innerHTML = "<p>No hay datos guardados.</p>";
-      return;
-    }
-
-    const tabla = `
-      <table>
-        <tr>
-          <th>#</th><th>Nombre</th><th>PJ</th><th>PG</th><th>PE</th><th>PP</th>
-          <th>%PG</th><th>%PE</th><th>%PP</th>
-        </tr>
-        ${parejas.map((p, i) => `
-          <tr>
-            <td>${i + 1}</td><td>${p.nombre}</td><td>${p.pj}</td><td>${p.pg}</td>
-            <td>${p.pe}</td><td>${p.pp}</td>
-            <td>${p.pctPG}</td><td>${p.pctPE}</td><td>${p.pctPP}</td>
-          </tr>
-        `).join("")}
-      </table>
-    `;
-
-    document.getElementById("tabla-parejas").innerHTML = tabla;
+  if (parejas.length === 0) {
+    document.getElementById("tabla-parejas").innerHTML = "<p>No hay datos guardados.</p>";
+    return;
   }
 
-  window.onload = function () {
-    const t = localStorage.getItem('theme') || 'light';
-    document.body.setAttribute('data-theme', t);
+  const tabla = `
+    <table>
+      <tr>
+        <th>#</th><th>Nombre</th><th>PJ</th><th>PG</th><th>PE</th><th>PP</th>
+        <th>%PG</th><th>%PE</th><th>%PP</th>
+      </tr>
+      ${parejas.map((p, i) => `
+        <tr>
+          <td>${i + 1}</td><td>${p.nombre}</td><td>${p.pj}</td><td>${p.pg}</td>
+          <td>${p.pe}</td><td>${p.pp}</td>
+          <td>${p.pctPG}</td><td>${p.pctPE}</td><td>${p.pctPP}</td>
+        </tr>
+      `).join("")}
+    </table>
+  `;
 
-    mostrarTablaLiga();      // ✅ Liga individual
-    mostrarTablaParejas();   // ✅ Parejas
-  };
+  document.getElementById("tabla-parejas").innerHTML = tabla;
+}
 </script>
 
 </body>
