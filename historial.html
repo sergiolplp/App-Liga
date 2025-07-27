@@ -228,18 +228,20 @@
         ? t.datos
         : Object.entries(t.parejas || {}).map(([nombre, s]) => ({
             nombre,
-            pj: s.pj || 0,
-            pg: s.pg || 0,
-            pe: s.pe || 0,
-            pp: s.pp || 0
+            pj: parseInt(s.pj) || 0,
+            pg: parseInt(s.pg) || 0,
+            pe: parseInt(s.pe) || 0,
+            pp: parseInt(s.pp) || 0
           }));
 
       datos.forEach(({ nombre, pj, pg, pe, pp }) => {
-        if (!acumulado[nombre]) acumulado[nombre] = { pj: 0, pg: 0, pe: 0, pp: 0 };
-        acumulado[nombre].pj += parseInt(pj) || 0;
-        acumulado[nombre].pg += parseInt(pg) || 0;
-        acumulado[nombre].pe += parseInt(pe) || 0;
-        acumulado[nombre].pp += parseInt(pp) || 0;
+        if (!acumulado[nombre]) {
+          acumulado[nombre] = { pj: 0, pg: 0, pe: 0, pp: 0 };
+        }
+        acumulado[nombre].pj += pj;
+        acumulado[nombre].pg += pg;
+        acumulado[nombre].pe += pe;
+        acumulado[nombre].pp += pp;
       });
     });
 
