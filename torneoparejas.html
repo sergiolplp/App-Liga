@@ -550,8 +550,8 @@ function guardarEnHistorial() {
       return {
         nombre: columnas[0]?.textContent.trim() || '',
         pj: columnas[2]?.textContent.trim() || '',
-        pg: '-', pe: '-', pp: '-',
-        pgp: '-', pep: '-', ppp: '-'
+        pg: '0', pe: '0', pp: '0',
+        pgp: '0', pep: '0', ppp: '0'
       };
     })
     .filter(d => d.nombre && d.pj); // ❗ Elimina filas vacías
