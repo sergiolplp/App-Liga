@@ -320,29 +320,49 @@
     }
 
     function mostrarTabla() {
-      const tabla = {};
-      resultados.forEach(([g1, g2], i) => {
-        if (g1 == null || g2 == null) return;
-        const [a, b] = partidos[i];
+  const tabla = {};
 
-        [a, b].forEach(n => tabla[n] = tabla[n] || [0, 0, 0]);
+  resultados.forEach(([g1, g2], i) => {
+    if (g1 == null || g2 == null) return;
+    const [a, b] = partidos[i];
 
-        tabla[a][1]++;
-        tabla[b][1]++;
-        tabla[a][2] += g1 - g2;
-        tabla[b][2] += g2 - g1;
+    // Inicializar si no existe: [PTS, PJ, DG, PG, PE, PP]
+    [a, b].forEach(j => tabla[j] = tabla[j] || [0, 0, 0, 0, 0, 0]);
 
-        if (g1 > g2) tabla[a][0] += 3;
-        else if (g2 > g1) tabla[b][0] += 3;
-        else { tabla[a][0]++; tabla[b][0]++; }
-      });
+    tabla[a][1]++; // PJ
+    tabla[b][1]++;
 
-      const div = document.getElementById('tabla-resultados');
-      div.innerHTML = "<table><tr><th>Jugador</th><th>Pts</th><th>PJ</th><th>DG</th></tr>" +
-        Object.entries(tabla).sort((a, b) => b[1][0] - a[1][0]).map(([k, v]) =>
-          `<tr><td>${k}</td><td>${v[0]}</td><td>${v[1]}</td><td>${v[2]}</td></tr>`).join("") +
-        "</table>";
+    const dgA = g1 - g2;
+    const dgB = g2 - g1;
+
+    tabla[a][2] += dgA; // DG
+    tabla[b][2] += dgB;
+
+    if (g1 > g2) {
+      tabla[a][0] += 3; // PTS
+      tabla[a][3]++;     // PG
+      tabla[b][5]++;     // PP
+    } else if (g2 > g1) {
+      tabla[b][0] += 3;
+      tabla[b][3]++;
+      tabla[a][5]++;
+    } else {
+      tabla[a][0]++; // PTS
+      tabla[b][0]++;
+      tabla[a][4]++; // PE
+      tabla[b][4]++;
     }
+  });
+
+  const div = document.getElementById('tabla-resultados');
+  div.innerHTML = "<table><tr><th>Jugador</th><th>PTS</th><th>PJ</th><th>DG</th><th>PG</th><th>PE</th><th>PP</th></tr>" +
+    Object.entries(tabla)
+      .sort((a, b) => b[1][0] - a[1][0] || b[1][2] - a[1][2]) // PTS y luego DG
+      .map(([nombre, datos]) =>
+        `<tr><td>${nombre}</td><td>${datos[0]}</td><td>${datos[1]}</td><td>${datos[2]}</td><td>${datos[3]}</td><td>${datos[4]}</td><td>${datos[5]}</td></tr>`
+      ).join("") +
+    "</table>";
+}
 
     function guardarEstado() {
       localStorage.setItem('liga_jugadores', JSON.stringify(jugadores));
