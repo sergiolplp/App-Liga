@@ -1,185 +1,160 @@
-<script>
-  const secciones = ['jugadores', 'partidos', 'tabla'];
-
-  function mostrarSeccion(id) {
-    secciones.forEach(s => document.getElementById(s).classList.remove('active'));
-    document.getElementById(id).classList.add('active');
-  }
-
-  function toggleMenu() {
-    const menu = document.getElementById('menu');
-    const isVisible = window.getComputedStyle(menu).display !== 'none';
-    menu.style.display = isVisible ? 'none' : 'flex';
-  }
-
-  function toggleTheme() {
-    const t = document.body.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
-    document.body.setAttribute('data-theme', t);
-    localStorage.setItem('theme', t);
-  }
-
-  let jugadores = [];
-  let partidos = [];
-  let resultados = [];
-
-  function generarPartidos() {
-    partidos = [];
-    resultados = [];
-    for (let i = 0; i < jugadores.length; i++) {
-      for (let j = i + 1; j < jugadores.length; j++) {
-        partidos.push([jugadores[i], jugadores[j]]);
-        resultados.push([null, null]);
-      }
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Liga Individual</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      margin: 0;
+      padding: 20px;
+      background-color: #f4f4f4;
+      transition: background 0.3s, color 0.3s;
     }
-  }
-
-  function agregarJugador() {
-    const input = document.getElementById('nuevo-jugador');
-    const nombre = input.value.trim();
-    if (nombre && !jugadores.includes(nombre)) {
-      jugadores.push(nombre);
-      input.value = '';
-      actualizarListaJugadores();
+    [data-theme="dark"] {
+      background-color: #121212;
+      color: #f0f0f0;
     }
-  }
+    h1 {
+      text-align: center;
+      margin-top: 0;
+    }
+    .btn-container {
+      text-align: center;
+      margin: 20px 0;
+    }
+    button {
+      padding: 10px 20px;
+      margin: 5px;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    .volver {
+      background-color: orange;
+      color: white;
+    }
+    .tema {
+      background-color: #333;
+      color: white;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+    th, td {
+      padding: 10px;
+      border: 1px solid #ccc;
+      text-align: center;
+    }
+    th {
+      background: #222;
+      color: #fff;
+    }
+    tbody tr:nth-child(even) {
+      background: #eee;
+    }
+    [data-theme="dark"] table th {
+      background: #444;
+    }
+    [data-theme="dark"] tbody tr:nth-child(even) {
+      background: #222;
+    }
+    [data-theme="dark"] td {
+      border-color: #444;
+    }
+  </style>
+</head>
+<body>
+  <h1>Liga Individual</h1>
 
-  function actualizarListaJugadores() {
-    const lista = document.getElementById('lista-jugadores');
-    lista.innerHTML = jugadores.map(j => `<li>${j}</li>`).join('');
-  }
+  <div class="btn-container">
+    <button class="volver" onclick="window.location.href='index.html'">VOLVER</button>
+    <button class="tema" onclick="toggleTheme()">CAMBIAR TEMA</button>
+  </div>
 
-  function iniciarLiga() {
-    if (jugadores.length < 2) return alert('Agrega al menos 2 jugadores');
-    generarPartidos();
-    mostrarPartidos();
-    mostrarTabla();
-    mostrarSeccion('partidos');
-  }
-
-  function mostrarPartidos() {
-    const div = document.getElementById('lista-partidos');
-    div.innerHTML = '';
-    partidos.forEach(([a, b], i) => {
-      const [g1, g2] = resultados[i];
-      div.innerHTML += `
-        <div>
-          <span>${a} vs ${b}</span>
-          <input type="number" placeholder="Goles ${a}" value="${g1 ?? ''}" onchange="guardarResultado(${i}, 0, this.value)">
-          <input type="number" placeholder="Goles ${b}" value="${g2 ?? ''}" onchange="guardarResultado(${i}, 1, this.value)">
-        </div>`;
-    });
-  }
-
-  function guardarResultado(i, j, valor) {
-    resultados[i][j] = parseInt(valor);
-    mostrarTabla();
-  }
-
-  function mostrarTabla() {
-    const tabla = {};
-
-    resultados.forEach(([g1, g2], i) => {
-      if (g1 == null || g2 == null) return;
-      const [a, b] = partidos[i];
-
-      tabla[a] = tabla[a] || { pts: 0, pj: 0, dg: 0, pg: 0, pe: 0, pp: 0 };
-      tabla[b] = tabla[b] || { pts: 0, pj: 0, dg: 0, pg: 0, pe: 0, pp: 0 };
-
-      tabla[a].pj++;
-      tabla[b].pj++;
-
-      tabla[a].dg += g1 - g2;
-      tabla[b].dg += g2 - g1;
-
-      if (g1 > g2) {
-        tabla[a].pts += 3;
-        tabla[a].pg++;
-        tabla[b].pp++;
-      } else if (g2 > g1) {
-        tabla[b].pts += 3;
-        tabla[b].pg++;
-        tabla[a].pp++;
-      } else {
-        tabla[a].pts += 1;
-        tabla[b].pts += 1;
-        tabla[a].pe++;
-        tabla[b].pe++;
-      }
-    });
-
-    const div = document.getElementById('tabla-resultados');
-    div.innerHTML = `<table>
+  <table id="tablaLiga">
+    <thead>
       <tr>
-        <th>Jugador</th>
-        <th>Pts</th>
+        <th>Nombre</th>
+        <th>PTS</th>
         <th>PJ</th>
         <th>DG</th>
         <th>PG</th>
         <th>PE</th>
         <th>PP</th>
-      </tr>` +
-      Object.entries(tabla)
-        .sort((a, b) => b[1].pts - a[1].pts)
-        .map(([nombre, stats]) => `
-          <tr>
-            <td>${nombre}</td>
-            <td>${stats.pts}</td>
-            <td>${stats.pj}</td>
-            <td>${stats.dg}</td>
-            <td>${stats.pg}</td>
-            <td>${stats.pe}</td>
-            <td>${stats.pp}</td>
-          </tr>
-        `).join("") +
-      `</table>`;
-  }
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
 
-  function guardarEnHistorial() {
-    const tabla = {};
+  <script>
+    function cargarDatosLiga() {
+      const historial = JSON.parse(localStorage.getItem("historial")) || [];
+      const jugadores = {};
 
-    resultados.forEach(([g1, g2], i) => {
-      if (g1 == null || g2 == null) return;
-      const [a, b] = partidos[i];
+      historial
+        .filter(t => t.tipo === "liga")
+        .forEach(t => {
+          const datos = t.datos || Object.entries(t.jugadores || {}).map(([nombre, s]) => ({
+            nombre,
+            pj: s.pj || 0,
+            dg: s.dg || 0,
+            pg: s.pg || 0,
+            pe: s.pe || 0,
+            pp: s.pp || 0
+          }));
 
-      tabla[a] = tabla[a] || { pts: 0, pj: 0, dg: 0, pg: 0, pe: 0, pp: 0 };
-      tabla[b] = tabla[b] || { pts: 0, pj: 0, dg: 0, pg: 0, pe: 0, pp: 0 };
+          datos.forEach(({ nombre, pj, dg, pg, pe, pp }) => {
+            if (!jugadores[nombre]) jugadores[nombre] = { pj: 0, dg: 0, pg: 0, pe: 0, pp: 0 };
+            jugadores[nombre].pj += parseInt(pj) || 0;
+            jugadores[nombre].dg += parseInt(dg) || 0;
+            jugadores[nombre].pg += parseInt(pg) || 0;
+            jugadores[nombre].pe += parseInt(pe) || 0;
+            jugadores[nombre].pp += parseInt(pp) || 0;
+          });
+        });
 
-      tabla[a].pj++;
-      tabla[b].pj++;
+      const tabla = Object.entries(jugadores).map(([nombre, stats]) => {
+        const { pj, dg, pg, pe, pp } = stats;
+        const pts = pg * 3 + pe;
+        return { nombre, pts, pj, dg, pg, pe, pp };
+      });
 
-      tabla[a].dg += g1 - g2;
-      tabla[b].dg += g2 - g1;
+      tabla.sort((a, b) => b.pts - a.pts || b.dg - a.dg);
 
-      if (g1 > g2) {
-        tabla[a].pts += 3;
-        tabla[a].pg++;
-        tabla[b].pp++;
-      } else if (g2 > g1) {
-        tabla[b].pts += 3;
-        tabla[b].pg++;
-        tabla[a].pp++;
-      } else {
-        tabla[a].pts += 1;
-        tabla[b].pts += 1;
-        tabla[a].pe++;
-        tabla[b].pe++;
-      }
-    });
+      const tbody = document.querySelector("#tablaLiga tbody");
+      tbody.innerHTML = "";
 
-    const fecha = new Date().toLocaleString();
-    const resumen = Object.entries(tabla)
-      .sort((a, b) => b[1].pts - a[1].pts)
-      .map(([nombre, s]) => `${nombre} ${s.pts}pts | PJ:${s.pj} DG:${s.dg} PG:${s.pg} PE:${s.pe} PP:${s.pp}`)
-      .join('\n');
+      tabla.forEach(j => {
+        const fila = document.createElement("tr");
+        fila.innerHTML = `
+          <td>${j.nombre}</td>
+          <td>${j.pts}</td>
+          <td>${j.pj}</td>
+          <td>${j.dg}</td>
+          <td>${j.pg}</td>
+          <td>${j.pe}</td>
+          <td>${j.pp}</td>
+        `;
+        tbody.appendChild(fila);
+      });
+    }
 
-    const historial = JSON.parse(localStorage.getItem('ligas') || '[]');
-    historial.push({ fecha, resumen });
-    localStorage.setItem('ligas', JSON.stringify(historial));
-    alert('¡Liga guardada en historial!');
-  }
+    function toggleTheme() {
+      const current = document.body.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+      document.body.setAttribute('data-theme', current);
+      localStorage.setItem('theme', current);
+    }
 
-  window.onload = () => {
-    const t = localStorage.getItem('theme') || 'light';
-    document.body.setAttribute('data-theme', t);
-  }
-</script>
+    window.onload = () => {
+      const savedTheme = localStorage.getItem('theme') || 'light';
+      document.body.setAttribute('data-theme', savedTheme);
+      cargarDatosLiga();
+    };
+  </script>
+</body>
+</html>
