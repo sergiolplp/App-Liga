@@ -434,9 +434,10 @@
         resumen: resumenArray
       });
     }
-
-    localStorage.setItem("historialTorneos", JSON.stringify(historial));
-    alert("Historial guardado con éxito");
+    
+      localStorage.setItem("historialTorneos", JSON.stringify(historial));
+  alert("Historial guardado con éxito");
+  reiniciar(); // ← Esto reinicia el torneo automáticamente
   }
 
   window.onload = () => {
