@@ -246,14 +246,10 @@
       <h2>Ingresá los jugadores</h2>
       <div id="form-jugadores"></div>
       <button onclick="agregarJugador()">+</button>
-      <div style="margin-top:10px;">
-        <label>
-          <input type="radio" name="modo" value="ida" checked> Solo ida
-        </label>
-        <label style="margin-left: 20px;">
-          <input type="radio" name="modo" value="vuelta"> Ida y vuelta
-        </label>
-      </div>
+      <div id="modo-partido">
+  <label><input type="radio" name="modo" value="ida" checked> Solo ida</label>
+  <label><input type="radio" name="modo" value="vuelta"> Ida y vuelta</label>
+</div>
       <button onclick="generarRondas()">Generar Rondas</button>
     </section>
 
@@ -340,69 +336,77 @@ Mail: sergiosainz.proyectos@gmail.com</footer>
   }
 
   function generarRondas() {
-    const inputs = document.querySelectorAll('#form-jugadores input');
-    nombres.length = 0;
+  const inputs = document.querySelectorAll('#form-jugadores input');
+  nombres.length = 0;
 
-    inputs.forEach(input => {
-      const nombre = input.value.trim();
-      if (!nombre) return;
-      nombres.push(nombre);
-    });
+  inputs.forEach(input => {
+    const nombre = input.value.trim();
+    if (!nombre) return;
+    nombres.push(nombre);
+  });
 
-    if (nombres.length < 4) {
-      alert("Debe haber al menos 4 jugadores para generar rondas");
-      return;
-    }
-
-    const parejas = [];
-    for (let i = 0; i < nombres.length; i++) {
-      for (let j = i + 1; j < nombres.length; j++) {
-        parejas.push([nombres[i], nombres[j]]);
-      }
-    }
-
-    const esValida = ronda => {
-      const usados = new Set();
-      for (const [a, b] of ronda) {
-        if (usados.has(a) || usados.has(b)) return false;
-        usados.add(a); usados.add(b);
-      }
-      return true;
-    };
-
-    const usadas = new Set();
-    const totalParejas = Math.floor(nombres.length / 2);
-    let intentos = 10000;
-    while (intentos-- > 0 && rondas.length < parejas.length) {
-      const candidatos = [...parejas].sort(() => Math.random() - 0.5);
-      const ronda = [];
-      const usados = new Set();
-      for (const [a, b] of candidatos) {
-        const key = `${a}-${b}`;
-        if (!usadas.has(key) && !usados.has(a) && !usados.has(b)) {
-          ronda.push([a, b]);
-          usados.add(a);
-          usados.add(b);
-          if (ronda.length === totalParejas) break;
-        }
-      }
-      if (ronda.length === totalParejas) {
-        ronda.forEach(([a, b]) => usadas.add(`${a}-${b}`));
-        rondas.push(ronda);
-      }
-    }
-
-    if (rondas.length === 0) {
-      alert("No se pudo generar un calendario válido.");
-      return;
-    }
-
-    partidos = rondas.flat();
-    resultados = Array(partidos.length).fill([null, null]);
-    mostrarSeccion('rondas');
-    mostrarRondas();
-    guardarEstado();
+  if (nombres.length < 4) {
+    alert("Debe haber al menos 4 jugadores para generar rondas");
+    return;
   }
+
+  const parejas = [];
+  for (let i = 0; i < nombres.length; i++) {
+    for (let j = i + 1; j < nombres.length; j++) {
+      parejas.push([nombres[i], nombres[j]]);
+    }
+  }
+
+  const esValida = ronda => {
+    const usados = new Set();
+    for (const [a, b] of ronda) {
+      if (usados.has(a) || usados.has(b)) return false;
+      usados.add(a); usados.add(b);
+    }
+    return true;
+  };
+
+  const usadas = new Set();
+  const totalParejas = Math.floor(nombres.length / 2);
+  let intentos = 10000;
+  rondas = []; // asegurate de resetear antes de generar
+  while (intentos-- > 0 && rondas.length < parejas.length) {
+    const candidatos = [...parejas].sort(() => Math.random() - 0.5);
+    const ronda = [];
+    const usados = new Set();
+    for (const [a, b] of candidatos) {
+      const key = `${a}-${b}`;
+      if (!usadas.has(key) && !usados.has(a) && !usados.has(b)) {
+        ronda.push([a, b]);
+        usados.add(a);
+        usados.add(b);
+        if (ronda.length === totalParejas) break;
+      }
+    }
+    if (ronda.length === totalParejas) {
+      ronda.forEach(([a, b]) => usadas.add(`${a}-${b}`));
+      rondas.push(ronda);
+    }
+  }
+
+  if (rondas.length === 0) {
+    alert("No se pudo generar un calendario válido.");
+    return;
+  }
+
+  // ✅ INSERTAR AQUÍ
+  const modoSeleccionado = document.querySelector('input[name="modo"]:checked')?.value || 'ida';
+  if (modoSeleccionado === 'vuelta') {
+    const rondasVuelta = rondas.map(ronda => ronda.map(([a, b]) => [b, a]));
+    rondas = [...rondas, ...rondasVuelta];
+  }
+
+  partidos = rondas.flat();
+  resultados = Array(partidos.length).fill([null, null]);
+  mostrarSeccion('rondas');
+  mostrarRondas();
+  guardarEstado();
+}
 
   function mostrarRondas() {
     const cont = document.getElementById('lista-rondas');
