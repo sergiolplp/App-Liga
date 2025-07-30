@@ -618,7 +618,11 @@ Mail: sergiosainz.proyectos@gmail.com</footer>
   }
 
 function reiniciar() {
+  localStorage.removeItem('jugadores');
+  localStorage.removeItem('rondas');
+  localStorage.removeItem('resultados');
   location.reload();
+}
 }
 
 </script>
