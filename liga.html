@@ -368,13 +368,14 @@
   }
 
   function reiniciar() {
-    if (confirm("¿Seguro que querés reiniciar el torneo?")) {
-      localStorage.removeItem('liga_jugadores');
-      localStorage.removeItem('liga_partidos');
-      localStorage.removeItem('liga_resultados');
-      location.reload();
-    }
+  if (confirm("¿Seguro que querés reiniciar el torneo?")) {
+    localStorage.removeItem('liga_jugadores');
+    localStorage.removeItem('liga_partidos');
+    localStorage.removeItem('liga_resultados');
+    localStorage.setItem('reinicioManual', 'true');  // <- NUEVO
+    location.reload();
   }
+}
 
   function guardarEnHistorial() {
     const resumenActual = {};
@@ -445,21 +446,25 @@ reiniciar(); // ← Esto reinicia el torneo automáticamente
   */
 
   window.onload = () => {
-    const t = localStorage.getItem('theme') || 'light';
-    document.body.setAttribute('data-theme', t);
-    if (cargarEstado()) {
-      mostrarSeccion('partidos');
-      mostrarPartidos();
-    } else {
-      generarInputs();
-    }
-  };
+  const t = localStorage.getItem('theme') || 'light';
+  document.body.setAttribute('data-theme', t);
 
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('service-worker.js')
-      .then(reg => console.log('✔ Service Worker registrado:', reg.scope))
-      .catch(err => console.error('✖ Error al registrar Service Worker:', err));
+  const reinicioManual = localStorage.getItem('reinicioManual');
+  if (reinicioManual) {
+    localStorage.removeItem('reinicioManual');
+    generarInputs();
+    mostrarSeccion('jugadores');
+    return;
   }
+
+  if (cargarEstado()) {
+    mostrarSeccion('partidos');
+    mostrarPartidos();
+  } else {
+    generarInputs();
+    mostrarSeccion('jugadores');
+  }
+};
 </script>
     
 </body>
