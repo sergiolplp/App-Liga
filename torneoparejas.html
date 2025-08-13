@@ -341,8 +341,7 @@ Mail: sergiosainz.proyectos@gmail.com</footer>
 
   inputs.forEach(input => {
     const nombre = input.value.trim();
-    if (!nombre) return;
-    nombres.push(nombre);
+    if (nombre) nombres.push(nombre);
   });
 
   if (nombres.length < 4) {
@@ -350,42 +349,40 @@ Mail: sergiosainz.proyectos@gmail.com</footer>
     return;
   }
 
-  const parejas = [];
+  // 🔹 1. Generar todas las combinaciones de parejas posibles (cada pareja única)
+  const parejasDisponibles = [];
   for (let i = 0; i < nombres.length; i++) {
     for (let j = i + 1; j < nombres.length; j++) {
-      parejas.push([nombres[i], nombres[j]]);
+      parejasDisponibles.push([nombres[i], nombres[j]]);
     }
   }
 
-  const esValida = ronda => {
-    const usados = new Set();
-    for (const [a, b] of ronda) {
-      if (usados.has(a) || usados.has(b)) return false;
-      usados.add(a); usados.add(b);
-    }
-    return true;
-  };
+  // 🔹 2. Crear rondas sin que un jugador se repita dentro de la misma ronda
+  rondas = [];
+  const totalParejasPorRonda = Math.floor(nombres.length / 2);
+  let parejasPendientes = [...parejasDisponibles];
 
-  const usadas = new Set();
-  const totalParejas = Math.floor(nombres.length / 2);
-  let intentos = 10000;
-  rondas = []; // asegurate de resetear antes de generar
-  while (intentos-- > 0 && rondas.length < parejas.length) {
-    const candidatos = [...parejas].sort(() => Math.random() - 0.5);
+  while (parejasPendientes.length > 0) {
     const ronda = [];
-    const usados = new Set();
-    for (const [a, b] of candidatos) {
-      const key = `${a}-${b}`;
-      if (!usadas.has(key) && !usados.has(a) && !usados.has(b)) {
+    const usadosEnRonda = new Set();
+
+    for (let i = 0; i < parejasPendientes.length; i++) {
+      const [a, b] = parejasPendientes[i];
+      if (!usadosEnRonda.has(a) && !usadosEnRonda.has(b)) {
         ronda.push([a, b]);
-        usados.add(a);
-        usados.add(b);
-        if (ronda.length === totalParejas) break;
+        usadosEnRonda.add(a);
+        usadosEnRonda.add(b);
+        parejasPendientes.splice(i, 1);
+        i--; // Ajusta índice por el splice
+        if (ronda.length === totalParejasPorRonda) break;
       }
     }
-    if (ronda.length === totalParejas) {
-      ronda.forEach(([a, b]) => usadas.add(`${a}-${b}`));
+
+    if (ronda.length > 0) {
       rondas.push(ronda);
+    } else {
+      console.warn("No se pudo completar una ronda sin repetir jugadores.");
+      break;
     }
   }
 
@@ -394,13 +391,14 @@ Mail: sergiosainz.proyectos@gmail.com</footer>
     return;
   }
 
-  // ✅ INSERTAR AQUÍ
+  // 🔹 3. Si es ida y vuelta, duplicar rondas invirtiendo orden
   const modoSeleccionado = document.querySelector('input[name="modo"]:checked')?.value || 'ida';
   if (modoSeleccionado === 'vuelta') {
     const rondasVuelta = rondas.map(ronda => ronda.map(([a, b]) => [b, a]));
     rondas = [...rondas, ...rondasVuelta];
   }
 
+  // 🔹 4. Guardar partidos y mostrar
   partidos = rondas.flat();
   resultados = Array(partidos.length).fill([null, null]);
   mostrarSeccion('rondas');
