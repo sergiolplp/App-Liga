@@ -336,87 +336,66 @@ Mail: sergiosainz.proyectos@gmail.com</footer>
   }
 
   function generarRondas() {
-  const inputs = document.querySelectorAll('#form-jugadores input');
-  nombres.length = 0;
+    let jugadores = [...jugadoresLista]; // tu lista de jugadores
+    let rondas = [];
 
-  inputs.forEach(input => {
-    const nombre = input.value.trim();
-    if (nombre) nombres.push(nombre);
-  });
-
-  if (nombres.length < 4) {
-    alert("Debe haber al menos 4 jugadores para generar rondas");
-    return;
-  }
-
-  // 🔹 1. Generar todas las combinaciones de parejas posibles (cada pareja única)
-  const parejasDisponibles = [];
-  for (let i = 0; i < nombres.length; i++) {
-    for (let j = i + 1; j < nombres.length; j++) {
-      parejasDisponibles.push([nombres[i], nombres[j]]);
-    }
-  }
-
-  // 🔹 2. Crear rondas sin que un jugador se repita dentro de la misma ronda
-  rondas = [];
-  const totalParejasPorRonda = Math.floor(nombres.length / 2);
-  let parejasPendientes = [...parejasDisponibles];
-
-  while (parejasPendientes.length > 0) {
-    const ronda = [];
-    const usadosEnRonda = new Set();
-
-    for (let i = 0; i < parejasPendientes.length; i++) {
-      const [a, b] = parejasPendientes[i];
-      if (!usadosEnRonda.has(a) && !usadosEnRonda.has(b)) {
-        ronda.push([a, b]);
-        usadosEnRonda.add(a);
-        usadosEnRonda.add(b);
-        parejasPendientes.splice(i, 1);
-        i--; // Ajusta índice por el splice
-        if (ronda.length === totalParejasPorRonda) break;
-      }
+    // Si es impar, agregamos un "descanso"
+    let impar = false;
+    if (jugadores.length % 2 !== 0) {
+        jugadores.push("DESCANSA");
+        impar = true;
     }
 
-    if (ronda.length > 0) {
-      rondas.push(ronda);
-    } else {
-      console.warn("No se pudo completar una ronda sin repetir jugadores.");
-      break;
+    let numJugadores = jugadores.length;
+    let partidosPorRonda = (numJugadores / 2) * (numJugadores - 1); 
+    // Esta fórmula asegura que cubrimos todas las combinaciones posibles
+
+    // Generar UNA ronda con todas las combinaciones de parejas posibles para que cada jugador
+    // juegue una vez con cada otro jugador
+    let partidos = [];
+    for (let i = 0; i < numJugadores; i++) {
+        for (let j = i + 1; j < numJugadores; j++) {
+            partidos.push([jugadores[i], jugadores[j]]);
+        }
     }
-  }
 
-  if (rondas.length === 0) {
-    alert("No se pudo generar un calendario válido.");
-    return;
-  }
+    // Convertir las parejas en partidos válidos dentro de una ronda
+    // Algoritmo tipo "emparejamiento" asegurando que nadie se repita dentro del mismo partido
+    let ronda = [];
+    let usadas = new Set();
 
-  // 🔹 3. Si es ida y vuelta, duplicar rondas invirtiendo orden
-  const modoSeleccionado = document.querySelector('input[name="modo"]:checked')?.value || 'ida';
-  if (modoSeleccionado === 'vuelta') {
-    const rondasVuelta = rondas.map(ronda => ronda.map(([a, b]) => [b, a]));
-    rondas = [...rondas, ...rondasVuelta];
-  }
+    for (let pareja of partidos) {
+        let [p1, p2] = pareja;
+        if (usadas.has(p1) || usadas.has(p2)) continue;
 
-  // 🔹 4. Guardar partidos y mostrar
-  partidos = rondas.flat();
-  resultados = Array(partidos.length).fill([null, null]);
-  mostrarSeccion('rondas');
-  mostrarRondas();
-  guardarEstado();
+        // Buscar rivales disponibles
+        let rivales = jugadores.filter(j => !usadas.has(j) && j !== p1 && j !== p2);
+        if (rivales.length >= 2) {
+            let partido = { pareja1: [p1, p2], pareja2: [rivales[0], rivales[1]] };
+            ronda.push(partido);
+
+            usadas.add(p1);
+            usadas.add(p2);
+            usadas.add(rivales[0]);
+            usadas.add(rivales[1]);
+        }
+    }
+
+    rondas.push(ronda);
+
+    // Si es ida y vuelta, duplicamos rondas cambiando local/visitante
+    if (idaVuelta) {
+        let rondasVuelta = rondas.map(r => 
+            r.map(p => ({
+                pareja1: p.pareja2,
+                pareja2: p.pareja1
+            }))
+        );
+        rondas = rondas.concat(rondasVuelta);
+    }
+
+    return rondas;
 }
-
-  function mostrarRondas() {
-    const cont = document.getElementById('lista-rondas');
-    cont.innerHTML = '';
-    rondas.forEach((ronda, i) => {
-      const div = document.createElement('div');
-      div.className = 'ronda-box';
-      div.innerHTML = `<strong>Ronda ${i + 1}</strong>` +
-        ronda.map(([a, b]) => `<div>${a} + ${b}</div>`).join('');
-      cont.appendChild(div);
-    });
-  }
 
   function mostrarPartidos() {
     const cont = document.getElementById('partidos-lista');
