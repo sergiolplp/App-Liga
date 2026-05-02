@@ -263,9 +263,7 @@ function mostrarSeccion(id){
   document.getElementById(id).classList.add('active');
 }
 
-/* =========================
-   🔥 FUNCIÓN CORREGIDA
-========================= */
+/* 🔥 CORRECCIÓN REAL */
 function generarRondas() {
 
   nombres.length = 0;
@@ -278,50 +276,68 @@ function generarRondas() {
     return;
   }
 
-  const jugadores = [...nombres];
-
-  const parejas = [];
-  for(let i=0;i<jugadores.length;i++){
-    for(let j=i+1;j<jugadores.length;j++){
-      parejas.push([jugadores[i],jugadores[j]]);
+  let parejas = [];
+  for(let i=0;i<nombres.length;i++){
+    for(let j=i+1;j<nombres.length;j++){
+      parejas.push([nombres[i], nombres[j]]);
     }
   }
 
   rondas = [];
-  let disponibles = [...parejas];
 
-  while(disponibles.length>0){
-    let ronda=[];
-    let usados=new Set();
+  while(parejas.length > 0){
 
-    for(let i=0;i<disponibles.length;i++){
-      let [a,b]=disponibles[i];
-      if(usados.has(a)||usados.has(b)) continue;
+    let ronda = [];
+    let usados = new Set();
 
-      for(let j=i+1;j<disponibles.length;j++){
-        let [c,d]=disponibles[j];
+    for(let i=0;i<parejas.length;i++){
 
-        if(usados.has(c)||usados.has(d)) continue;
-        if([a,b].includes(c)||[a,b].includes(d)) continue;
+      const [a,b] = parejas[i];
 
-        ronda.push({pareja1:[a,b],pareja2:[c,d]});
+      if(usados.has(a) || usados.has(b)) continue;
 
-        usados.add(a);usados.add(b);
-        usados.add(c);usados.add(d);
+      let rivalIndex = -1;
 
-        disponibles.splice(j,1);
-        disponibles.splice(i,1);
-        i--;
+      for(let j=i+1;j<parejas.length;j++){
+        const [c,d] = parejas[j];
+
+        if(
+          usados.has(c) || usados.has(d) ||
+          a===c || a===d || b===c || b===d
+        ) continue;
+
+        rivalIndex = j;
         break;
+      }
+
+      if(rivalIndex !== -1){
+
+        const rival = parejas[rivalIndex];
+
+        ronda.push({pareja1:[a,b], pareja2:rival});
+
+        usados.add(a); usados.add(b);
+        usados.add(rival[0]); usados.add(rival[1]);
+
+        parejas.splice(rivalIndex,1);
+        parejas.splice(i,1);
+        i--;
+
+      } else {
+
+        ronda.push({pareja1:[a,b], pareja2:null});
+
+        usados.add(a); usados.add(b);
+        parejas.splice(i,1);
+        i--;
       }
     }
 
-    if(ronda.length>0) rondas.push(ronda);
-    else break;
+    rondas.push(ronda);
   }
 
-  // ida y vuelta
   const modo=document.querySelector('input[name="modo"]:checked').value;
+
   if(modo==="vuelta"){
     const vuelta=rondas.map(r=>r.map(p=>({
       pareja1:p.pareja2,
@@ -334,7 +350,7 @@ function generarRondas() {
   rondas.forEach(r=>{
     r.forEach(p=>{
       partidos.push(p.pareja1);
-      partidos.push(p.pareja2);
+      if(p.pareja2) partidos.push(p.pareja2);
     });
   });
 
@@ -344,9 +360,6 @@ function generarRondas() {
   mostrarRondas();
 }
 
-/* =========================
-   🔥 NUEVA FUNCIÓN
-========================= */
 function mostrarRondas(){
   const cont=document.getElementById('lista-rondas');
   cont.innerHTML='';
@@ -354,7 +367,11 @@ function mostrarRondas(){
   rondas.forEach((r,i)=>{
     let html=`<div class="ronda-box"><b>Ronda ${i+1}</b>`;
     r.forEach(p=>{
-      html+=`<div>${p.pareja1.join(" + ")} vs ${p.pareja2.join(" + ")}</div>`;
+      if(p.pareja2){
+        html+=`<div>${p.pareja1.join(" + ")} vs ${p.pareja2.join(" + ")}</div>`;
+      } else {
+        html+=`<div>${p.pareja1.join(" + ")} (libre)</div>`;
+      }
     });
     html+=`</div>`;
     cont.innerHTML+=html;
@@ -377,7 +394,7 @@ function mostrarPartidos(){
         <div>vs</div>
         <input onchange="guardarResultado(${i},1,this.value)">
       </div>
-      <span>${b[0]} + ${b[1]}</span>
+      <span>${b ? b[0]+" + "+b[1] : "(libre)"}</span>
     </div>`;
   }
 }
