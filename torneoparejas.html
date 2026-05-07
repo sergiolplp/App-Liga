@@ -136,51 +136,35 @@
 <script>
 
 let jugadores = [];
-
 let encuentros = [];
 
 /* =========================
-
    AGREGAR INPUT
-
 ========================= */
 
 function agregarInputJugador() {
-
   const input = document.createElement('input');
-
   input.type = 'text';
-
   input.placeholder =
-
     `Jugador ${document.querySelectorAll('#form-jugadores input').length + 1}`;
 
   document.getElementById('form-jugadores').appendChild(input);
-
 }
 
 /* =========================
-
    MOSTRAR SECCIÓN
-
 ========================= */
 
 function mostrarSeccion(id) {
-
   document.querySelectorAll('.section')
-
     .forEach(sec => sec.classList.remove('active'));
 
   document.getElementById(id)
-
     .classList.add('active');
-
 }
 
 /* =========================
-
    GENERAR TORNEO
-
 ========================= */
 
 function generarTorneo() {
@@ -188,173 +172,125 @@ function generarTorneo() {
   jugadores = [];
 
   document.querySelectorAll('#form-jugadores input')
-
     .forEach(input => {
 
       const nombre = input.value.trim();
 
       if(nombre){
-
         jugadores.push(nombre);
-
       }
 
     });
 
   if(jugadores.length < 4){
-
     alert("Mínimo 4 jugadores");
-
     return;
-
   }
 
   encuentros = [];
 
-  /* =====================================
+  /* =========================
+     GENERAR TODAS LAS PAREJAS
+  ========================= */
 
-     TODAS LAS PAREJAS POSIBLES
-
-  ===================================== */
-
-  const parejas = [];
+  let parejasPendientes = [];
 
   for(let i=0;i<jugadores.length;i++){
 
     for(let j=i+1;j<jugadores.length;j++){
 
-      parejas.push([
-
+      parejasPendientes.push([
         jugadores[i],
-
         jugadores[j]
-
       ]);
 
     }
 
   }
 
-  /* =====================================
+  /* =========================
+     ARMAR PARTIDOS
+  ========================= */
 
-     CONTROL DE PAREJAS YA UTILIZADAS
+  while(parejasPendientes.length > 0){
 
-  ===================================== */
+    const pareja1 = parejasPendientes.shift();
 
-  const usadas = new Set();
+    let rivalIndex = -1;
 
-  /* =====================================
+    for(let i=0;i<parejasPendientes.length;i++){
 
-     GENERACIÓN DE PARTIDOS
+      const pareja2 = parejasPendientes[i];
 
-  ===================================== */
-
-  for(let i=0;i<parejas.length;i++){
-
-    if(usadas.has(i)) continue;
-
-    const pareja1 = parejas[i];
-
-    let rivalEncontrado = false;
-
-    for(let j=i+1;j<parejas.length;j++){
-
-      if(usadas.has(j)) continue;
-
-      const pareja2 = parejas[j];
-
-      const todos = [
-
+      const jugadoresPartido = [
         ...pareja1,
-
         ...pareja2
-
       ];
 
-      /* =====================================
+      /* =========================
+         VALIDAR 4 JUGADORES DISTINTOS
+      ========================= */
 
-         EVITAR JUGADORES REPETIDOS
+      if(new Set(jugadoresPartido).size === 4){
 
-      ===================================== */
-
-      if(new Set(todos).size !== 4){
-
-        continue;
+        rivalIndex = i;
+        break;
 
       }
 
+    }
+
+    /* =========================
+       SI ENCONTRÓ RIVAL
+    ========================= */
+
+    if(rivalIndex !== -1){
+
+      const pareja2 =
+        parejasPendientes.splice(rivalIndex,1)[0];
+
       encuentros.push({
-
         e1: pareja1,
-
         e2: pareja2,
-
         g1: 0,
-
         g2: 0
-
       });
-
-      usadas.add(i);
-
-      usadas.add(j);
-
-      rivalEncontrado = true;
-
-      break;
 
     }
 
-    /* =====================================
-
+    /* =========================
        SI QUEDA LIBRE
+    ========================= */
 
-    ===================================== */
-
-    if(!rivalEncontrado && !usadas.has(i)){
+    else {
 
       encuentros.push({
-
         e1: pareja1,
-
         e2: null,
-
         g1: 0,
-
         g2: 0
-
       });
-
-      usadas.add(i);
 
     }
 
   }
 
-  /* =====================================
-
+  /* =========================
      IDA Y VUELTA
-
-  ===================================== */
+  ========================= */
 
   const modo =
-
     document.querySelector('input[name="modo"]:checked').value;
 
   if(modo === "vuelta"){
 
     const vuelta = encuentros
-
       .filter(e => e.e2)
-
       .map(e => ({
 
         e1: e.e2,
-
         e2: e.e1,
-
         g1: 0,
-
         g2: 0
 
       }));
@@ -370,15 +306,12 @@ function generarTorneo() {
 }
 
 /* =========================
-
    MOSTRAR RONDAS
-
 ========================= */
 
 function mostrarRondas(){
 
   const lista =
-
     document.getElementById('lista-rondas');
 
   lista.innerHTML = '';
@@ -391,7 +324,8 @@ function mostrarRondas(){
 
     div.innerHTML = `
 
-      <strong>Partido ${index + 1}</strong><br><br>
+      <strong>Partido ${index + 1}</strong>
+      <br><br>
 
       ${enc.e1.join(' + ')}
 
@@ -402,13 +336,9 @@ function mostrarRondas(){
       <br><br>
 
       ${
-
         enc.e2
-
         ? enc.e2.join(' + ')
-
         : 'LIBRE'
-
       }
 
     `;
@@ -420,15 +350,12 @@ function mostrarRondas(){
 }
 
 /* =========================
-
    PARTIDOS
-
 ========================= */
 
 function irAPartidos(){
 
   const lista =
-
     document.getElementById('partidos-lista');
 
   lista.innerHTML = '';
@@ -446,25 +373,17 @@ function irAPartidos(){
       <span>${enc.e1.join(' + ')}</span>
 
       <input
-
         type="number"
-
         value="${enc.g1}"
-
         onchange="actualizarGoles(${index},1,this.value)"
-
       >
 
       <span>VS</span>
 
       <input
-
         type="number"
-
         value="${enc.g2}"
-
         onchange="actualizarGoles(${index},2,this.value)"
-
       >
 
       <span>${enc.e2.join(' + ')}</span>
@@ -480,9 +399,7 @@ function irAPartidos(){
 }
 
 /* =========================
-
    GOLES
-
 ========================= */
 
 function actualizarGoles(index,equipo,goles){
@@ -502,9 +419,7 @@ function actualizarGoles(index,equipo,goles){
 }
 
 /* =========================
-
    TABLA
-
 ========================= */
 
 function calcularYMostrarTabla(){
@@ -514,21 +429,13 @@ function calcularYMostrarTabla(){
   jugadores.forEach(j=>{
 
     stats[j] = {
-
       pts:0,
-
       pj:0,
-
       pg:0,
-
       pe:0,
-
       pp:0,
-
       gf:0,
-
       gc:0
-
     };
 
   });
@@ -540,9 +447,7 @@ function calcularYMostrarTabla(){
     enc.e1.forEach(j=>{
 
       stats[j].pj++;
-
       stats[j].gf += enc.g1;
-
       stats[j].gc += enc.g2;
 
     });
@@ -550,9 +455,7 @@ function calcularYMostrarTabla(){
     enc.e2.forEach(j=>{
 
       stats[j].pj++;
-
       stats[j].gf += enc.g2;
-
       stats[j].gc += enc.g1;
 
     });
@@ -562,7 +465,6 @@ function calcularYMostrarTabla(){
       enc.e1.forEach(j=>{
 
         stats[j].pts += 3;
-
         stats[j].pg++;
 
       });
@@ -573,12 +475,13 @@ function calcularYMostrarTabla(){
 
       });
 
-    } else if(enc.g2 > enc.g1){
+    }
+
+    else if(enc.g2 > enc.g1){
 
       enc.e2.forEach(j=>{
 
         stats[j].pts += 3;
-
         stats[j].pg++;
 
       });
@@ -589,12 +492,13 @@ function calcularYMostrarTabla(){
 
       });
 
-    } else {
+    }
+
+    else {
 
       enc.e1.forEach(j=>{
 
         stats[j].pts++;
-
         stats[j].pe++;
 
       });
@@ -602,7 +506,6 @@ function calcularYMostrarTabla(){
       enc.e2.forEach(j=>{
 
         stats[j].pts++;
-
         stats[j].pe++;
 
       });
@@ -612,25 +515,18 @@ function calcularYMostrarTabla(){
   });
 
   const ranking =
-
     Object.entries(stats)
-
       .sort((a,b)=>{
 
         const difA =
-
           a[1].gf - a[1].gc;
 
         const difB =
-
           b[1].gf - b[1].gc;
 
         return (
-
           b[1].pts - a[1].pts ||
-
           difB - difA
-
         );
 
       });
@@ -640,19 +536,12 @@ function calcularYMostrarTabla(){
     <table>
 
       <tr>
-
         <th>Jugador</th>
-
         <th>PTS</th>
-
         <th>PJ</th>
-
         <th>GF</th>
-
         <th>GC</th>
-
         <th>DF</th>
-
       </tr>
 
   `;
@@ -665,11 +554,7 @@ function calcularYMostrarTabla(){
 
         <td>${nombre}</td>
 
-        <td>
-
-          <b>${s.pts}</b>
-
-        </td>
+        <td><b>${s.pts}</b></td>
 
         <td>${s.pj}</td>
 
@@ -688,7 +573,6 @@ function calcularYMostrarTabla(){
   html += `</table>`;
 
   document.getElementById('tabla-resultados')
-
     .innerHTML = html;
 
   mostrarSeccion('tabla');
