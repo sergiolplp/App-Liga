@@ -133,7 +133,388 @@
   </section>
 </main>
 
+<script>
 
+let jugadores = [];
+let encuentros = [];
+
+function agregarInputJugador() {
+
+  const input = document.createElement("input");
+
+  input.type = "text";
+
+  input.placeholder =
+    `Jugador ${document.querySelectorAll('#form-jugadores input').length + 1}`;
+
+  document.getElementById("form-jugadores")
+    .appendChild(input);
+}
+
+function mostrarSeccion(id){
+
+  document.querySelectorAll(".section")
+    .forEach(sec => sec.classList.remove("active"));
+
+  document.getElementById(id)
+    .classList.add("active");
+}
+
+function generarTorneo(){
+
+  jugadores = [];
+  encuentros = [];
+
+  document.querySelectorAll("#form-jugadores input")
+    .forEach(input => {
+
+      const nombre = input.value.trim();
+
+      if(nombre !== ""){
+        jugadores.push(nombre);
+      }
+
+    });
+
+  if(jugadores.length < 4){
+
+    alert("Se necesitan mínimo 4 jugadores");
+
+    return;
+  }
+
+  const parejas = [];
+
+  for(let i = 0; i < jugadores.length; i++){
+
+    for(let j = i + 1; j < jugadores.length; j++){
+
+      parejas.push([
+        jugadores[i],
+        jugadores[j]
+      ]);
+
+    }
+
+  }
+
+  const usadas = new Set();
+
+  for(let i = 0; i < parejas.length; i++){
+
+    if(usadas.has(i)) continue;
+
+    const pareja1 = parejas[i];
+
+    let rival = null;
+    let rivalIndex = -1;
+
+    for(let j = i + 1; j < parejas.length; j++){
+
+      if(usadas.has(j)) continue;
+
+      const pareja2 = parejas[j];
+
+      const todos = [
+        ...pareja1,
+        ...pareja2
+      ];
+
+      if(new Set(todos).size === 4){
+
+        rival = pareja2;
+        rivalIndex = j;
+
+        break;
+      }
+
+    }
+
+    if(rival){
+
+      encuentros.push({
+        e1: pareja1,
+        e2: rival,
+        g1: 0,
+        g2: 0
+      });
+
+      usadas.add(i);
+      usadas.add(rivalIndex);
+
+    } else {
+
+      encuentros.push({
+        e1: pareja1,
+        e2: null,
+        g1: 0,
+        g2: 0
+      });
+
+      usadas.add(i);
+
+    }
+
+  }
+
+  const modo =
+    document.querySelector('input[name="modo"]:checked').value;
+
+  if(modo === "vuelta"){
+
+    const vuelta = encuentros
+      .filter(e => e.e2 !== null)
+      .map(e => ({
+        e1: e.e2,
+        e2: e.e1,
+        g1: 0,
+        g2: 0
+      }));
+
+    encuentros = encuentros.concat(vuelta);
+  }
+
+  mostrarRondas();
+
+  mostrarSeccion("rondas");
+}
+
+function mostrarRondas(){
+
+  const lista =
+    document.getElementById("lista-rondas");
+
+  lista.innerHTML = "";
+
+  encuentros.forEach((enc,index)=>{
+
+    const div = document.createElement("div");
+
+    div.className = "ronda-box";
+
+    div.innerHTML = `
+      <strong>Partido ${index + 1}</strong>
+      <br><br>
+
+      ${enc.e1.join(" + ")}
+
+      <br><br>
+
+      VS
+
+      <br><br>
+
+      ${
+        enc.e2
+        ? enc.e2.join(" + ")
+        : "LIBRE"
+      }
+    `;
+
+    lista.appendChild(div);
+
+  });
+
+}
+
+function irAPartidos(){
+
+  const lista =
+    document.getElementById("partidos-lista");
+
+  lista.innerHTML = "";
+
+  encuentros.forEach((enc,index)=>{
+
+    if(!enc.e2) return;
+
+    const div = document.createElement("div");
+
+    div.className = "partido";
+
+    div.innerHTML = `
+      <span>${enc.e1.join(" + ")}</span>
+
+      <input
+        type="number"
+        value="${enc.g1}"
+        onchange="actualizarGoles(${index},1,this.value)"
+      >
+
+      <span>VS</span>
+
+      <input
+        type="number"
+        value="${enc.g2}"
+        onchange="actualizarGoles(${index},2,this.value)"
+      >
+
+      <span>${enc.e2.join(" + ")}</span>
+    `;
+
+    lista.appendChild(div);
+
+  });
+
+  mostrarSeccion("partidos");
+}
+
+function actualizarGoles(index,equipo,goles){
+
+  goles = parseInt(goles) || 0;
+
+  if(equipo === 1){
+
+    encuentros[index].g1 = goles;
+
+  } else {
+
+    encuentros[index].g2 = goles;
+  }
+}
+
+function calcularYMostrarTabla(){
+
+  const stats = {};
+
+  jugadores.forEach(j => {
+
+    stats[j] = {
+      pts:0,
+      pj:0,
+      pg:0,
+      pe:0,
+      pp:0,
+      gf:0,
+      gc:0
+    };
+
+  });
+
+  encuentros.forEach(enc => {
+
+    if(!enc.e2) return;
+
+    enc.e1.forEach(j => {
+
+      stats[j].pj++;
+      stats[j].gf += enc.g1;
+      stats[j].gc += enc.g2;
+
+    });
+
+    enc.e2.forEach(j => {
+
+      stats[j].pj++;
+      stats[j].gf += enc.g2;
+      stats[j].gc += enc.g1;
+
+    });
+
+    if(enc.g1 > enc.g2){
+
+      enc.e1.forEach(j => {
+
+        stats[j].pts += 3;
+        stats[j].pg++;
+
+      });
+
+      enc.e2.forEach(j => {
+
+        stats[j].pp++;
+
+      });
+
+    }
+
+    else if(enc.g2 > enc.g1){
+
+      enc.e2.forEach(j => {
+
+        stats[j].pts += 3;
+        stats[j].pg++;
+
+      });
+
+      enc.e1.forEach(j => {
+
+        stats[j].pp++;
+
+      });
+
+    }
+
+    else {
+
+      enc.e1.forEach(j => {
+
+        stats[j].pts++;
+        stats[j].pe++;
+
+      });
+
+      enc.e2.forEach(j => {
+
+        stats[j].pts++;
+        stats[j].pe++;
+
+      });
+
+    }
+
+  });
+
+  const ranking =
+    Object.entries(stats)
+      .sort((a,b)=>{
+
+        const difA = a[1].gf - a[1].gc;
+        const difB = b[1].gf - b[1].gc;
+
+        return (
+          b[1].pts - a[1].pts ||
+          difB - difA
+        );
+
+      });
+
+  let html = `
+    <table>
+      <tr>
+        <th>Jugador</th>
+        <th>PTS</th>
+        <th>PJ</th>
+        <th>GF</th>
+        <th>GC</th>
+        <th>DF</th>
+      </tr>
+  `;
+
+  ranking.forEach(([nombre,s])=>{
+
+    html += `
+      <tr>
+        <td>${nombre}</td>
+        <td><b>${s.pts}</b></td>
+        <td>${s.pj}</td>
+        <td>${s.gf}</td>
+        <td>${s.gc}</td>
+        <td>${s.gf - s.gc}</td>
+      </tr>
+    `;
+
+  });
+
+  html += `</table>`;
+
+  document.getElementById("tabla-resultados")
+    .innerHTML = html;
+
+  mostrarSeccion("tabla");
+}
+
+</script>
 
 </body>
 </html>
