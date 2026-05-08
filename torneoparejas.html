@@ -183,7 +183,11 @@ function generarTorneo(){
     return;
   }
 
-  const parejas = [];
+  /* =========================
+     GENERAR TODAS LAS PAREJAS
+  ========================= */
+
+  let parejas = [];
 
   for(let i = 0; i < jugadores.length; i++){
 
@@ -198,85 +202,110 @@ function generarTorneo(){
 
   }
 
-  const usadas = new Set();
+  /* =========================
+     CREAR PARTIDOS VÁLIDOS
+  ========================= */
 
-  for(let i = 0; i < parejas.length; i++){
+  while(parejas.length > 0){
 
-    if(usadas.has(i)) continue;
+    let pareja1 = parejas.shift();
 
-    const pareja1 = parejas[i];
-
-    let rival = null;
     let rivalIndex = -1;
 
-    for(let j = i + 1; j < parejas.length; j++){
+    for(let i = 0; i < parejas.length; i++){
 
-      if(usadas.has(j)) continue;
+      let pareja2 = parejas[i];
 
-      const pareja2 = parejas[j];
-
-      const todos = [
+      let todos = [
         ...pareja1,
         ...pareja2
       ];
 
+      /* 4 jugadores distintos */
+
       if(new Set(todos).size === 4){
 
-        rival = pareja2;
-        rivalIndex = j;
+        rivalIndex = i;
 
         break;
       }
 
     }
 
-    if(rival){
+    /* =========================
+       SI ENCUENTRA RIVAL
+    ========================= */
+
+    if(rivalIndex !== -1){
+
+      let pareja2 = parejas.splice(rivalIndex,1)[0];
 
       encuentros.push({
+
         e1: pareja1,
-        e2: rival,
+        e2: pareja2,
         g1: 0,
         g2: 0
+
       });
 
-      usadas.add(i);
-      usadas.add(rivalIndex);
+    }
 
-    } else {
+    /* =========================
+       LIBRE
+    ========================= */
+
+    else {
 
       encuentros.push({
+
         e1: pareja1,
         e2: null,
         g1: 0,
         g2: 0
-      });
 
-      usadas.add(i);
+      });
 
     }
 
   }
+
+  /* =========================
+     IDA Y VUELTA
+  ========================= */
 
   const modo =
     document.querySelector('input[name="modo"]:checked').value;
 
   if(modo === "vuelta"){
 
-    const vuelta = encuentros
-      .filter(e => e.e2 !== null)
-      .map(e => ({
-        e1: e.e2,
-        e2: e.e1,
-        g1: 0,
-        g2: 0
-      }));
+    let vuelta = [];
+
+    encuentros.forEach(enc => {
+
+      if(enc.e2){
+
+        vuelta.push({
+
+          e1: enc.e2,
+          e2: enc.e1,
+          g1: 0,
+          g2: 0
+
+        });
+
+      }
+
+    });
 
     encuentros = encuentros.concat(vuelta);
+
   }
 
   mostrarRondas();
 
   mostrarSeccion("rondas");
+
 }
 
 function mostrarRondas(){
