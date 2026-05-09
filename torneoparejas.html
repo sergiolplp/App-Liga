@@ -133,20 +133,15 @@
   </section>
 </main>
 
-  <script>
+ <script>
 
 let jugadores = [];
-let parejasUsadas = [];
 let rondas = [];
 let rondaActual = 0;
 
-let tabla = {};
+let tablaGeneral = {};
 
-/* =========================
-   AGREGAR INPUT
-========================= */
-
-function agregarInputJugador(){
+function agregarInputJugador() {
 
   const input = document.createElement("input");
 
@@ -155,8 +150,7 @@ function agregarInputJugador(){
   input.placeholder =
     `Jugador ${document.querySelectorAll('#form-jugadores input').length + 1}`;
 
-  document
-    .getElementById("form-jugadores")
+  document.getElementById("form-jugadores")
     .appendChild(input);
 }
 
@@ -166,44 +160,30 @@ function agregarInputJugador(){
 
 function mostrarSeccion(id){
 
-  document
-    .querySelectorAll(".section")
+  document.querySelectorAll(".section")
     .forEach(sec => sec.classList.remove("active"));
 
-  document
-    .getElementById(id)
+  document.getElementById(id)
     .classList.add("active");
 }
 
 /* =========================
-   INICIAR TORNEO
+   GENERAR TORNEO
 ========================= */
 
 function generarTorneo(){
 
   jugadores = [];
-  parejasUsadas = [];
   rondas = [];
   rondaActual = 0;
-  tabla = {};
 
-  document
-    .querySelectorAll("#form-jugadores input")
+  document.querySelectorAll("#form-jugadores input")
     .forEach(input => {
 
       const nombre = input.value.trim();
 
-      if(nombre !== ""){
+      if(nombre){
         jugadores.push(nombre);
-
-        tabla[nombre] = {
-          pts:0,
-          pj:0,
-          pg:0,
-          pe:0,
-          pp:0,
-          goles:0
-        };
       }
 
     });
@@ -215,24 +195,17 @@ function generarTorneo(){
     return;
   }
 
-  generarRondas();
+  /* =========================
+     CREAR TODAS LAS PAREJAS
+  ========================= */
 
-  mostrarRonda();
-}
-
-/* =========================
-   GENERAR RONDAS
-========================= */
-
-function generarRondas(){
-
-  const todasParejas = [];
+  let parejas = [];
 
   for(let i=0;i<jugadores.length;i++){
 
     for(let j=i+1;j<jugadores.length;j++){
 
-      todasParejas.push([
+      parejas.push([
         jugadores[i],
         jugadores[j]
       ]);
@@ -241,80 +214,114 @@ function generarRondas(){
 
   }
 
-  while(todasParejas.length > 0){
+  /* =========================
+     ARMAR RONDAS
+  ========================= */
 
-    const parejasRonda = [];
-    const usados = new Set();
+  while(parejas.length >= 3){
 
-    for(let i=0;i<todasParejas.length;i++){
+    const p1 = parejas.shift();
 
-      const pareja = todasParejas[i];
+    let rival1 = null;
+    let rival2 = null;
+
+    for(let i=0;i<parejas.length;i++){
+
+      const test = parejas[i];
 
       if(
-        usados.has(pareja[0]) ||
-        usados.has(pareja[1])
+        !p1.includes(test[0]) &&
+        !p1.includes(test[1])
       ){
-        continue;
+
+        rival1 = test;
+
+        parejas.splice(i,1);
+
+        break;
       }
 
-      parejasRonda.push(pareja);
-
-      usados.add(pareja[0]);
-      usados.add(pareja[1]);
-
-      todasParejas.splice(i,1);
-
-      i--;
     }
 
-    if(parejasRonda.length >= 2){
+    for(let i=0;i<parejas.length;i++){
 
-      rondas.push(crearPartidos(parejasRonda));
+      const test = parejas[i];
 
-    } else {
+      const usados = [
+        ...p1,
+        ...rival1
+      ];
 
-      break;
+      if(
+        !usados.includes(test[0]) &&
+        !usados.includes(test[1])
+      ){
+
+        rival2 = test;
+
+        parejas.splice(i,1);
+
+        break;
+      }
+
+    }
+
+    if(rival1 && rival2){
+
+      rondas.push([
+
+        {
+          e1:p1,
+          e2:rival1,
+          g1:"",
+          g2:"",
+          libre:rival2
+        },
+
+        {
+          e1:rival1,
+          e2:rival2,
+          g1:"",
+          g2:"",
+          libre:p1
+        },
+
+        {
+          e1:rival2,
+          e2:p1,
+          g1:"",
+          g2:"",
+          libre:rival1
+        }
+
+      ]);
+
     }
 
   }
-}
 
-/* =========================
-   CREAR PARTIDOS
-========================= */
+  /* =========================
+     TABLA GENERAL
+  ========================= */
 
-function crearPartidos(parejas){
+  tablaGeneral = {};
 
-  const partidos = [];
+  jugadores.forEach(j => {
 
-  for(let i=0;i<parejas.length;i++){
+    tablaGeneral[j] = {
 
-    const actual = parejas[i];
+      pts:0,
+      pj:0,
+      pg:0,
+      pe:0,
+      pp:0,
+      goles:0
 
-    const rival =
-      i === parejas.length - 1
-      ? parejas[0]
-      : parejas[i+1];
+    };
 
-    const libre =
-      parejas.find(p =>
-        p !== actual &&
-        p !== rival
-      );
+  });
 
-    partidos.push({
-
-      local: actual,
-      visitante: rival,
-      libre: libre || null,
-      gl: "",
-      gv: ""
-
-    });
-
-  }
-
-  return partidos;
+  mostrarRonda();
 }
 
 /* =========================
@@ -332,15 +339,14 @@ function mostrarRonda(){
 
   const ronda = rondas[rondaActual];
 
-  const titulo =
-    document.createElement("h3");
+  const titulo = document.createElement("h3");
 
   titulo.innerHTML =
-    `Ronda ${rondaActual + 1}`;
+    `RONDA ${rondaActual + 1}`;
 
   cont.appendChild(titulo);
 
-  ronda.forEach((p,index)=>{
+  ronda.forEach((partido,index)=>{
 
     const div =
       document.createElement("div");
@@ -350,43 +356,38 @@ function mostrarRonda(){
     div.innerHTML = `
 
       <strong>
-      Partido ${index + 1}
+        ${partido.e1.join(" + ")}
       </strong>
 
       <br><br>
 
-      ${p.local.join(" + ")}
-
-      <br>
-
       <input
         type="number"
-        min="0"
-        onchange="guardarGol(${index},'gl',this.value)"
+        id="g1-${index}"
+        value="${partido.g1}"
       >
 
       VS
 
       <input
         type="number"
-        min="0"
-        onchange="guardarGol(${index},'gv',this.value)"
+        id="g2-${index}"
+        value="${partido.g2}"
       >
-
-      <br>
-
-      ${p.visitante.join(" + ")}
 
       <br><br>
 
-      ${
-        p.libre
-        ? `
-          <b>Libre:</b>
-          ${p.libre.join(" + ")}
-        `
-        : ""
-      }
+      <strong>
+        ${partido.e2.join(" + ")}
+      </strong>
+
+      <hr>
+
+      <b>LIBRE:</b>
+
+      <br>
+
+      ${partido.libre.join(" + ")}
 
     `;
 
@@ -394,84 +395,82 @@ function mostrarRonda(){
 
   });
 
-  const boton =
+  const btnTabla =
     document.createElement("button");
 
-  boton.innerText =
-    "Finalizar Ronda";
+  btnTabla.innerText =
+    "Ver tabla parcial";
 
-  boton.onclick =
-    finalizarRonda;
+  btnTabla.onclick =
+    calcularTabla;
 
-  cont.appendChild(boton);
+  cont.appendChild(btnTabla);
+
 }
 
 /* =========================
-   GUARDAR GOLES
+   TABLA
 ========================= */
 
-function guardarGol(index,tipo,valor){
-
-  rondas[rondaActual][index][tipo] =
-    parseInt(valor) || 0;
-}
-
-/* =========================
-   FINALIZAR RONDA
-========================= */
-
-function finalizarRonda(){
+function calcularTabla(){
 
   const ronda = rondas[rondaActual];
 
-  ronda.forEach(p=>{
+  ronda.forEach((p,index)=>{
 
-    const gl = p.gl;
-    const gv = p.gv;
+    p.g1 =
+      parseInt(
+        document.getElementById(`g1-${index}`).value
+      ) || 0;
 
-    p.local.forEach(j=>{
+    p.g2 =
+      parseInt(
+        document.getElementById(`g2-${index}`).value
+      ) || 0;
 
-      tabla[j].pj++;
-      tabla[j].goles += gl;
+    p.e1.forEach(j=>{
+
+      tablaGeneral[j].pj++;
+      tablaGeneral[j].goles += p.g1;
 
     });
 
-    p.visitante.forEach(j=>{
+    p.e2.forEach(j=>{
 
-      tabla[j].pj++;
-      tabla[j].goles += gv;
+      tablaGeneral[j].pj++;
+      tablaGeneral[j].goles += p.g2;
 
     });
 
-    if(gl > gv){
+    if(p.g1 > p.g2){
 
-      p.local.forEach(j=>{
+      p.e1.forEach(j=>{
 
-        tabla[j].pts += 3;
-        tabla[j].pg++;
+        tablaGeneral[j].pts += 3;
+        tablaGeneral[j].pg++;
 
       });
 
-      p.visitante.forEach(j=>{
+      p.e2.forEach(j=>{
 
-        tabla[j].pp++;
+        tablaGeneral[j].pp++;
 
       });
 
     }
 
-    else if(gv > gl){
+    else if(p.g2 > p.g1){
 
-      p.visitante.forEach(j=>{
+      p.e2.forEach(j=>{
 
-        tabla[j].pts += 3;
-        tabla[j].pg++;
+        tablaGeneral[j].pts += 3;
+        tablaGeneral[j].pg++;
 
       });
 
-      p.local.forEach(j=>{
+      p.e1.forEach(j=>{
 
-        tabla[j].pp++;
+        tablaGeneral[j].pp++;
 
       });
 
@@ -479,17 +478,17 @@ function finalizarRonda(){
 
     else {
 
-      p.local.forEach(j=>{
+      p.e1.forEach(j=>{
 
-        tabla[j].pts++;
-        tabla[j].pe++;
+        tablaGeneral[j].pts++;
+        tablaGeneral[j].pe++;
 
       });
 
-      p.visitante.forEach(j=>{
+      p.e2.forEach(j=>{
 
-        tabla[j].pts++;
-        tabla[j].pe++;
+        tablaGeneral[j].pts++;
+        tablaGeneral[j].pe++;
 
       });
 
@@ -497,31 +496,27 @@ function finalizarRonda(){
 
   });
 
-  mostrarTablaParcial();
+  mostrarTabla();
 }
 
 /* =========================
-   TABLA
+   MOSTRAR TABLA
 ========================= */
 
-function mostrarTablaParcial(){
+function mostrarTabla(){
 
   mostrarSeccion("tabla");
 
   const div =
     document.getElementById("tabla-resultados");
 
-  const ranking =
-    Object.entries(tabla)
+  let ranking =
+    Object.entries(tablaGeneral)
       .sort((a,b)=>
         b[1].pts - a[1].pts
       );
 
   let html = `
-
-    <h3>
-      Tabla parcial
-    </h3>
 
     <table>
 
@@ -545,17 +540,17 @@ function mostrarTablaParcial(){
 
   ranking.forEach(([nombre,s],i)=>{
 
-    const pg =
+    const porcPG =
       s.pj
       ? ((s.pg/s.pj)*100).toFixed(0)
       : 0;
 
-    const pe =
+    const porcPE =
       s.pj
       ? ((s.pe/s.pj)*100).toFixed(0)
       : 0;
 
-    const pp =
+    const porcPP =
       s.pj
       ? ((s.pp/s.pj)*100).toFixed(0)
       : 0;
@@ -565,15 +560,25 @@ function mostrarTablaParcial(){
       <tr>
 
         <td>${i+1}</td>
+
         <td>${nombre}</td>
+
         <td>${s.pts}</td>
+
         <td>${s.pj}</td>
+
         <td>${s.pg}</td>
+
         <td>${s.pe}</td>
+
         <td>${s.pp}</td>
-        <td>${pg}%</td>
-        <td>${pe}%</td>
-        <td>${pp}%</td>
+
+        <td>${porcPG}%</td>
+
+        <td>${porcPE}%</td>
+
+        <td>${porcPP}%</td>
+
         <td>${s.goles}</td>
 
       </tr>
@@ -584,9 +589,17 @@ function mostrarTablaParcial(){
 
   html += `</table>`;
 
+  /* =========================
+     BOTONES
+  ========================= */
+
   if(rondaActual < rondas.length - 1){
 
     html += `
+
+      <button onclick="volverARonda()">
+        ← Volver
+      </button>
 
       <button onclick="siguienteRonda()">
         Siguiente ronda
@@ -600,11 +613,20 @@ function mostrarTablaParcial(){
 
     html += `
 
-      <h2>
-        TORNEO FINALIZADO
-      </h2>
+      <button onclick="volverARonda()">
+        ← Volver
+      </button>
+
+      <button onclick="finalizarTorneo()">
+        Finalizar torneo
+      </button>
+
+      <button onclick="location.reload()">
+        Nuevo torneo
+      </button>
 
     `;
+
   }
 
   div.innerHTML = html;
@@ -619,6 +641,31 @@ function siguienteRonda(){
   rondaActual++;
 
   mostrarRonda();
+}
+
+/* =========================
+   VOLVER
+========================= */
+
+function volverARonda(){
+
+  mostrarRonda();
+}
+
+/* =========================
+   FINALIZAR
+========================= */
+
+function finalizarTorneo(){
+
+  alert("TORNEO FINALIZADO");
+
+  /*
+    ACÁ DESPUÉS
+    VAMOS A GUARDAR
+    EN historial.html
+  */
+
 }
 
 </script>
