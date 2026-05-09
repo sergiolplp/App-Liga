@@ -136,18 +136,11 @@
   <script>
 
 let jugadores = [];
+let parejasUsadas = [];
+let rondas = [];
+let rondaActual = 0;
 
-let parejasHistoricas = [];
-
-let rondaActualParejas = [];
-
-let partidosRonda = [];
-
-let tablaIndividual = {};
-
-let historialRondas = [];
-
-
+let tabla = {};
 
 /* =========================
    AGREGAR INPUT
@@ -162,28 +155,25 @@ function agregarInputJugador(){
   input.placeholder =
     `Jugador ${document.querySelectorAll('#form-jugadores input').length + 1}`;
 
-  document.getElementById("form-jugadores")
+  document
+    .getElementById("form-jugadores")
     .appendChild(input);
-
 }
 
-
-
 /* =========================
-   MOSTRAR SECCION
+   MOSTRAR SECCIÓN
 ========================= */
 
 function mostrarSeccion(id){
 
-  document.querySelectorAll(".section")
+  document
+    .querySelectorAll(".section")
     .forEach(sec => sec.classList.remove("active"));
 
-  document.getElementById(id)
+  document
+    .getElementById(id)
     .classList.add("active");
-
 }
-
-
 
 /* =========================
    INICIAR TORNEO
@@ -192,333 +182,296 @@ function mostrarSeccion(id){
 function generarTorneo(){
 
   jugadores = [];
+  parejasUsadas = [];
+  rondas = [];
+  rondaActual = 0;
+  tabla = {};
 
-  parejasHistoricas = [];
-
-  historialRondas = [];
-
-  tablaIndividual = {};
-
-  document.querySelectorAll("#form-jugadores input")
+  document
+    .querySelectorAll("#form-jugadores input")
     .forEach(input => {
 
       const nombre = input.value.trim();
 
       if(nombre !== ""){
-
         jugadores.push(nombre);
 
+        tabla[nombre] = {
+          pts:0,
+          pj:0,
+          pg:0,
+          pe:0,
+          pp:0,
+          goles:0
+        };
       }
 
     });
 
   if(jugadores.length < 4){
 
-    alert("Se necesitan mínimo 4 jugadores");
+    alert("Mínimo 4 jugadores");
 
     return;
-
   }
 
-  jugadores.forEach(j => {
+  generarRondas();
 
-    tablaIndividual[j] = {
-
-      pts:0,
-      pj:0,
-      pg:0,
-      pe:0,
-      pp:0
-
-    };
-
-  });
-
-  generarNuevaRonda();
-
+  mostrarRonda();
 }
 
-
-
 /* =========================
-   GENERAR NUEVA RONDA
+   GENERAR RONDAS
 ========================= */
 
-function generarNuevaRonda(){
+function generarRondas(){
 
-  rondaActualParejas = [];
+  const todasParejas = [];
 
-  partidosRonda = [];
+  for(let i=0;i<jugadores.length;i++){
 
-  let disponibles = [...jugadores];
+    for(let j=i+1;j<jugadores.length;j++){
 
-
-
-  /* =========================
-     GENERAR PAREJAS
-  ========================= */
-
-  while(disponibles.length >= 2){
-
-    let jugador1 = disponibles.shift();
-
-    let parejaEncontrada = false;
-
-    for(let i = 0; i < disponibles.length; i++){
-
-      let jugador2 = disponibles[i];
-
-      let nombrePareja =
-        [jugador1,jugador2]
-        .sort()
-        .join("|");
-
-      if(!parejasHistoricas.includes(nombrePareja)){
-
-        rondaActualParejas.push([
-          jugador1,
-          jugador2
-        ]);
-
-        parejasHistoricas.push(nombrePareja);
-
-        disponibles.splice(i,1);
-
-        parejaEncontrada = true;
-
-        break;
-
-      }
-
-    }
-
-    if(!parejaEncontrada){
-
-      break;
+      todasParejas.push([
+        jugadores[i],
+        jugadores[j]
+      ]);
 
     }
 
   }
 
+  while(todasParejas.length > 0){
 
+    const parejasRonda = [];
+    const usados = new Set();
 
-  /* =========================
-     GENERAR PARTIDOS
-  ========================= */
+    for(let i=0;i<todasParejas.length;i++){
 
-  for(let i = 0; i < rondaActualParejas.length; i++){
+      const pareja = todasParejas[i];
 
-    const pareja1 = rondaActualParejas[i];
+      if(
+        usados.has(pareja[0]) ||
+        usados.has(pareja[1])
+      ){
+        continue;
+      }
 
-    const pareja2 =
-      rondaActualParejas[
-        (i + 1) % rondaActualParejas.length
-      ];
+      parejasRonda.push(pareja);
 
-    partidosRonda.push({
+      usados.add(pareja[0]);
+      usados.add(pareja[1]);
 
-      e1: pareja1,
+      todasParejas.splice(i,1);
 
-      e2: pareja2,
+      i--;
+    }
 
-      libre:
-        rondaActualParejas[
-          (i + 2) % rondaActualParejas.length
-        ],
+    if(parejasRonda.length >= 2){
 
-      g1: "",
+      rondas.push(crearPartidos(parejasRonda));
 
-      g2: ""
+    } else {
+
+      break;
+    }
+
+  }
+}
+
+/* =========================
+   CREAR PARTIDOS
+========================= */
+
+function crearPartidos(parejas){
+
+  const partidos = [];
+
+  for(let i=0;i<parejas.length;i++){
+
+    const actual = parejas[i];
+
+    const rival =
+      i === parejas.length - 1
+      ? parejas[0]
+      : parejas[i+1];
+
+    const libre =
+      parejas.find(p =>
+        p !== actual &&
+        p !== rival
+      );
+
+    partidos.push({
+
+      local: actual,
+      visitante: rival,
+      libre: libre || null,
+      gl: "",
+      gv: ""
 
     });
 
   }
 
-  historialRondas.push(partidosRonda);
-
-  mostrarRondas();
-
+  return partidos;
 }
 
-
-
 /* =========================
-   MOSTRAR RONDAS
+   MOSTRAR RONDA
 ========================= */
 
-function mostrarRondas(){
+function mostrarRonda(){
 
-  const lista =
+  mostrarSeccion("rondas");
+
+  const cont =
     document.getElementById("lista-rondas");
 
-  lista.innerHTML = "";
+  cont.innerHTML = "";
 
-  partidosRonda.forEach((partido,index)=>{
+  const ronda = rondas[rondaActual];
 
-    const div = document.createElement("div");
+  const titulo =
+    document.createElement("h3");
+
+  titulo.innerHTML =
+    `Ronda ${rondaActual + 1}`;
+
+  cont.appendChild(titulo);
+
+  ronda.forEach((p,index)=>{
+
+    const div =
+      document.createElement("div");
 
     div.className = "ronda-box";
 
     div.innerHTML = `
 
-      <strong>Partido ${index + 1}</strong>
+      <strong>
+      Partido ${index + 1}
+      </strong>
 
       <br><br>
 
-      ${partido.e1.join(" + ")}
+      ${p.local.join(" + ")}
 
-      <br><br>
+      <br>
+
+      <input
+        type="number"
+        min="0"
+        onchange="guardarGol(${index},'gl',this.value)"
+      >
 
       VS
 
-      <br><br>
-
-      ${partido.e2.join(" + ")}
-
-      <br><br>
-
-      LIBRE:
-
-      <br><br>
-
-      ${partido.libre.join(" + ")}
-
-    `;
-
-    lista.appendChild(div);
-
-  });
-
-  mostrarSeccion("rondas");
-
-}
-
-
-
-/* =========================
-   IR A PARTIDOS
-========================= */
-
-function irAPartidos(){
-
-  const lista =
-    document.getElementById("partidos-lista");
-
-  lista.innerHTML = "";
-
-  partidosRonda.forEach((partido,index)=>{
-
-    const div = document.createElement("div");
-
-    div.className = "partido";
-
-    div.innerHTML = `
-
-      <span>${partido.e1.join(" + ")}</span>
-
       <input
         type="number"
         min="0"
-        onchange="actualizarGoles(${index},1,this.value)"
+        onchange="guardarGol(${index},'gv',this.value)"
       >
 
-      <span>VS</span>
+      <br>
 
-      <input
-        type="number"
-        min="0"
-        onchange="actualizarGoles(${index},2,this.value)"
-      >
+      ${p.visitante.join(" + ")}
 
-      <span>${partido.e2.join(" + ")}</span>
+      <br><br>
+
+      ${
+        p.libre
+        ? `
+          <b>Libre:</b>
+          ${p.libre.join(" + ")}
+        `
+        : ""
+      }
 
     `;
 
-    lista.appendChild(div);
+    cont.appendChild(div);
 
   });
 
-  mostrarSeccion("partidos");
+  const boton =
+    document.createElement("button");
 
+  boton.innerText =
+    "Finalizar Ronda";
+
+  boton.onclick =
+    finalizarRonda;
+
+  cont.appendChild(boton);
 }
 
-
-
 /* =========================
-   ACTUALIZAR GOLES
+   GUARDAR GOLES
 ========================= */
 
-function actualizarGoles(index,equipo,goles){
+function guardarGol(index,tipo,valor){
 
-  goles = parseInt(goles) || 0;
-
-  if(equipo === 1){
-
-    partidosRonda[index].g1 = goles;
-
-  }
-
-  else {
-
-    partidosRonda[index].g2 = goles;
-
-  }
-
+  rondas[rondaActual][index][tipo] =
+    parseInt(valor) || 0;
 }
 
-
-
 /* =========================
-   CALCULAR TABLA
+   FINALIZAR RONDA
 ========================= */
 
-function calcularYMostrarTabla(){
+function finalizarRonda(){
 
-  partidosRonda.forEach(partido => {
+  const ronda = rondas[rondaActual];
 
-    partido.e1.forEach(j => {
+  ronda.forEach(p=>{
 
-      tablaIndividual[j].pj++;
+    const gl = p.gl;
+    const gv = p.gv;
+
+    p.local.forEach(j=>{
+
+      tabla[j].pj++;
+      tabla[j].goles += gl;
 
     });
 
-    partido.e2.forEach(j => {
+    p.visitante.forEach(j=>{
 
-      tablaIndividual[j].pj++;
+      tabla[j].pj++;
+      tabla[j].goles += gv;
 
     });
 
-    if(partido.g1 > partido.g2){
+    if(gl > gv){
 
-      partido.e1.forEach(j => {
+      p.local.forEach(j=>{
 
-        tablaIndividual[j].pts += 3;
-
-        tablaIndividual[j].pg++;
+        tabla[j].pts += 3;
+        tabla[j].pg++;
 
       });
 
-      partido.e2.forEach(j => {
+      p.visitante.forEach(j=>{
 
-        tablaIndividual[j].pp++;
+        tabla[j].pp++;
 
       });
 
     }
 
-    else if(partido.g2 > partido.g1){
+    else if(gv > gl){
 
-      partido.e2.forEach(j => {
+      p.visitante.forEach(j=>{
 
-        tablaIndividual[j].pts += 3;
-
-        tablaIndividual[j].pg++;
+        tabla[j].pts += 3;
+        tabla[j].pg++;
 
       });
 
-      partido.e1.forEach(j => {
+      p.local.forEach(j=>{
 
-        tablaIndividual[j].pp++;
+        tabla[j].pp++;
 
       });
 
@@ -526,19 +479,17 @@ function calcularYMostrarTabla(){
 
     else {
 
-      partido.e1.forEach(j => {
+      p.local.forEach(j=>{
 
-        tablaIndividual[j].pts += 1;
-
-        tablaIndividual[j].pe++;
+        tabla[j].pts++;
+        tabla[j].pe++;
 
       });
 
-      partido.e2.forEach(j => {
+      p.visitante.forEach(j=>{
 
-        tablaIndividual[j].pts += 1;
-
-        tablaIndividual[j].pe++;
+        tabla[j].pts++;
+        tabla[j].pe++;
 
       });
 
@@ -546,27 +497,31 @@ function calcularYMostrarTabla(){
 
   });
 
-  mostrarTabla();
-
-  guardarHistorial();
-
+  mostrarTablaParcial();
 }
 
-
-
 /* =========================
-   MOSTRAR TABLA
+   TABLA
 ========================= */
 
-function mostrarTabla(){
+function mostrarTablaParcial(){
+
+  mostrarSeccion("tabla");
+
+  const div =
+    document.getElementById("tabla-resultados");
 
   const ranking =
-    Object.entries(tablaIndividual)
+    Object.entries(tabla)
       .sort((a,b)=>
         b[1].pts - a[1].pts
       );
 
   let html = `
+
+    <h3>
+      Tabla parcial
+    </h3>
 
     <table>
 
@@ -579,45 +534,47 @@ function mostrarTabla(){
         <th>PG</th>
         <th>PE</th>
         <th>PP</th>
+        <th>%PG</th>
+        <th>%PE</th>
+        <th>%PP</th>
+        <th>GOLES</th>
 
       </tr>
 
   `;
 
-  ranking.forEach(([nombre,s],index)=>{
+  ranking.forEach(([nombre,s],i)=>{
 
-    const porcentajePG =
+    const pg =
       s.pj
-      ? ((s.pg / s.pj) * 100).toFixed(0)
+      ? ((s.pg/s.pj)*100).toFixed(0)
       : 0;
 
-    const porcentajePE =
+    const pe =
       s.pj
-      ? ((s.pe / s.pj) * 100).toFixed(0)
+      ? ((s.pe/s.pj)*100).toFixed(0)
       : 0;
 
-    const porcentajePP =
+    const pp =
       s.pj
-      ? ((s.pp / s.pj) * 100).toFixed(0)
+      ? ((s.pp/s.pj)*100).toFixed(0)
       : 0;
 
     html += `
 
       <tr>
 
-        <td>${index + 1}</td>
-
+        <td>${i+1}</td>
         <td>${nombre}</td>
-
         <td>${s.pts}</td>
-
         <td>${s.pj}</td>
-
         <td>${s.pg}</td>
-
         <td>${s.pe}</td>
-
         <td>${s.pp}</td>
+        <td>${pg}%</td>
+        <td>${pe}%</td>
+        <td>${pp}%</td>
+        <td>${s.goles}</td>
 
       </tr>
 
@@ -627,95 +584,41 @@ function mostrarTabla(){
 
   html += `</table>`;
 
+  if(rondaActual < rondas.length - 1){
 
+    html += `
 
-  /* =========================
-     SIGUIENTE RONDA
-  ========================= */
+      <button onclick="siguienteRonda()">
+        Siguiente ronda
+      </button>
 
-  html += `
+    `;
 
-    <br><br>
+  }
 
-    <button onclick="generarNuevaRonda()">
+  else {
 
-      Siguiente ronda
+    html += `
 
-    </button>
+      <h2>
+        TORNEO FINALIZADO
+      </h2>
 
-  `;
+    `;
+  }
 
-  document.getElementById("tabla-resultados")
-    .innerHTML = html;
-
-  mostrarSeccion("tabla");
-
+  div.innerHTML = html;
 }
 
-
-
 /* =========================
-   GUARDAR HISTORIAL
+   SIGUIENTE RONDA
 ========================= */
 
-function guardarHistorial(){
+function siguienteRonda(){
 
-  let historialIndividual =
-    JSON.parse(
-      localStorage.getItem("historialIndividual")
-    ) || [];
+  rondaActual++;
 
-  jugadores.forEach(j => {
-
-    let datos = tablaIndividual[j];
-
-    let existente =
-      historialIndividual.find(
-        h => h.nombre === j
-      );
-
-    if(!existente){
-
-      existente = {
-
-        nombre:j,
-
-        pts:0,
-
-        pj:0,
-
-        pg:0,
-
-        pe:0,
-
-        pp:0
-
-      };
-
-      historialIndividual.push(existente);
-
-    }
-
-    existente.pts = datos.pts;
-
-    existente.pj = datos.pj;
-
-    existente.pg = datos.pg;
-
-    existente.pe = datos.pe;
-
-    existente.pp = datos.pp;
-
-  });
-
-  localStorage.setItem(
-
-    "historialIndividual",
-
-    JSON.stringify(historialIndividual)
-
-  );
-
+  mostrarRonda();
 }
 
 </script>
