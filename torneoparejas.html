@@ -136,19 +136,24 @@
   <script>
 
 let jugadores = [];
-let parejasDisponibles = [];
-let parejasUsadas = [];
-let rondaActual = [];
-let historialRondas = [];
+
+let parejasHistoricas = [];
+
+let rondaActualParejas = [];
+
+let partidosRonda = [];
 
 let tablaIndividual = {};
-let tablaParejas = [];
+
+let historialRondas = [];
+
+
 
 /* =========================
    AGREGAR INPUT
 ========================= */
 
-function agregarInputJugador() {
+function agregarInputJugador(){
 
   const input = document.createElement("input");
 
@@ -159,7 +164,10 @@ function agregarInputJugador() {
 
   document.getElementById("form-jugadores")
     .appendChild(input);
+
 }
+
+
 
 /* =========================
    MOSTRAR SECCION
@@ -172,7 +180,10 @@ function mostrarSeccion(id){
 
   document.getElementById(id)
     .classList.add("active");
+
 }
+
+
 
 /* =========================
    INICIAR TORNEO
@@ -181,12 +192,12 @@ function mostrarSeccion(id){
 function generarTorneo(){
 
   jugadores = [];
-  parejasDisponibles = [];
-  parejasUsadas = [];
+
+  parejasHistoricas = [];
+
   historialRondas = [];
-  rondaActual = [];
+
   tablaIndividual = {};
-  tablaParejas = [];
 
   document.querySelectorAll("#form-jugadores input")
     .forEach(input => {
@@ -194,7 +205,9 @@ function generarTorneo(){
       const nombre = input.value.trim();
 
       if(nombre !== ""){
+
         jugadores.push(nombre);
+
       }
 
     });
@@ -204,43 +217,28 @@ function generarTorneo(){
     alert("Se necesitan mínimo 4 jugadores");
 
     return;
-  }
 
-  /* =========================
-     TABLA INDIVIDUAL
-  ========================= */
+  }
 
   jugadores.forEach(j => {
 
     tablaIndividual[j] = {
+
       pts:0,
       pj:0,
       pg:0,
       pe:0,
       pp:0
+
     };
 
   });
 
-  /* =========================
-     GENERAR TODAS LAS PAREJAS
-  ========================= */
-
-  for(let i = 0; i < jugadores.length; i++){
-
-    for(let j = i + 1; j < jugadores.length; j++){
-
-      parejasDisponibles.push([
-        jugadores[i],
-        jugadores[j]
-      ]);
-
-    }
-
-  }
-
   generarNuevaRonda();
+
 }
+
+
 
 /* =========================
    GENERAR NUEVA RONDA
@@ -248,94 +246,101 @@ function generarTorneo(){
 
 function generarNuevaRonda(){
 
-  rondaActual = [];
+  rondaActualParejas = [];
 
-  let usadasEnRonda = [];
+  partidosRonda = [];
 
-  for(let i = 0; i < parejasDisponibles.length; i++){
+  let disponibles = [...jugadores];
 
-    const pareja1 = parejasDisponibles[i];
 
-    if(usadasEnRonda.includes(i)) continue;
 
-    let rivalEncontrado = false;
+  /* =========================
+     GENERAR PAREJAS
+  ========================= */
 
-    for(let j = i + 1; j < parejasDisponibles.length; j++){
+  while(disponibles.length >= 2){
 
-      if(usadasEnRonda.includes(j)) continue;
+    let jugador1 = disponibles.shift();
 
-      const pareja2 = parejasDisponibles[j];
+    let parejaEncontrada = false;
 
-      const jugadoresPartido = [
-        ...pareja1,
-        ...pareja2
-      ];
+    for(let i = 0; i < disponibles.length; i++){
 
-      /* =========================
-         VALIDAR 4 DISTINTOS
-      ========================= */
+      let jugador2 = disponibles[i];
 
-      if(new Set(jugadoresPartido).size === 4){
+      let nombrePareja =
+        [jugador1,jugador2]
+        .sort()
+        .join("|");
 
-        rondaActual.push({
+      if(!parejasHistoricas.includes(nombrePareja)){
 
-          e1: pareja1,
-          e2: pareja2,
-          g1: "",
-          g2: ""
+        rondaActualParejas.push([
+          jugador1,
+          jugador2
+        ]);
 
-        });
+        parejasHistoricas.push(nombrePareja);
 
-        usadasEnRonda.push(i);
-        usadasEnRonda.push(j);
+        disponibles.splice(i,1);
 
-        rivalEncontrado = true;
+        parejaEncontrada = true;
 
         break;
+
       }
 
     }
 
-    /* =========================
-       LIBRE
-    ========================= */
+    if(!parejaEncontrada){
 
-    if(!rivalEncontrado){
+      break;
 
-      rondaActual.push({
-
-        e1: pareja1,
-        e2: null,
-        g1: "",
-        g2: ""
-
-      });
-
-      usadasEnRonda.push(i);
     }
 
   }
 
+
+
   /* =========================
-     ELIMINAR PAREJAS USADAS
+     GENERAR PARTIDOS
   ========================= */
 
-  usadasEnRonda.sort((a,b)=>b-a);
+  for(let i = 0; i < rondaActualParejas.length; i++){
 
-  usadasEnRonda.forEach(index => {
+    const pareja1 = rondaActualParejas[i];
 
-    parejasUsadas.push(
-      parejasDisponibles[index]
-    );
+    const pareja2 =
+      rondaActualParejas[
+        (i + 1) % rondaActualParejas.length
+      ];
 
-    parejasDisponibles.splice(index,1);
+    partidosRonda.push({
 
-  });
+      e1: pareja1,
 
-  historialRondas.push(rondaActual);
+      e2: pareja2,
+
+      libre:
+        rondaActualParejas[
+          (i + 2) % rondaActualParejas.length
+        ],
+
+      g1: "",
+
+      g2: ""
+
+    });
+
+  }
+
+  historialRondas.push(partidosRonda);
 
   mostrarRondas();
+
 }
+
+
 
 /* =========================
    MOSTRAR RONDAS
@@ -348,7 +353,7 @@ function mostrarRondas(){
 
   lista.innerHTML = "";
 
-  rondaActual.forEach((enc,index)=>{
+  partidosRonda.forEach((partido,index)=>{
 
     const div = document.createElement("div");
 
@@ -360,7 +365,7 @@ function mostrarRondas(){
 
       <br><br>
 
-      ${enc.e1.join(" + ")}
+      ${partido.e1.join(" + ")}
 
       <br><br>
 
@@ -368,11 +373,15 @@ function mostrarRondas(){
 
       <br><br>
 
-      ${
-        enc.e2
-        ? enc.e2.join(" + ")
-        : "LIBRE"
-      }
+      ${partido.e2.join(" + ")}
+
+      <br><br>
+
+      LIBRE:
+
+      <br><br>
+
+      ${partido.libre.join(" + ")}
 
     `;
 
@@ -381,10 +390,13 @@ function mostrarRondas(){
   });
 
   mostrarSeccion("rondas");
+
 }
 
+
+
 /* =========================
-   IR A RESULTADOS
+   IR A PARTIDOS
 ========================= */
 
 function irAPartidos(){
@@ -394,9 +406,7 @@ function irAPartidos(){
 
   lista.innerHTML = "";
 
-  rondaActual.forEach((enc,index)=>{
-
-    if(!enc.e2) return;
+  partidosRonda.forEach((partido,index)=>{
 
     const div = document.createElement("div");
 
@@ -404,7 +414,7 @@ function irAPartidos(){
 
     div.innerHTML = `
 
-      <span>${enc.e1.join(" + ")}</span>
+      <span>${partido.e1.join(" + ")}</span>
 
       <input
         type="number"
@@ -420,7 +430,7 @@ function irAPartidos(){
         onchange="actualizarGoles(${index},2,this.value)"
       >
 
-      <span>${enc.e2.join(" + ")}</span>
+      <span>${partido.e2.join(" + ")}</span>
 
     `;
 
@@ -429,7 +439,10 @@ function irAPartidos(){
   });
 
   mostrarSeccion("partidos");
+
 }
+
+
 
 /* =========================
    ACTUALIZAR GOLES
@@ -441,72 +454,51 @@ function actualizarGoles(index,equipo,goles){
 
   if(equipo === 1){
 
-    rondaActual[index].g1 = goles;
+    partidosRonda[index].g1 = goles;
 
-  } else {
-
-    rondaActual[index].g2 = goles;
   }
+
+  else {
+
+    partidosRonda[index].g2 = goles;
+
+  }
+
 }
 
+
+
 /* =========================
-   CERRAR RONDA
+   CALCULAR TABLA
 ========================= */
 
 function calcularYMostrarTabla(){
 
-  rondaActual.forEach(enc => {
+  partidosRonda.forEach(partido => {
 
-    if(!enc.e2) return;
+    partido.e1.forEach(j => {
 
-    const parejaNombre1 =
-      enc.e1.join(" + ");
-
-    const parejaNombre2 =
-      enc.e2.join(" + ");
-
-    /* =========================
-       TABLA PAREJAS
-    ========================= */
-
-    actualizarPareja(
-      parejaNombre1,
-      enc.g1,
-      enc.g2
-    );
-
-    actualizarPareja(
-      parejaNombre2,
-      enc.g2,
-      enc.g1
-    );
-
-    /* =========================
-       PJ
-    ========================= */
-
-    enc.e1.forEach(j => {
       tablaIndividual[j].pj++;
+
     });
 
-    enc.e2.forEach(j => {
+    partido.e2.forEach(j => {
+
       tablaIndividual[j].pj++;
+
     });
 
-    /* =========================
-       GANADOR
-    ========================= */
+    if(partido.g1 > partido.g2){
 
-    if(enc.g1 > enc.g2){
-
-      enc.e1.forEach(j => {
+      partido.e1.forEach(j => {
 
         tablaIndividual[j].pts += 3;
+
         tablaIndividual[j].pg++;
 
       });
 
-      enc.e2.forEach(j => {
+      partido.e2.forEach(j => {
 
         tablaIndividual[j].pp++;
 
@@ -514,16 +506,17 @@ function calcularYMostrarTabla(){
 
     }
 
-    else if(enc.g2 > enc.g1){
+    else if(partido.g2 > partido.g1){
 
-      enc.e2.forEach(j => {
+      partido.e2.forEach(j => {
 
         tablaIndividual[j].pts += 3;
+
         tablaIndividual[j].pg++;
 
       });
 
-      enc.e1.forEach(j => {
+      partido.e1.forEach(j => {
 
         tablaIndividual[j].pp++;
 
@@ -533,16 +526,18 @@ function calcularYMostrarTabla(){
 
     else {
 
-      enc.e1.forEach(j => {
+      partido.e1.forEach(j => {
 
         tablaIndividual[j].pts += 1;
+
         tablaIndividual[j].pe++;
 
       });
 
-      enc.e2.forEach(j => {
+      partido.e2.forEach(j => {
 
         tablaIndividual[j].pts += 1;
+
         tablaIndividual[j].pe++;
 
       });
@@ -557,52 +552,7 @@ function calcularYMostrarTabla(){
 
 }
 
-/* =========================
-   ACTUALIZAR PAREJAS
-========================= */
 
-function actualizarPareja(nombre,gf,gc){
-
-  let pareja = tablaParejas.find(
-    p => p.nombre === nombre
-  );
-
-  if(!pareja){
-
-    pareja = {
-      nombre,
-      pts:0,
-      pj:0,
-      pg:0,
-      pe:0,
-      pp:0
-    };
-
-    tablaParejas.push(pareja);
-  }
-
-  pareja.pj++;
-
-  if(gf > gc){
-
-    pareja.pts += 3;
-    pareja.pg++;
-
-  }
-
-  else if(gf < gc){
-
-    pareja.pp++;
-
-  }
-
-  else {
-
-    pareja.pts += 1;
-    pareja.pe++;
-
-  }
-}
 
 /* =========================
    MOSTRAR TABLA
@@ -623,7 +573,7 @@ function mostrarTabla(){
       <tr>
 
         <th>#</th>
-        <th>Jugador</th>
+        <th>Nombre</th>
         <th>PTS</th>
         <th>PJ</th>
         <th>PG</th>
@@ -635,6 +585,21 @@ function mostrarTabla(){
   `;
 
   ranking.forEach(([nombre,s],index)=>{
+
+    const porcentajePG =
+      s.pj
+      ? ((s.pg / s.pj) * 100).toFixed(0)
+      : 0;
+
+    const porcentajePE =
+      s.pj
+      ? ((s.pe / s.pj) * 100).toFixed(0)
+      : 0;
+
+    const porcentajePP =
+      s.pj
+      ? ((s.pp / s.pj) * 100).toFixed(0)
+      : 0;
 
     html += `
 
@@ -662,52 +627,38 @@ function mostrarTabla(){
 
   html += `</table>`;
 
+
+
   /* =========================
-     BOTON SIGUIENTE RONDA
+     SIGUIENTE RONDA
   ========================= */
 
-  if(parejasDisponibles.length > 0){
+  html += `
 
-    html += `
+    <br><br>
 
-      <br><br>
+    <button onclick="generarNuevaRonda()">
 
-      <button onclick="generarNuevaRonda()">
+      Siguiente ronda
 
-        Siguiente Ronda
+    </button>
 
-      </button>
-
-    `;
-
-  }
-
-  else {
-
-    html += `
-
-      <br><br>
-
-      <h2>TORNEO FINALIZADO</h2>
-
-    `;
-  }
+  `;
 
   document.getElementById("tabla-resultados")
     .innerHTML = html;
 
   mostrarSeccion("tabla");
+
 }
+
+
 
 /* =========================
    GUARDAR HISTORIAL
 ========================= */
 
 function guardarHistorial(){
-
-  /* =========================
-     HISTORIAL INDIVIDUAL
-  ========================= */
 
   let historialIndividual =
     JSON.parse(
@@ -716,82 +667,55 @@ function guardarHistorial(){
 
   jugadores.forEach(j => {
 
-    const datos = tablaIndividual[j];
+    let datos = tablaIndividual[j];
 
-    let jugadorHistorial =
+    let existente =
       historialIndividual.find(
         h => h.nombre === j
       );
 
-    if(!jugadorHistorial){
+    if(!existente){
 
-      jugadorHistorial = {
+      existente = {
+
         nombre:j,
+
         pts:0,
+
         pj:0,
+
         pg:0,
+
         pe:0,
+
         pp:0
+
       };
 
-      historialIndividual.push(jugadorHistorial);
+      historialIndividual.push(existente);
+
     }
 
-    jugadorHistorial.pts += datos.pts;
-    jugadorHistorial.pj += datos.pj;
-    jugadorHistorial.pg += datos.pg;
-    jugadorHistorial.pe += datos.pe;
-    jugadorHistorial.pp += datos.pp;
+    existente.pts = datos.pts;
+
+    existente.pj = datos.pj;
+
+    existente.pg = datos.pg;
+
+    existente.pe = datos.pe;
+
+    existente.pp = datos.pp;
 
   });
 
   localStorage.setItem(
+
     "historialIndividual",
+
     JSON.stringify(historialIndividual)
+
   );
 
-  /* =========================
-     HISTORIAL PAREJAS
-  ========================= */
-
-  let historialParejas =
-    JSON.parse(
-      localStorage.getItem("historialParejas")
-    ) || [];
-
-  tablaParejas.forEach(p => {
-
-    let parejaHistorial =
-      historialParejas.find(
-        h => h.nombre === p.nombre
-      );
-
-    if(!parejaHistorial){
-
-      parejaHistorial = {
-        nombre:p.nombre,
-        pts:0,
-        pj:0,
-        pg:0,
-        pe:0,
-        pp:0
-      };
-
-      historialParejas.push(parejaHistorial);
-    }
-
-    parejaHistorial.pts += p.pts;
-    parejaHistorial.pj += p.pj;
-    parejaHistorial.pg += p.pg;
-    parejaHistorial.pe += p.pe;
-    parejaHistorial.pp += p.pp;
-
-  });
-
-  localStorage.setItem(
-    "historialParejas",
-    JSON.stringify(historialParejas)
-  );
 }
 
 </script>
