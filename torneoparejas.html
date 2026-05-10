@@ -187,9 +187,9 @@ function generarTorneo(){
 
     });
 
-  if(jugadores.length < 4){
+  if(jugadores.length < 6){
 
-    alert("Mínimo 4 jugadores");
+    alert("Este modo necesita mínimo 6 jugadores");
 
     return;
   }
@@ -198,7 +198,7 @@ function generarTorneo(){
      CREAR TODAS LAS PAREJAS
   ========================= */
 
-  let parejas = [];
+  const parejas = [];
 
   for(let i=0;i<jugadores.length;i++){
 
@@ -214,83 +214,41 @@ function generarTorneo(){
   }
 
   /* =========================
-     ARMAR RONDAS
+     GENERAR RONDAS
   ========================= */
 
-  while(parejas.length >= 3){
+  for(let i=0;i<parejas.length;i+=3){
 
-    const p1 = parejas.shift();
+    const grupo = paresSeguros(
+      parejas.slice(i,i+3)
+    );
 
-    let rival1 = null;
-    let rival2 = null;
-
-    for(let i=0;i<parejas.length;i++){
-
-      const test = parejas[i];
-
-      if(
-        !p1.includes(test[0]) &&
-        !p1.includes(test[1])
-      ){
-
-        rival1 = test;
-
-        parejas.splice(i,1);
-
-        break;
-      }
-
-    }
-
-    for(let i=0;i<parejas.length;i++){
-
-      const test = parejas[i];
-
-      const usados = [
-        ...p1,
-        ...rival1
-      ];
-
-      if(
-        !usados.includes(test[0]) &&
-        !usados.includes(test[1])
-      ){
-
-        rival2 = test;
-
-        parejas.splice(i,1);
-
-        break;
-      }
-
-    }
-
-    if(rival1 && rival2){
+    if(grupo){
 
       rondas.push([
 
         {
-          e1:p1,
-          e2:rival1,
+          e1: grupo[0],
+          e2: grupo[1],
           g1:"",
           g2:"",
-          libre:rival2
+          libre: grupo[2]
         },
 
         {
-          e1:rival1,
-          e2:rival2,
+          e1: grupo[1],
+          e2: grupo[2],
           g1:"",
           g2:"",
-          libre:p1
+          libre: grupo[0]
         },
 
         {
-          e1:rival2,
-          e2:p1,
+          e1: grupo[2],
+          e2: grupo[0],
           g1:"",
           g2:"",
-          libre:rival1
+          libre: grupo[1]
         }
 
       ]);
@@ -321,6 +279,29 @@ function generarTorneo(){
   });
 
   mostrarRonda();
+}
+
+/* =========================
+   VALIDAR PAREJAS
+========================= */
+
+function paresSeguros(lista){
+
+  if(lista.length < 3){
+    return null;
+  }
+
+  const todos = [
+    ...lista[0],
+    ...lista[1],
+    ...lista[2]
+  ];
+
+  if(new Set(todos).size !== 6){
+    return null;
+  }
+
+  return lista;
 }
 
 /* =========================
