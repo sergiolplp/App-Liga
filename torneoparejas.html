@@ -405,6 +405,20 @@ function mostrarRonda(){
 
   cont.appendChild(btnTabla);
 
+  const btnVolver =
+  document.createElement("button");
+
+btnVolver.innerText =
+  "← Volver";
+
+btnVolver.onclick = () => {
+
+  mostrarSeccion("jugadores");
+
+};
+
+cont.appendChild(btnVolver);
+
 }
 
 /* =========================
@@ -416,6 +430,16 @@ function calcularTabla(){
   const ronda = rondas[rondaActual];
 
   ronda.forEach((p,index)=>{
+
+    const valor1 =
+  document.getElementById(`g1-${index}`).value;
+
+const valor2 =
+  document.getElementById(`g2-${index}`).value;
+
+if(valor1 === "" || valor2 === ""){
+  return;
+}
 
     p.g1 =
       parseInt(
@@ -592,41 +616,41 @@ function mostrarTabla(){
      BOTONES
   ========================= */
 
-  if(rondaActual < rondas.length - 1){
+  html += `
 
-    html += `
+  <button onclick="volverARonda()">
+    ← Volver
+  </button>
 
-      <button onclick="volverARonda()">
-        ← Volver
-      </button>
+`;
 
-      <button onclick="siguienteRonda()">
-        Siguiente ronda
-      </button>
+if(rondaActual < 4){
 
-    `;
+  html += `
 
-  }
+    <button onclick="siguienteRonda()">
+      Siguiente ronda
+    </button>
 
-  else {
+  `;
 
-    html += `
+}
 
-      <button onclick="volverARonda()">
-        ← Volver
-      </button>
+else {
 
-      <button onclick="finalizarTorneo()">
-        Finalizar torneo
-      </button>
+  html += `
 
-      <button onclick="location.reload()">
-        Nuevo torneo
-      </button>
+    <button onclick="finalizarTorneo()">
+      Finalizar torneo
+    </button>
 
-    `;
+    <button onclick="location.reload()">
+      Nuevo torneo
+    </button>
 
-  }
+  `;
+
+}
 
   div.innerHTML = html;
 }
