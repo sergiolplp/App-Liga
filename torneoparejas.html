@@ -316,12 +316,13 @@ while(parejasUsadas.size < parejas.length){
     }
 
     partidos.push({
-      e1,
-      e2,
-      libre: [],
-      g1: "",
-      g2: ""
-    });
+  e1,
+  e2,
+  libre: [],
+  g1: "",
+  g2: "",
+  procesado: false
+});
 
   }
 
@@ -379,6 +380,11 @@ function mostrarRonda(){
   cont.innerHTML = "";
 
   const ronda = rondas[rondaActual];
+
+  if(!ronda){
+  alert("No se pudieron generar rondas");
+  return;
+}
 
   const titulo = document.createElement("h3");
 
@@ -476,6 +482,10 @@ function calcularTabla(){
 
   ronda.forEach((p,index)=>{
 
+if(p.procesado){
+  return;
+}
+    
     const valor1 =
   document.getElementById(`g1-${index}`).value;
 
@@ -565,10 +575,12 @@ if(
         tablaGeneral[j].pts++;
         tablaGeneral[j].pe++;
 
+
+
       });
 
     }
-
+        p.procesado = true;
   });
 
   mostrarTabla();
