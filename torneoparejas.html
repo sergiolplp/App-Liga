@@ -177,29 +177,50 @@ rondas = [];
 rondaActual = 0;
 tablaGeneral = {};
 
-  document.querySelectorAll("#form-jugadores input")
-    .forEach(input => {
+document.querySelectorAll("#form-jugadores input")
+  .forEach(input => {
 
-      const nombre = input.value.trim();
+    const nombre = input.value.trim();
 
-      if(nombre){
-        jugadores.push(nombre);
-      }
+    if(nombre){
+      jugadores.push(nombre);
+    }
 
-    });
+  });
 
-  if(jugadores.length < 6){
+  const cantidadJugadores = jugadores.length;
 
-    alert("Este modo necesita mínimo 6 jugadores");
+const esImpar =
+  cantidadJugadores % 2 !== 0;
+      
+      
 
-    return;
-  }
+  if(jugadores.length < 3){
+
+  alert("Este modo necesita mínimo 3 jugadores");
+
+  return;
+}
+
+if(jugadores.length > 10){
+
+  alert("Máximo permitido: 10 jugadores");
+
+  return;
+}
+  if(esImpar){
+
+  jugadores.push("LIBRE");
+
+}
 
 /* =========================
    INICIALIZAR TABLA
 ========================= */
 
-jugadores.forEach(j => {
+jugadores
+  .filter(j => j !== "LIBRE")
+  .forEach(j => {
 
   tablaGeneral[j] = {
     pts: 0,
@@ -426,7 +447,10 @@ function mostrarRonda(){
 
       <br>
 
-      ${partido.libre.join(" + ")}
+      ${partido.libre.includes("LIBRE")
+  ? "Descansa"
+  : partido.libre.join(" + ")
+}
 
     `;
 
@@ -491,6 +515,13 @@ if(valor1 === "" || valor2 === ""){
         document.getElementById(`g2-${index}`).value
       ) || 0;
 
+if(
+  p.e1.includes("LIBRE") ||
+  p.e2.includes("LIBRE")
+){
+  return;
+}
+    
     p.e1.forEach(j=>{
 
       tablaGeneral[j].pj++;
@@ -664,7 +695,7 @@ function mostrarTabla(){
 
 `;
 
-if(rondaActual < 4){
+if(rondaActual < rondas.length - 1){
 
   html += `
 
@@ -675,6 +706,8 @@ if(rondaActual < 4){
   `;
 
 }
+
+  
 
 else {
 
