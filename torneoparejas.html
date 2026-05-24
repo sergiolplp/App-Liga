@@ -173,8 +173,9 @@ function mostrarSeccion(id){
 function generarTorneo(){
 
   jugadores = [];
-  rondas = [];
-  rondaActual = 0;
+rondas = [];
+rondaActual = 0;
+tablaGeneral = {};
 
   document.querySelectorAll("#form-jugadores input")
     .forEach(input => {
@@ -194,6 +195,23 @@ function generarTorneo(){
     return;
   }
 
+/* =========================
+   INICIALIZAR TABLA
+========================= */
+
+jugadores.forEach(j => {
+
+  tablaGeneral[j] = {
+    pts: 0,
+    pj: 0,
+    pg: 0,
+    pe: 0,
+    pp: 0,
+    goles: 0
+  };
+
+});
+  
 /* =========================
    GENERAR TODAS LAS PAREJAS
 ========================= */
