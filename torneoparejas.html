@@ -261,109 +261,90 @@ rondas = [];
 const parejasUsadas = new Set();
 
 /* =========================
-   GENERAR RONDAS
+   GENERAR RONDAS UNIVERSAL
 ========================= */
 
-for(let i = 0; i < parejas.length; i++){
+while(parejasUsadas.size < parejas.length){
 
-  const p1 = parejas[i];
+  const ronda = [];
 
-  const key1 = p1.join("-");
+  const jugadoresUsados = new Set();
 
-  if(parejasUsadas.has(key1)){
-    continue;
+  for(let i = 0; i < parejas.length; i++){
+
+    const pareja = parejas[i];
+
+    const key =
+      pareja.join("-");
+
+    if(parejasUsadas.has(key)){
+      continue;
+    }
+
+    const [j1,j2] = pareja;
+
+    if(
+      jugadoresUsados.has(j1) ||
+      jugadoresUsados.has(j2)
+    ){
+      continue;
+    }
+
+    jugadoresUsados.add(j1);
+    jugadoresUsados.add(j2);
+
+    ronda.push(pareja);
+
+    parejasUsadas.add(key);
+
   }
 
-  for(let j = i + 1; j < parejas.length; j++){
+  /* =========================
+     CREAR PARTIDOS
+  ========================= */
 
-    const p2 = parejas[j];
+  const partidos = [];
 
-    const key2 = p2.join("-");
+  for(let i = 0; i < ronda.length; i += 2){
 
-    if(parejasUsadas.has(key2)){
-      continue;
-    }
+    const e1 = ronda[i];
 
-    const jugadoresUsados = [
-      ...p1,
-      ...p2
-    ];
+    const e2 = ronda[i + 1];
 
-    if(new Set(jugadoresUsados).size !== 4){
-      continue;
-    }
-
-    for(let k = j + 1; k < parejas.length; k++){
-
-      const p3 = parejas[k];
-
-      const key3 = p3.join("-");
-
-      if(parejasUsadas.has(key3)){
-        continue;
-      }
-
-      const todos = [
-        ...p1,
-        ...p2,
-        ...p3
-      ];
-
-      /* =========================
-         NECESITAMOS 6 DISTINTOS
-      ========================= */
-
-      if(new Set(todos).size !== 6){
-        continue;
-      }
-
-      /* =========================
-         CREAR RONDA
-      ========================= */
-
-      rondas.push([
-
-        {
-          e1: p1,
-          e2: p2,
-          libre: p3,
-          g1: "",
-          g2: ""
-        },
-
-        {
-          e1: p2,
-          e2: p3,
-          libre: p1,
-          g1: "",
-          g2: ""
-        },
-
-        {
-          e1: p3,
-          e2: p1,
-          libre: p2,
-          g1: "",
-          g2: ""
-        }
-
-      ]);
-
-      parejasUsadas.add(key1);
-      parejasUsadas.add(key2);
-      parejasUsadas.add(key3);
-
-      break;
-
-    }
-
-    if(parejasUsadas.has(key1)){
+    if(!e2){
       break;
     }
 
+    partidos.push({
+      e1,
+      e2,
+      libre: [],
+      g1: "",
+      g2: ""
+    });
+
+  }
+
+  /* =========================
+     JUGADOR LIBRE
+  ========================= */
+
+  const libres = jugadores.filter(j =>
+    !jugadoresUsados.has(j)
+  );
+
+  partidos.forEach(p => {
+
+    p.libre = libres;
+
+  });
+
+  if(partidos.length > 0){
+    rondas.push(partidos);
   }
 
 }
+
   
 /* =========================
    INICIAR TORNEO
