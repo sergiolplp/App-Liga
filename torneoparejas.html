@@ -232,88 +232,118 @@ for(let i = 0; i < jugadores.length; i++){
 }
 
 /* =========================
-   ARMAR RONDAS
+   ARMAR RONDAS REALES
 ========================= */
 
 rondas = [];
 
-const usadas = new Set();
+const parejasUsadas = new Set();
+
+/* =========================
+   GENERAR RONDAS
+========================= */
 
 for(let i = 0; i < parejas.length; i++){
 
-  if(usadas.has(i)) continue;
+  const p1 = parejas[i];
 
-  const pareja1 = parejas[i];
+  const key1 = p1.join("-");
 
-  const grupo = [pareja1];
+  if(parejasUsadas.has(key1)){
+    continue;
+  }
 
-  usadas.add(i);
+  for(let j = i + 1; j < parejas.length; j++){
 
-  for(let j = 0; j < parejas.length; j++){
+    const p2 = parejas[j];
 
-    if(usadas.has(j)) continue;
+    const key2 = p2.join("-");
 
-    const pareja2 = parejas[j];
+    if(parejasUsadas.has(key2)){
+      continue;
+    }
 
-    let compatible = true;
+    const jugadoresUsados = [
+      ...p1,
+      ...p2
+    ];
 
-    grupo.forEach(p => {
+    if(new Set(jugadoresUsados).size !== 4){
+      continue;
+    }
 
-      const todos = [
-        ...p,
-        ...pareja2
-      ];
+    for(let k = j + 1; k < parejas.length; k++){
 
-      if(new Set(todos).size !== 4){
-        compatible = false;
+      const p3 = parejas[k];
+
+      const key3 = p3.join("-");
+
+      if(parejasUsadas.has(key3)){
+        continue;
       }
 
-    });
+      const todos = [
+        ...p1,
+        ...p2,
+        ...p3
+      ];
 
-    if(compatible){
+      /* =========================
+         NECESITAMOS 6 DISTINTOS
+      ========================= */
 
-      grupo.push(pareja2);
+      if(new Set(todos).size !== 6){
+        continue;
+      }
 
-      usadas.add(j);
+      /* =========================
+         CREAR RONDA
+      ========================= */
+
+      rondas.push([
+
+        {
+          e1: p1,
+          e2: p2,
+          libre: p3,
+          g1: "",
+          g2: ""
+        },
+
+        {
+          e1: p2,
+          e2: p3,
+          libre: p1,
+          g1: "",
+          g2: ""
+        },
+
+        {
+          e1: p3,
+          e2: p1,
+          libre: p2,
+          g1: "",
+          g2: ""
+        }
+
+      ]);
+
+      parejasUsadas.add(key1);
+      parejasUsadas.add(key2);
+      parejasUsadas.add(key3);
+
+      break;
 
     }
 
-    if(grupo.length === 3){
+    if(parejasUsadas.has(key1)){
       break;
     }
 
   }
 
-  if(grupo.length === 3){
-
-    rondas.push([
-      {
-        e1: grupo[0],
-        e2: grupo[1],
-        libre: grupo[2],
-        g1: "",
-        g2: ""
-      },
-      {
-        e1: grupo[1],
-        e2: grupo[2],
-        libre: grupo[0],
-        g1: "",
-        g2: ""
-      },
-      {
-        e1: grupo[2],
-        e2: grupo[0],
-        libre: grupo[1],
-        g1: "",
-        g2: ""
-      }
-    ]);
-
-  }
-
 }
-
+  
 /* =========================
    INICIAR TORNEO
 ========================= */
