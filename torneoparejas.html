@@ -194,89 +194,119 @@ function generarTorneo(){
     return;
   }
 
-  /* =========================
-     CREAR TODAS LAS PAREJAS
-  ========================= */
+/* =========================
+   GENERAR TODAS LAS PAREJAS
+========================= */
 
-  const parejas = [];
+const parejas = [];
 
-  for(let i=0;i<jugadores.length;i++){
+for(let i = 0; i < jugadores.length; i++){
 
-    for(let j=i+1;j<jugadores.length;j++){
+  for(let j = i + 1; j < jugadores.length; j++){
 
-      parejas.push([
-        jugadores[i],
-        jugadores[j]
-      ]);
+    parejas.push([
+      jugadores[i],
+      jugadores[j]
+    ]);
 
+  }
+
+}
+
+/* =========================
+   ARMAR RONDAS
+========================= */
+
+rondas = [];
+
+const usadas = new Set();
+
+for(let i = 0; i < parejas.length; i++){
+
+  if(usadas.has(i)) continue;
+
+  const pareja1 = parejas[i];
+
+  const grupo = [pareja1];
+
+  usadas.add(i);
+
+  for(let j = 0; j < parejas.length; j++){
+
+    if(usadas.has(j)) continue;
+
+    const pareja2 = parejas[j];
+
+    let compatible = true;
+
+    grupo.forEach(p => {
+
+      const todos = [
+        ...p,
+        ...pareja2
+      ];
+
+      if(new Set(todos).size !== 4){
+        compatible = false;
+      }
+
+    });
+
+    if(compatible){
+
+      grupo.push(pareja2);
+
+      usadas.add(j);
+
+    }
+
+    if(grupo.length === 3){
+      break;
     }
 
   }
 
-  /* =========================
-     GENERAR RONDAS
-  ========================= */
+  if(grupo.length === 3){
 
-  for(let i=0;i<parejas.length;i+=3){
+    rondas.push([
+      {
+        e1: grupo[0],
+        e2: grupo[1],
+        libre: grupo[2],
+        g1: "",
+        g2: ""
+      },
+      {
+        e1: grupo[1],
+        e2: grupo[2],
+        libre: grupo[0],
+        g1: "",
+        g2: ""
+      },
+      {
+        e1: grupo[2],
+        e2: grupo[0],
+        libre: grupo[1],
+        g1: "",
+        g2: ""
+      }
+    ]);
 
-  if(!parejas[i+2]) break;
-
-  const p1 = parejas[i];
-  const p2 = parejas[i+1];
-  const p3 = parejas[i+2];
-
-  rondas.push([
-
-    {
-      e1:p1,
-      e2:p2,
-      g1:"",
-      g2:"",
-      libre:p3
-    },
-
-    {
-      e1:p2,
-      e2:p3,
-      g1:"",
-      g2:"",
-      libre:p1
-    },
-
-    {
-      e1:p3,
-      e2:p1,
-      g1:"",
-      g2:"",
-      libre:p2
-    }
-
-  ]);
+  }
 
 }
 
-  /* =========================
-     TABLA GENERAL
-  ========================= */
+/* =========================
+   INICIAR TORNEO
+========================= */
 
-  tablaGeneral = {};
+rondaActual = 0;
 
-  jugadores.forEach(j => {
+mostrarRondaActual();
 
-    tablaGeneral[j] = {
+mostrarSeccion("rondas");
 
-      pts:0,
-      pj:0,
-      pg:0,
-      pe:0,
-      pp:0,
-      goles:0
-
-    };
-
-  });
-
-  mostrarRonda();
+  
 }
 
 /* =========================
