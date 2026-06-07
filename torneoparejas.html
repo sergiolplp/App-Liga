@@ -177,50 +177,29 @@ rondas = [];
 rondaActual = 0;
 tablaGeneral = {};
 
-document.querySelectorAll("#form-jugadores input")
-  .forEach(input => {
+  document.querySelectorAll("#form-jugadores input")
+    .forEach(input => {
 
-    const nombre = input.value.trim();
+      const nombre = input.value.trim();
 
-    if(nombre){
-      jugadores.push(nombre);
-    }
+      if(nombre){
+        jugadores.push(nombre);
+      }
 
-  });
+    });
 
-  const cantidadJugadores = jugadores.length;
+  if(jugadores.length < 6){
 
-const esImpar =
-  cantidadJugadores % 2 !== 0;
-      
-      
+    alert("Este modo necesita mínimo 6 jugadores");
 
-  if(jugadores.length < 3){
-
-  alert("Este modo necesita mínimo 3 jugadores");
-
-  return;
-}
-
-if(jugadores.length > 10){
-
-  alert("Máximo permitido: 10 jugadores");
-
-  return;
-}
-  if(esImpar){
-
-  jugadores.push("LIBRE");
-
-}
+    return;
+  }
 
 /* =========================
    INICIALIZAR TABLA
 ========================= */
 
-jugadores
-  .filter(j => j !== "LIBRE")
-  .forEach(j => {
+jugadores.forEach(j => {
 
   tablaGeneral[j] = {
     pts: 0,
@@ -261,91 +240,109 @@ rondas = [];
 const parejasUsadas = new Set();
 
 /* =========================
-   GENERAR RONDAS UNIVERSAL
+   GENERAR RONDAS
 ========================= */
 
-while(parejasUsadas.size < parejas.length){
+for(let i = 0; i < parejas.length; i++){
 
-  const ronda = [];
+  const p1 = parejas[i];
 
-  const jugadoresUsados = new Set();
+  const key1 = p1.join("-");
 
-  for(let i = 0; i < parejas.length; i++){
-
-    const pareja = parejas[i];
-
-    const key =
-      pareja.join("-");
-
-    if(parejasUsadas.has(key)){
-      continue;
-    }
-
-    const [j1,j2] = pareja;
-
-    if(
-      jugadoresUsados.has(j1) ||
-      jugadoresUsados.has(j2)
-    ){
-      continue;
-    }
-
-    jugadoresUsados.add(j1);
-    jugadoresUsados.add(j2);
-
-    ronda.push(pareja);
-
-    parejasUsadas.add(key);
-
+  if(parejasUsadas.has(key1)){
+    continue;
   }
 
-  /* =========================
-     CREAR PARTIDOS
-  ========================= */
+  for(let j = i + 1; j < parejas.length; j++){
 
-  const partidos = [];
+    const p2 = parejas[j];
 
-  for(let i = 0; i < ronda.length; i += 2){
+    const key2 = p2.join("-");
 
-    const e1 = ronda[i];
+    if(parejasUsadas.has(key2)){
+      continue;
+    }
 
-    const e2 = ronda[i + 1];
+    const jugadoresUsados = [
+      ...p1,
+      ...p2
+    ];
 
-    if(!e2){
+    if(new Set(jugadoresUsados).size !== 4){
+      continue;
+    }
+
+    for(let k = j + 1; k < parejas.length; k++){
+
+      const p3 = parejas[k];
+
+      const key3 = p3.join("-");
+
+      if(parejasUsadas.has(key3)){
+        continue;
+      }
+
+      const todos = [
+        ...p1,
+        ...p2,
+        ...p3
+      ];
+
+      /* =========================
+         NECESITAMOS 6 DISTINTOS
+      ========================= */
+
+      if(new Set(todos).size !== 6){
+        continue;
+      }
+
+      /* =========================
+         CREAR RONDA
+      ========================= */
+
+      rondas.push([
+
+        {
+          e1: p1,
+          e2: p2,
+          libre: p3,
+          g1: "",
+          g2: ""
+        },
+
+        {
+          e1: p2,
+          e2: p3,
+          libre: p1,
+          g1: "",
+          g2: ""
+        },
+
+        {
+          e1: p3,
+          e2: p1,
+          libre: p2,
+          g1: "",
+          g2: ""
+        }
+
+      ]);
+
+      parejasUsadas.add(key1);
+      parejasUsadas.add(key2);
+      parejasUsadas.add(key3);
+
+      break;
+
+    }
+
+    if(parejasUsadas.has(key1)){
       break;
     }
 
-    partidos.push({
-  e1,
-  e2,
-  libre: [],
-  g1: "",
-  g2: "",
-  procesado: false
-});
-
-  }
-
-  /* =========================
-     JUGADOR LIBRE
-  ========================= */
-
-  const libres = jugadores.filter(j =>
-    !jugadoresUsados.has(j)
-  );
-
-  partidos.forEach(p => {
-
-    p.libre = libres;
-
-  });
-
-  if(partidos.length > 0){
-    rondas.push(partidos);
   }
 
 }
-
   
 /* =========================
    INICIAR TORNEO
@@ -380,11 +377,6 @@ function mostrarRonda(){
   cont.innerHTML = "";
 
   const ronda = rondas[rondaActual];
-
-  if(!ronda){
-  alert("No se pudieron generar rondas");
-  return;
-}
 
   const titulo = document.createElement("h3");
 
@@ -434,10 +426,7 @@ function mostrarRonda(){
 
       <br>
 
-      ${partido.libre.includes("LIBRE")
-  ? "Descansa"
-  : partido.libre.join(" + ")
-}
+      ${partido.libre.join(" + ")}
 
     `;
 
@@ -482,10 +471,6 @@ function calcularTabla(){
 
   ronda.forEach((p,index)=>{
 
-if(p.procesado){
-  return;
-}
-    
     const valor1 =
   document.getElementById(`g1-${index}`).value;
 
@@ -506,13 +491,6 @@ if(valor1 === "" || valor2 === ""){
         document.getElementById(`g2-${index}`).value
       ) || 0;
 
-if(
-  p.e1.includes("LIBRE") ||
-  p.e2.includes("LIBRE")
-){
-  return;
-}
-    
     p.e1.forEach(j=>{
 
       tablaGeneral[j].pj++;
@@ -575,12 +553,10 @@ if(
         tablaGeneral[j].pts++;
         tablaGeneral[j].pe++;
 
-
-
       });
 
     }
-        p.procesado = true;
+
   });
 
   mostrarTabla();
@@ -688,7 +664,7 @@ function mostrarTabla(){
 
 `;
 
-if(rondaActual < rondas.length - 1){
+if(rondaActual < 4){
 
   html += `
 
@@ -699,8 +675,6 @@ if(rondaActual < rondas.length - 1){
   `;
 
 }
-
-  
 
 else {
 
