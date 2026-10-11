@@ -465,102 +465,114 @@ cont.appendChild(btnVolver);
    TABLA
 ========================= */
 
-function calcularTabla(){
 
+function calcularTabla() {
+
+  // 1. Guardar los resultados ingresados en la ronda actual
   const ronda = rondas[rondaActual];
 
-  ronda.forEach((p,index)=>{
+  ronda.forEach((p, index) => {
 
-    const valor1 =
-  document.getElementById(`g1-${index}`).value;
+    const valor1 = document.getElementById(`g1-${index}`).value;
+    const valor2 = document.getElementById(`g2-${index}`).value;
 
-const valor2 =
-  document.getElementById(`g2-${index}`).value;
-
-if(valor1 === "" || valor2 === ""){
-  return;
-}
-
-    p.g1 =
-      parseInt(
-        document.getElementById(`g1-${index}`).value
-      ) || 0;
-
-    p.g2 =
-      parseInt(
-        document.getElementById(`g2-${index}`).value
-      ) || 0;
-
-    p.e1.forEach(j=>{
-
-      tablaGeneral[j].pj++;
-      tablaGeneral[j].goles += p.g1;
-
-    });
-
-    p.e2.forEach(j=>{
-
-      tablaGeneral[j].pj++;
-      tablaGeneral[j].goles += p.g2;
-
-    });
-
-    if(p.g1 > p.g2){
-
-      p.e1.forEach(j=>{
-
-        tablaGeneral[j].pts += 3;
-        tablaGeneral[j].pg++;
-
-      });
-
-      p.e2.forEach(j=>{
-
-        tablaGeneral[j].pp++;
-
-      });
-
-    }
-
-    else if(p.g2 > p.g1){
-
-      p.e2.forEach(j=>{
-
-        tablaGeneral[j].pts += 3;
-        tablaGeneral[j].pg++;
-
-      });
-
-      p.e1.forEach(j=>{
-
-        tablaGeneral[j].pp++;
-
-      });
-
-    }
-
-    else {
-
-      p.e1.forEach(j=>{
-
-        tablaGeneral[j].pts++;
-        tablaGeneral[j].pe++;
-
-      });
-
-      p.e2.forEach(j=>{
-
-        tablaGeneral[j].pts++;
-        tablaGeneral[j].pe++;
-
-      });
-
-    }
+    p.g1 = valor1 === "" ? "" : Number(valor1);
+    p.g2 = valor2 === "" ? "" : Number(valor2);
 
   });
 
+  // 2. Reiniciar todas las estadísticas
+  Object.values(tablaGeneral).forEach(j => {
+
+    j.pts = 0;
+    j.pj = 0;
+    j.pg = 0;
+    j.pe = 0;
+    j.pp = 0;
+    j.goles = 0;
+
+  });
+
+  // 3. Recorrer todas las rondas y contabilizar cada partido una sola vez
+  rondas.forEach(ronda => {
+
+    ronda.forEach(p => {
+
+      // No contabilizar partidos sin ambos resultados
+      if (p.g1 === "" || p.g2 === "") {
+        return;
+      }
+
+      const g1 = Number(p.g1);
+      const g2 = Number(p.g2);
+
+      // Registrar partidos jugados y goles
+      p.e1.forEach(j => {
+
+        tablaGeneral[j].pj++;
+        tablaGeneral[j].goles += g1;
+
+      });
+
+      p.e2.forEach(j => {
+
+        tablaGeneral[j].pj++;
+        tablaGeneral[j].goles += g2;
+
+      });
+
+      // Victoria del primer equipo
+      if (g1 > g2) {
+
+        p.e1.forEach(j => {
+          tablaGeneral[j].pts += 3;
+          tablaGeneral[j].pg++;
+        });
+
+        p.e2.forEach(j => {
+          tablaGeneral[j].pp++;
+        });
+
+      }
+
+      // Victoria del segundo equipo
+      else if (g2 > g1) {
+
+        p.e2.forEach(j => {
+          tablaGeneral[j].pts += 3;
+          tablaGeneral[j].pg++;
+        });
+
+        p.e1.forEach(j => {
+          tablaGeneral[j].pp++;
+        });
+
+      }
+
+      // Empate
+      else {
+
+        p.e1.forEach(j => {
+          tablaGeneral[j].pts += 1;
+          tablaGeneral[j].pe++;
+        });
+
+        p.e2.forEach(j => {
+          tablaGeneral[j].pts += 1;
+          tablaGeneral[j].pe++;
+        });
+
+      }
+
+    });
+
+  });
+
+  // 4. Mostrar la tabla actualizada
   mostrarTabla();
+
 }
+
 
 /* =========================
    MOSTRAR TABLA
